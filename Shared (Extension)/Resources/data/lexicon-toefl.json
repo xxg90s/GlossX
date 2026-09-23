@@ -1,0 +1,17 @@
+[
+  {"id":"toefl_lecture","zh":"讲座","en":"lecture","pos":"n","phonetic":"/ˈlektʃər/","lexicon":"toefl"},
+  {"id":"toefl_campus","zh":"校园","en":"campus","pos":"n","phonetic":"/ˈkæmpəs/","lexicon":"toefl"},
+  {"id":"toefl_enrollment","zh":"注册","en":"enrollment","pos":"n","phonetic":"/ɪnˈroʊlmənt/","lexicon":"toefl"},
+  {"id":"toefl_scholarship","zh":"奖学金","en":"scholarship","pos":"n","phonetic":"/ˈskɑːlərʃɪp/","lexicon":"toefl"},
+  {"id":"toefl_tuition","zh":"学费","en":"tuition","pos":"n","phonetic":"/tuˈɪʃn/","lexicon":"toefl"},
+  {"id":"toefl_assignment","zh":"作业","en":"assignment","pos":"n","phonetic":"/əˈsaɪnmənt/","lexicon":"toefl"},
+  {"id":"toefl_deadline","zh":"截止日期","en":"deadline","pos":"n","phonetic":"/ˈdedlaɪn/","lexicon":"toefl"},
+  {"id":"toefl_hypothesis_toefl","zh":"假设","en":"hypothesis","pos":"n","phonetic":"/haɪˈpɑːθəsɪs/","lexicon":"toefl"},
+  {"id":"toefl_experiment","zh":"实验","en":"experiment","pos":"n","phonetic":"/ɪkˈsperɪmənt/","lexicon":"toefl"},
+  {"id":"toefl_laboratory","zh":"实验室","en":"laboratory","pos":"n","phonetic":"/ˈlæbrətɔːri/","lexicon":"toefl"},
+  {"id":"toefl_seminar","zh":"研讨会","en":"seminar","pos":"n","phonetic":"/ˈsemɪnɑːr/","lexicon":"toefl"},
+  {"id":"toefl_dissertation","zh":"论文","en":"dissertation","pos":"n","phonetic":"/ˌdɪsərˈteɪʃn/","lexicon":"toefl"},
+  {"id":"toefl_faculty","zh":"院系","en":"faculty","pos":"n","phonetic":"/ˈfæklti/","lexicon":"toefl"},
+  {"id":"toefl_prerequisite","zh":"先修","en":"prerequisite","pos":"n","phonetic":"/ˌpriːˈrekwəzɪt/","lexicon":"toefl"},
+  {"id":"toefl_accreditation","zh":"认证","en":"accreditation","pos":"n","phonetic":"/əˌkredɪˈteɪʃn/","lexicon":"toefl"}
+]

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+    <header class="popup-header">
+        <div class="popup-title">GlossX</div>
+        <div class="popup-subtitle">沉浸式英语阅读</div>
+    </header>
+
+    <section class="popup-section status-banner" id="status-banner">
+        正在加载状态…
+    </section>
+
+    <section class="popup-section">
+        <label class="toggle-row">
+            <span>总开关</span>
+            <input type="checkbox" id="global-enabled">
+        </label>
+        <label class="toggle-row">
+            <span id="site-toggle-label">当前站点白名单</span>
+            <input type="checkbox" id="site-enabled">
+        </label>
+        <div class="site-name" id="site-name">正在检测当前站点…</div>
+    </section>
+
+    <section class="popup-section stats">
+        <div class="stat-item" id="stat-new-item" title="词库 0 · 生词 0 · 句库 0">
+            <div class="stat-value" id="stat-new">0</div>
+            <div class="stat-label">今日新词</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="stat-review">0</div>
+            <div class="stat-label">今日复习</div>
+        </div>
+        <div class="stat-item">
+            <div class="stat-value" id="stat-streak">0</div>
+            <div class="stat-label">连续天数</div>
+        </div>
+    </section>
+
+    <section class="popup-section">
+        <button type="button" id="open-learning" class="vocab-entry-btn">
+            <span class="vocab-entry-label">📚 学习</span>
+            <span class="vocab-entry-meta">
+                <span id="learning-meta" class="vocab-entry-sub">生词 0 · 句库 0</span>
+                <span aria-hidden="true">→</span>
+            </span>
+        </button>
+    </section>
+
+    <section class="popup-section">
+        <div class="section-heading">词级替换</div>
+        <label class="toggle-row">
+            <span>启用词级替换</span>
+            <input type="checkbox" id="word-replace-enabled">
+        </label>
+        <label class="field-label" for="density">替换密度</label>
+        <select id="density">
+            <option value="minimal">极低 (2%)</option>
+            <option value="low">低 (5%)</option>
+            <option value="medium">中 (10%)</option>
+            <option value="high">偏高 (20%)</option>
+            <option value="higher">高 (30%)</option>
+            <option value="intense">很高 (40%)</option>
+            <option value="max">最高 (50%)</option>
+        </select>
+    </section>
+
+    <section class="popup-section">
+        <div class="section-heading">语句英文化</div>
+        <label class="toggle-row">
+            <span>启用语句英文化</span>
+            <input type="checkbox" id="paragraph-mode-enabled">
+        </label>
+        <label class="field-label" for="paragraph-ratio">语句占比</label>
+        <select id="paragraph-ratio">
+            <option value="minimal">极低 (10%)</option>
+            <option value="low">低 (20%)</option>
+            <option value="medium">中 (30%)</option>
+            <option value="high">偏高 (40%)</option>
+            <option value="max">高 (50%)</option>
+        </select>
+        <label class="field-label" for="paragraph-display-mode">中英文对照</label>
+        <select id="paragraph-display-mode">
+            <option value="en_then_cn">英文在左，中文在右</option>
+            <option value="cn_then_en">中文在左，英文在右</option>
+            <option value="english_only">仅显示英文</option>
+        </select>
+        <div class="hint-text">整句翻译为地道英文，不做逐词替换；对照模式以左右并排展示。</div>
+        <div class="hint-text" id="paragraph-ai-hint">未配置 AI Key 时将使用备用翻译。</div>
+    </section>
+
+    <section class="popup-section">
+        <div class="section-heading">iCloud 同步</div>
+        <div class="hint-text" id="icloud-sync-status">正在检查同步状态…</div>
+        <div class="input-row">
+            <button type="button" id="icloud-sync-now" class="secondary-btn">立即同步</button>
+        </div>
+        <div class="hint-text">登录同一 Apple ID 后自动同步；也可在此立即推送或拉取。</div>
+    </section>
+
+    <section class="popup-section actions">
+        <button type="button" id="enable-current-site" class="primary-btn">一键启用当前网站</button>
+        <button type="button" id="enable-weixin" class="secondary-btn full-width hidden">启用微信公众号 (mp.weixin.qq.com)</button>
+        <button type="button" id="open-options" class="secondary-btn full-width">打开完整设置（AI / 词库 / iCloud）</button>
+    </section>
+
+    <section class="popup-section privacy">
+        Safari 中启用扩展后，还需在此开启总开关并将网站加入白名单。也可点击网页右下角的灰色圆点快速启用。
+    </section>
+
+    <script src="browser-shim.js" charset="utf-8"></script>
+    <script src="icloud-sync.js" charset="utf-8"></script>
+    <script src="popup-storage.js" charset="utf-8"></script>
+    <script src="popup.js" charset="utf-8"></script>
+</body>
+</html>

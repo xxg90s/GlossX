@@ -1,0 +1,10 @@
+{
+    "extension_name": {
+        "message": "GlossX",
+        "description": "扩展显示名称"
+    },
+    "extension_description": {
+        "message": "Safari 沉浸式英语阅读扩展 — 在中文网页中自然嵌入英文词，并用 SM-2 间隔重复巩固记忆。",
+        "description": "扩展功能描述"
+    }
+}

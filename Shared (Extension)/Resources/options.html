@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlossX 设置</title>
+    <link rel="stylesheet" href="popup.css">
+    <style>
+        body {
+            width: auto;
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+    </style>
+</head>
+<body>
+    <header class="popup-header">
+        <div class="popup-title">GlossX 设置</div>
+        <div class="popup-subtitle">阅读偏好、白名单与 AI 配置</div>
+    </header>
+
+    <section class="popup-section">
+        <label class="toggle-row">
+            <span>总开关</span>
+            <input type="checkbox" id="global-enabled">
+        </label>
+        <label class="toggle-row">
+            <span id="site-toggle-label">当前站点白名单</span>
+            <input type="checkbox" id="site-enabled">
+        </label>
+        <div class="site-name" id="site-name">正在检测当前站点…</div>
+        <div class="hint-text">开启总开关后，还需要把当前网站加入白名单，页面才会出现英文词替换。</div>
+    </section>
+
+    <section class="popup-section">
+        <div class="section-heading">学习页</div>
+        <label class="field-label" for="learning-open-mode">打开方式</label>
+        <select id="learning-open-mode">
+            <option value="tab">在当前窗口右侧插入标签页</option>
+            <option value="window">以新窗口打开</option>
+        </select>
+        <div class="hint-text">从 Safari 工具栏点击「学习」展开收藏内容时生效。默认为插入标签页。</div>
+    </section>
+
+    <section class="popup-section">
+        <div class="section-heading">iCloud 同步</div>
+        <div class="hint-text" id="icloud-sync-status">正在检查同步状态…</div>
+        <div class="input-row">
+            <button type="button" id="icloud-sync-now" class="secondary-btn">立即同步</button>
+        </div>
+        <div class="hint-text">使用同一 Apple ID 时，删除重装后会自动恢复生词本、句库和大模型配置。也可点「立即同步」马上推送或拉取。</div>
+    </section>
+
+    <section class="popup-section">
+        <div class="section-heading">词库级别</div>
+        <div class="hint-text">可多选，合并后作为替换词来源（难度由所选词库共同决定）。</div>
+        <div class="lexicon-levels" id="lexicon-levels"></div>
+    </section>
+
+    <section class="popup-section">
+        <div class="section-heading">词级替换</div>
+
+        <label class="toggle-row compact">
+            <span>启用词级替换</span>
+            <input type="checkbox" id="word-replace-enabled">
+        </label>
+
+        <label class="field-label" for="density">替换密度</label>
+        <select id="density">
+            <option value="minimal">极低 (2%)</option>
+            <option value="low">低 (5%)</option>
+            <option value="medium">中 (10%)</option>
+            <option value="high">偏高 (20%)</option>
+            <option value="higher">高 (30%)</option>
+            <option value="intense">很高 (40%)</option>
+            <option value="max">最高 (50%)</option>
+        </select>
+
+        <label class="field-label" for="display-mode">中文显示</label>
+        <select id="display-mode">
+            <option value="english_only">纯英文</option>
+            <option value="en_then_cn">前英后中 · process(处理)</option>
+            <option value="cn_then_en">前中后英 · 处理(process)</option>
+        </select>
+
+        <label class="field-label">高亮背景色</label>
+        <div class="color-row">
+            <input type="color" id="highlight-color" value="#dcfce7" title="选择背景色">
+            <input type="text" id="highlight-color-text" placeholder="#dcfce7" maxlength="7">
+            <button type="button" id="highlight-reset" class="secondary-btn">恢复默认</button>
+        </div>
+        <div class="hint-text">留空则使用默认样式（无自定义背景色）。</div>
+
+        <label class="field-label" for="pronunciation">发音</label>
+        <select id="pronunciation">
+            <option value="us">美式</option>
+            <option value="uk">英式</option>
+        </select>
+
+        <label class="toggle-row compact">
+            <span>悬停自动发音</span>
+            <input type="checkbox" id="hover-auto-play">
+        </label>
+
+        <label class="toggle-row compact">
+            <span>显示右下角快捷控制与提示</span>
+            <input type="checkbox" id="show-page-assist">
+        </label>
+        <div class="hint-text">关闭后隐藏页面右下角的圆点按钮和操作提示条，仍可通过 Safari 工具栏管理开关。</div>
+    </section>
+
+    <section class="popup-section">
+        <div class="section-heading">语句英文化</div>
+        <div class="hint-text">随机选取页面中的部分语句（以句号、问号等切分）翻译为地道英文，与词级替换独立开关，可同时启用。</div>
+
+        <label class="toggle-row compact">
+            <span>启用语句英文化</span>
+            <input type="checkbox" id="paragraph-mode-enabled">
+        </label>
+
+        <label class="field-label" for="paragraph-ratio">语句占比</label>
+        <select id="paragraph-ratio">
+            <option value="minimal">极低 (10%)</option>
+            <option value="low">低 (20%)</option>
+            <option value="medium">中 (30%)</option>
+            <option value="high">偏高 (40%)</option>
+            <option value="max">高 (50%)</option>
+        </select>
+
+        <label class="field-label" for="paragraph-display-mode">语句中英文对照</label>
+        <select id="paragraph-display-mode">
+            <option value="en_then_cn">英文在左，中文在右</option>
+            <option value="cn_then_en">中文在左，英文在右</option>
+            <option value="english_only">仅显示英文</option>
+        </select>
+
+        <div class="hint-text" id="paragraph-ai-hint">整句翻译为地道英文，不做逐词替换。未配置 AI Key 时将使用备用翻译。</div>
+    </section>
+
+    <section class="popup-section">
+        <div class="section-heading">AI 辅助选词</div>
+
+        <label class="toggle-row compact">
+            <span>启用 AI 消歧</span>
+            <input type="checkbox" id="ai-enabled">
+        </label>
+
+        <label class="field-label" for="ai-provider">服务商</label>
+        <select id="ai-provider"></select>
+
+        <label class="field-label" for="ai-model">模型</label>
+        <select id="ai-model"></select>
+
+        <label class="field-label" for="ai-api-key">API Key</label>
+        <div class="input-row">
+            <input type="password" id="ai-api-key" placeholder="输入 API Key" autocomplete="off">
+            <button type="button" id="ai-save-key" class="secondary-btn">保存</button>
+        </div>
+        <div class="hint-text" id="ai-key-hint">未配置</div>
+
+        <div id="ai-custom-fields" class="hidden">
+            <label class="field-label" for="ai-custom-base-url">接口地址</label>
+            <input type="url" id="ai-custom-base-url" placeholder="https://api.example.com/v1/chat/completions">
+
+            <label class="field-label" for="ai-custom-model">模型名称</label>
+            <input type="text" id="ai-custom-model" placeholder="model-name">
+        </div>
+
+        <label class="field-label" for="ai-profile-name">存为常用</label>
+        <div class="input-row">
+            <input type="text" id="ai-profile-name" placeholder="例如：公司 DeepSeek" maxlength="32" autocomplete="off">
+            <button type="button" id="ai-profile-save" class="secondary-btn">存为常用</button>
+        </div>
+
+        <label class="field-label" for="ai-profile-select">常用配置</label>
+        <select id="ai-profile-select">
+            <option value="">选择已保存配置…</option>
+        </select>
+        <div class="input-row ai-profile-actions">
+            <button type="button" id="ai-profile-apply" class="secondary-btn">应用</button>
+            <button type="button" id="ai-profile-delete" class="secondary-btn">删除</button>
+        </div>
+        <div class="hint-text" id="ai-profile-hint"></div>
+
+        <button type="button" id="ai-test" class="primary-btn">测试连接</button>
+        <div class="hint-text" id="ai-test-result"></div>
+    </section>
+
+    <section class="popup-section privacy">
+        学习数据保存在本机，并在登录 iCloud 时同步到你的私有 iCloud 容器（含大模型配置）。启用 AI 或语句英文化后，会将短句上下文或选中语句文本发送至所选模型服务商或备用翻译服务。
+    </section>
+
+    <script src="browser-shim.js" charset="utf-8"></script>
+    <script src="opencc-t2cn.js" charset="utf-8"></script>
+    <script src="text-normalize.js" charset="utf-8"></script>
+    <script src="icloud-sync.js" charset="utf-8"></script>
+    <script src="ai-providers.js" charset="utf-8"></script>
+    <script src="ai-profiles.js" charset="utf-8"></script>
+    <script src="settings-ui.js" charset="utf-8"></script>
+    <script src="options.js" charset="utf-8"></script>
+</body>
+</html>

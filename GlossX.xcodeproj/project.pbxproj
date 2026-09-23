@@ -1,0 +1,1061 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		376CAB1A2FF0ED1C002E1FC2 /* GlossX Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 376CAB192FF0ED1C002E1FC2 /* GlossX Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		376CAB242FF0ED1C002E1FC2 /* GlossX Extension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 376CAB232FF0ED1C002E1FC2 /* GlossX Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		376CAB722FF0ED1C002E1FC2 /* GlossXCore in Frameworks */ = {isa = PBXBuildFile; productRef = 376CAB712FF0ED1C002E1FC2 /* GlossXCore */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		376CAB1B2FF0ED1C002E1FC2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 376CAAE02FF0ED1A002E1FC2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 376CAB182FF0ED1C002E1FC2;
+			remoteInfo = "GlossX Extension (iOS)";
+		};
+		376CAB252FF0ED1C002E1FC2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 376CAAE02FF0ED1A002E1FC2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 376CAB222FF0ED1C002E1FC2;
+			remoteInfo = "GlossX Extension (macOS)";
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		376CAB4C2FF0ED1C002E1FC2 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				376CAB1A2FF0ED1C002E1FC2 /* GlossX Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376CAB562FF0ED1C002E1FC2 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				376CAB242FF0ED1C002E1FC2 /* GlossX Extension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		376CAAFC2FF0ED1C002E1FC2 /* GlossX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GlossX.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		376CAB0E2FF0ED1C002E1FC2 /* GlossX.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = GlossX.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		376CAB192FF0ED1C002E1FC2 /* GlossX Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "GlossX Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		376CAB232FF0ED1C002E1FC2 /* GlossX Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "GlossX Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		376CAB472FF0ED1C002E1FC2 /* Exceptions for "Shared (App)" folder in "GlossX (iOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"/Localized: Resources/Main.html",
+				Assets.xcassets,
+				Resources/Icon.png,
+				Resources/Script.js,
+				Resources/Style.css,
+				ViewController.swift,
+			);
+			target = 376CAAFB2FF0ED1C002E1FC2 /* GlossX (iOS) */;
+		};
+		376CAB4B2FF0ED1C002E1FC2 /* Exceptions for "iOS (Extension)" folder in "GlossX Extension (iOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 376CAB182FF0ED1C002E1FC2 /* GlossX Extension (iOS) */;
+		};
+		376CAB502FF0ED1C002E1FC2 /* Exceptions for "iOS (App)" folder in "GlossX (iOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 376CAAFB2FF0ED1C002E1FC2 /* GlossX (iOS) */;
+		};
+		376CAB512FF0ED1C002E1FC2 /* Exceptions for "Shared (App)" folder in "GlossX (macOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"/Localized: Resources/Main.html",
+				Assets.xcassets,
+				Resources/Icon.png,
+				Resources/Script.js,
+				Resources/Style.css,
+				ViewController.swift,
+			);
+			target = 376CAB0D2FF0ED1C002E1FC2 /* GlossX (macOS) */;
+		};
+		376CAB552FF0ED1C002E1FC2 /* Exceptions for "macOS (Extension)" folder in "GlossX Extension (macOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 376CAB222FF0ED1C002E1FC2 /* GlossX Extension (macOS) */;
+		};
+		376CAB5A2FF0ED1C002E1FC2 /* Exceptions for "Shared (Extension)" folder in "GlossX Extension (iOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/_locales,
+				Resources/background.js,
+				"Resources/browser-shim.js",
+				Resources/content.css,
+				Resources/content.js,
+				"Resources/data/lexicon-cet4.json",
+				"Resources/data/lexicon-cet6.json",
+				"Resources/data/lexicon-daily.json",
+				"Resources/data/lexicon-ielts.json",
+				"Resources/data/lexicon-kaoyan.json",
+				"Resources/data/lexicon-toefl.json",
+				"Resources/download-frame.html",
+				"Resources/download-frame.js",
+				Resources/export.css,
+				Resources/export.html,
+				Resources/export.js,
+				"Resources/icloud-sync.js",
+				Resources/images,
+				Resources/learning.css,
+				Resources/learning.html,
+				Resources/learning.js,
+				"Resources/lib/ai-client.js",
+				"Resources/lib/ai-profiles.js",
+				"Resources/lib/ai-providers.js",
+				"Resources/lib/ai-service.js",
+				"Resources/lib/decode-panel.js",
+				"Resources/lib/floating-control.js",
+				"Resources/lib/learning-export.js",
+				Resources/lib/lexicon.js,
+				"Resources/lib/opencc-LICENSE.txt",
+				"Resources/lib/opencc-t2cn.js",
+				"Resources/lib/paragraph-translator.js",
+				Resources/lib/replacer.js,
+				Resources/lib/sm2.js,
+				"Resources/lib/snippet-marker.js",
+				"Resources/lib/snippet-save-panel.js",
+				"Resources/lib/snippet-storage.js",
+				"Resources/lib/snippet-utils.js",
+				Resources/lib/storage.js,
+				"Resources/lib/text-normalize.js",
+				"Resources/lib/vocab-marker.js",
+				"Resources/lib/vocab-storage.js",
+				"Resources/lib/word-save-panel.js",
+				Resources/manifest.json,
+				Resources/options.html,
+				Resources/options.js,
+				"Resources/popup-storage.js",
+				Resources/popup.css,
+				Resources/popup.html,
+				Resources/popup.js,
+				"Resources/settings-ui.js",
+				Resources/snippets.js,
+				Resources/vocabulary.css,
+				Resources/vocabulary.html,
+				Resources/vocabulary.js,
+				SafariWebExtensionHandler.swift,
+			);
+			target = 376CAB182FF0ED1C002E1FC2 /* GlossX Extension (iOS) */;
+		};
+		376CAB5B2FF0ED1C002E1FC2 /* Exceptions for "Shared (Extension)" folder in "GlossX Extension (macOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Resources/_locales,
+				Resources/background.js,
+				"Resources/browser-shim.js",
+				Resources/content.css,
+				Resources/content.js,
+				"Resources/data/lexicon-cet4.json",
+				"Resources/data/lexicon-cet6.json",
+				"Resources/data/lexicon-daily.json",
+				"Resources/data/lexicon-ielts.json",
+				"Resources/data/lexicon-kaoyan.json",
+				"Resources/data/lexicon-toefl.json",
+				"Resources/download-frame.html",
+				"Resources/download-frame.js",
+				Resources/export.css,
+				Resources/export.html,
+				Resources/export.js,
+				"Resources/icloud-sync.js",
+				Resources/images,
+				Resources/learning.css,
+				Resources/learning.html,
+				Resources/learning.js,
+				"Resources/lib/ai-client.js",
+				"Resources/lib/ai-profiles.js",
+				"Resources/lib/ai-providers.js",
+				"Resources/lib/ai-service.js",
+				"Resources/lib/decode-panel.js",
+				"Resources/lib/floating-control.js",
+				"Resources/lib/learning-export.js",
+				Resources/lib/lexicon.js,
+				"Resources/lib/opencc-LICENSE.txt",
+				"Resources/lib/opencc-t2cn.js",
+				"Resources/lib/paragraph-translator.js",
+				Resources/lib/replacer.js,
+				Resources/lib/sm2.js,
+				"Resources/lib/snippet-marker.js",
+				"Resources/lib/snippet-save-panel.js",
+				"Resources/lib/snippet-storage.js",
+				"Resources/lib/snippet-utils.js",
+				Resources/lib/storage.js,
+				"Resources/lib/text-normalize.js",
+				"Resources/lib/vocab-marker.js",
+				"Resources/lib/vocab-storage.js",
+				"Resources/lib/word-save-panel.js",
+				Resources/manifest.json,
+				Resources/options.html,
+				Resources/options.js,
+				"Resources/popup-storage.js",
+				Resources/popup.css,
+				Resources/popup.html,
+				Resources/popup.js,
+				"Resources/settings-ui.js",
+				Resources/snippets.js,
+				Resources/vocabulary.css,
+				Resources/vocabulary.html,
+				Resources/vocabulary.js,
+				SafariWebExtensionHandler.swift,
+			);
+			target = 376CAB222FF0ED1C002E1FC2 /* GlossX Extension (macOS) */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		376CAAE42FF0ED1A002E1FC2 /* Shared (App) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				376CAB472FF0ED1C002E1FC2 /* Exceptions for "Shared (App)" folder in "GlossX (iOS)" target */,
+				376CAB512FF0ED1C002E1FC2 /* Exceptions for "Shared (App)" folder in "GlossX (macOS)" target */,
+			);
+			path = "Shared (App)";
+			sourceTree = "<group>";
+		};
+		376CAAED2FF0ED1C002E1FC2 /* Shared (Extension) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				376CAB5A2FF0ED1C002E1FC2 /* Exceptions for "Shared (Extension)" folder in "GlossX Extension (iOS)" target */,
+				376CAB5B2FF0ED1C002E1FC2 /* Exceptions for "Shared (Extension)" folder in "GlossX Extension (macOS)" target */,
+			);
+			explicitFolders = (
+				Resources/_locales,
+				Resources/images,
+			);
+			path = "Shared (Extension)";
+			sourceTree = "<group>";
+		};
+		376CAAFE2FF0ED1C002E1FC2 /* iOS (App) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				376CAB502FF0ED1C002E1FC2 /* Exceptions for "iOS (App)" folder in "GlossX (iOS)" target */,
+			);
+			path = "iOS (App)";
+			sourceTree = "<group>";
+		};
+		376CAB0F2FF0ED1C002E1FC2 /* macOS (App) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "macOS (App)";
+			sourceTree = "<group>";
+		};
+		376CAB1D2FF0ED1C002E1FC2 /* iOS (Extension) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				376CAB4B2FF0ED1C002E1FC2 /* Exceptions for "iOS (Extension)" folder in "GlossX Extension (iOS)" target */,
+			);
+			path = "iOS (Extension)";
+			sourceTree = "<group>";
+		};
+		376CAB272FF0ED1C002E1FC2 /* macOS (Extension) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				376CAB552FF0ED1C002E1FC2 /* Exceptions for "macOS (Extension)" folder in "GlossX Extension (macOS)" target */,
+			);
+			path = "macOS (Extension)";
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		376CAAF92FF0ED1C002E1FC2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				376CAB722FF0ED1C002E1FC2 /* GlossXCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376CAB0B2FF0ED1C002E1FC2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376CAB162FF0ED1C002E1FC2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376CAB202FF0ED1C002E1FC2 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		376CAADF2FF0ED1A002E1FC2 = {
+			isa = PBXGroup;
+			children = (
+				376CAAE42FF0ED1A002E1FC2 /* Shared (App) */,
+				376CAAED2FF0ED1C002E1FC2 /* Shared (Extension) */,
+				376CAAFE2FF0ED1C002E1FC2 /* iOS (App) */,
+				376CAB0F2FF0ED1C002E1FC2 /* macOS (App) */,
+				376CAB1D2FF0ED1C002E1FC2 /* iOS (Extension) */,
+				376CAB272FF0ED1C002E1FC2 /* macOS (Extension) */,
+				376CAAFD2FF0ED1C002E1FC2 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		376CAAFD2FF0ED1C002E1FC2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				376CAAFC2FF0ED1C002E1FC2 /* GlossX.app */,
+				376CAB0E2FF0ED1C002E1FC2 /* GlossX.app */,
+				376CAB192FF0ED1C002E1FC2 /* GlossX Extension.appex */,
+				376CAB232FF0ED1C002E1FC2 /* GlossX Extension.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		376CAAFB2FF0ED1C002E1FC2 /* GlossX (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 376CAB4D2FF0ED1C002E1FC2 /* Build configuration list for PBXNativeTarget "GlossX (iOS)" */;
+			buildPhases = (
+				376CAAF82FF0ED1C002E1FC2 /* Sources */,
+				376CAAF92FF0ED1C002E1FC2 /* Frameworks */,
+				376CAAFA2FF0ED1C002E1FC2 /* Resources */,
+				376CAB4C2FF0ED1C002E1FC2 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				376CAB1C2FF0ED1C002E1FC2 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				376CAAFE2FF0ED1C002E1FC2 /* iOS (App) */,
+			);
+			name = "GlossX (iOS)";
+			packageProductDependencies = (
+				376CAB712FF0ED1C002E1FC2 /* GlossXCore */,
+			);
+			productName = "GlossX (iOS)";
+			productReference = 376CAAFC2FF0ED1C002E1FC2 /* GlossX.app */;
+			productType = "com.apple.product-type.application";
+		};
+		376CAB0D2FF0ED1C002E1FC2 /* GlossX (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 376CAB572FF0ED1C002E1FC2 /* Build configuration list for PBXNativeTarget "GlossX (macOS)" */;
+			buildPhases = (
+				376CAB0A2FF0ED1C002E1FC2 /* Sources */,
+				376CAB0B2FF0ED1C002E1FC2 /* Frameworks */,
+				376CAB0C2FF0ED1C002E1FC2 /* Resources */,
+				376CAB562FF0ED1C002E1FC2 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				376CAB262FF0ED1C002E1FC2 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				376CAB0F2FF0ED1C002E1FC2 /* macOS (App) */,
+			);
+			name = "GlossX (macOS)";
+			packageProductDependencies = (
+			);
+			productName = "GlossX (macOS)";
+			productReference = 376CAB0E2FF0ED1C002E1FC2 /* GlossX.app */;
+			productType = "com.apple.product-type.application";
+		};
+		376CAB182FF0ED1C002E1FC2 /* GlossX Extension (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 376CAB482FF0ED1C002E1FC2 /* Build configuration list for PBXNativeTarget "GlossX Extension (iOS)" */;
+			buildPhases = (
+				376CAB152FF0ED1C002E1FC2 /* Sources */,
+				376CAB162FF0ED1C002E1FC2 /* Frameworks */,
+				376CAB172FF0ED1C002E1FC2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				376CAB1D2FF0ED1C002E1FC2 /* iOS (Extension) */,
+			);
+			name = "GlossX Extension (iOS)";
+			packageProductDependencies = (
+			);
+			productName = "GlossX Extension (iOS)";
+			productReference = 376CAB192FF0ED1C002E1FC2 /* GlossX Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		376CAB222FF0ED1C002E1FC2 /* GlossX Extension (macOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 376CAB522FF0ED1C002E1FC2 /* Build configuration list for PBXNativeTarget "GlossX Extension (macOS)" */;
+			buildPhases = (
+				376CAB1F2FF0ED1C002E1FC2 /* Sources */,
+				376CAB202FF0ED1C002E1FC2 /* Frameworks */,
+				376CAB212FF0ED1C002E1FC2 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				376CAB272FF0ED1C002E1FC2 /* macOS (Extension) */,
+			);
+			name = "GlossX Extension (macOS)";
+			packageProductDependencies = (
+			);
+			productName = "GlossX Extension (macOS)";
+			productReference = 376CAB232FF0ED1C002E1FC2 /* GlossX Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		376CAAE02FF0ED1A002E1FC2 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 2610;
+				LastUpgradeCheck = 2610;
+				TargetAttributes = {
+					376CAAFB2FF0ED1C002E1FC2 = {
+						CreatedOnToolsVersion = 26.1;
+					};
+					376CAB0D2FF0ED1C002E1FC2 = {
+						CreatedOnToolsVersion = 26.1;
+					};
+					376CAB182FF0ED1C002E1FC2 = {
+						CreatedOnToolsVersion = 26.1;
+					};
+					376CAB222FF0ED1C002E1FC2 = {
+						CreatedOnToolsVersion = 26.1;
+					};
+				};
+			};
+			buildConfigurationList = 376CAAE32FF0ED1A002E1FC2 /* Build configuration list for PBXProject "GlossX" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 376CAADF2FF0ED1A002E1FC2;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				376CAB702FF0ED1C002E1FC2 /* XCLocalSwiftPackageReference "GlossXCore" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 376CAAFD2FF0ED1C002E1FC2 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				376CAAFB2FF0ED1C002E1FC2 /* GlossX (iOS) */,
+				376CAB0D2FF0ED1C002E1FC2 /* GlossX (macOS) */,
+				376CAB182FF0ED1C002E1FC2 /* GlossX Extension (iOS) */,
+				376CAB222FF0ED1C002E1FC2 /* GlossX Extension (macOS) */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		376CAAFA2FF0ED1C002E1FC2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376CAB0C2FF0ED1C002E1FC2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376CAB172FF0ED1C002E1FC2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376CAB212FF0ED1C002E1FC2 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		376CAAF82FF0ED1C002E1FC2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376CAB0A2FF0ED1C002E1FC2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376CAB152FF0ED1C002E1FC2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		376CAB1F2FF0ED1C002E1FC2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		376CAB1C2FF0ED1C002E1FC2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 376CAB182FF0ED1C002E1FC2 /* GlossX Extension (iOS) */;
+			targetProxy = 376CAB1B2FF0ED1C002E1FC2 /* PBXContainerItemProxy */;
+		};
+		376CAB262FF0ED1C002E1FC2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 376CAB222FF0ED1C002E1FC2 /* GlossX Extension (macOS) */;
+			targetProxy = 376CAB252FF0ED1C002E1FC2 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		376CAB492FF0ED1C002E1FC2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "iOS (Extension)/GlossX.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "GlossX Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xxg.Flipword.Extension;
+				PRODUCT_NAME = "GlossX Extension";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		376CAB4A2FF0ED1C002E1FC2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "iOS (Extension)/GlossX.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "GlossX Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xxg.Flipword.Extension;
+				PRODUCT_NAME = "GlossX Extension";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		376CAB4E2FF0ED1C002E1FC2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "iOS (App)/GlossX.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = GlossX;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xxg.Flipword;
+				PRODUCT_NAME = GlossX;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		376CAB4F2FF0ED1C002E1FC2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "iOS (App)/GlossX.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (App)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = GlossX;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xxg.Flipword;
+				PRODUCT_NAME = GlossX;
+				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		376CAB532FF0ED1C002E1FC2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/GlossX.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "GlossX Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xxg.Flipword.Extension;
+				PRODUCT_NAME = "GlossX Extension";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		376CAB542FF0ED1C002E1FC2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "macOS (Extension)/GlossX.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "macOS (Extension)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "GlossX Extension";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@executable_path/../../../../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xxg.Flipword.Extension;
+				PRODUCT_NAME = "GlossX Extension";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		376CAB582FF0ED1C002E1FC2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "macOS (App)/GlossX.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = GlossX;
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xxg.Flipword;
+				PRODUCT_NAME = GlossX;
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		376CAB592FF0ED1C002E1FC2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "macOS (App)/GlossX.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
+				ENABLE_USER_SELECTED_FILES = readonly;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = GlossX;
+				INFOPLIST_KEY_NSMainStoryboardFile = Main;
+				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.14;
+				MARKETING_VERSION = 1.1;
+				OTHER_LDFLAGS = (
+					"-framework",
+					SafariServices,
+					"-framework",
+					WebKit,
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.xxg.Flipword;
+				PRODUCT_NAME = GlossX;
+				REGISTER_APP_GROUPS = YES;
+				SDKROOT = macosx;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		376CAB5C2FF0ED1C002E1FC2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		376CAB5D2FF0ED1C002E1FC2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		376CAAE32FF0ED1A002E1FC2 /* Build configuration list for PBXProject "GlossX" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				376CAB5C2FF0ED1C002E1FC2 /* Debug */,
+				376CAB5D2FF0ED1C002E1FC2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		376CAB482FF0ED1C002E1FC2 /* Build configuration list for PBXNativeTarget "GlossX Extension (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				376CAB492FF0ED1C002E1FC2 /* Debug */,
+				376CAB4A2FF0ED1C002E1FC2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		376CAB4D2FF0ED1C002E1FC2 /* Build configuration list for PBXNativeTarget "GlossX (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				376CAB4E2FF0ED1C002E1FC2 /* Debug */,
+				376CAB4F2FF0ED1C002E1FC2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		376CAB522FF0ED1C002E1FC2 /* Build configuration list for PBXNativeTarget "GlossX Extension (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				376CAB532FF0ED1C002E1FC2 /* Debug */,
+				376CAB542FF0ED1C002E1FC2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		376CAB572FF0ED1C002E1FC2 /* Build configuration list for PBXNativeTarget "GlossX (macOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				376CAB582FF0ED1C002E1FC2 /* Debug */,
+				376CAB592FF0ED1C002E1FC2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		376CAB702FF0ED1C002E1FC2 /* XCLocalSwiftPackageReference "GlossXCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = GlossXCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		376CAB712FF0ED1C002E1FC2 /* GlossXCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GlossXCore;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 376CAAE02FF0ED1A002E1FC2 /* Project object */;
+}

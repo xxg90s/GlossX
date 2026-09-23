@@ -1,0 +1,10 @@
+{
+    "extension_name": {
+        "message": "GlossX",
+        "description": "The display name for the extension."
+    },
+    "extension_description": {
+        "message": "Immersive English reading for Safari — replace Chinese words with English in context and review with SM-2.",
+        "description": "Description of what the extension does."
+    }
+}

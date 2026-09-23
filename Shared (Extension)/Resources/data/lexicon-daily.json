@@ -1,0 +1,22 @@
+[
+  {"id":"daily_time","zh":"时间","en":"time","pos":"n","phonetic":"/taɪm/","lexicon":"daily"},
+  {"id":"daily_people","zh":"人们","en":"people","pos":"n","phonetic":"/ˈpiːpl/","lexicon":"daily"},
+  {"id":"daily_way","zh":"方式","en":"way","pos":"n","phonetic":"/weɪ/","lexicon":"daily"},
+  {"id":"daily_day","zh":"天","en":"day","pos":"n","phonetic":"/deɪ/","lexicon":"daily"},
+  {"id":"daily_man","zh":"男人","en":"man","pos":"n","phonetic":"/mæn/","lexicon":"daily"},
+  {"id":"daily_woman","zh":"女人","en":"woman","pos":"n","phonetic":"/ˈwʊmən/","lexicon":"daily"},
+  {"id":"daily_life","zh":"生活","en":"life","pos":"n","phonetic":"/laɪf/","lexicon":"daily"},
+  {"id":"daily_child","zh":"孩子","en":"child","pos":"n","phonetic":"/tʃaɪld/","lexicon":"daily"},
+  {"id":"daily_world","zh":"世界","en":"world","pos":"n","phonetic":"/wɜːrld/","lexicon":"daily"},
+  {"id":"daily_school","zh":"学校","en":"school","pos":"n","phonetic":"/skuːl/","lexicon":"daily"},
+  {"id":"daily_state","zh":"状态","en":"state","pos":"n","phonetic":"/steɪt/","lexicon":"daily"},
+  {"id":"daily_family","zh":"家庭","en":"family","pos":"n","phonetic":"/ˈfæməli/","lexicon":"daily"},
+  {"id":"daily_student","zh":"学生","en":"student","pos":"n","phonetic":"/ˈstuːdnt/","lexicon":"daily"},
+  {"id":"daily_group","zh":"群体","en":"group","pos":"n","phonetic":"/ɡruːp/","lexicon":"daily"},
+  {"id":"daily_country","zh":"国家","en":"country","pos":"n","phonetic":"/ˈkʌntri/","lexicon":"daily"},
+  {"id":"daily_problem","zh":"问题","en":"problem","pos":"n","phonetic":"/ˈprɑːbləm/","lexicon":"daily"},
+  {"id":"daily_hand","zh":"手","en":"hand","pos":"n","phonetic":"/hænd/","lexicon":"daily"},
+  {"id":"daily_part","zh":"部分","en":"part","pos":"n","phonetic":"/pɑːrt/","lexicon":"daily"},
+  {"id":"daily_place","zh":"地方","en":"place","pos":"n","phonetic":"/pleɪs/","lexicon":"daily"},
+  {"id":"daily_case","zh":"情况","en":"case","pos":"n","phonetic":"/keɪs/","lexicon":"daily"}
+]

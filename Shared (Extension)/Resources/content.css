@@ -1,0 +1,597 @@
+.glossx-word {
+    color: #1b4332;
+    border-bottom: 1px dashed rgba(27, 67, 50, 0.45);
+    cursor: help;
+    transition: background-color 120ms ease, color 120ms ease;
+}
+
+.glossx-word:hover {
+    background: rgba(27, 67, 50, 0.08);
+    color: #081c15;
+}
+
+.glossx-word.glossx-word-mastered {
+    color: #2d6a4f;
+    border-bottom: none;
+    background: rgba(45, 106, 79, 0.14);
+    border-radius: 4px;
+    padding-inline: 3px;
+    cursor: default;
+}
+
+.glossx-word.glossx-word-mastered::after {
+    content: "✓";
+    margin-inline-start: 3px;
+    font-size: 0.72em;
+    font-weight: 700;
+    color: #40916c;
+}
+
+.glossx-word.glossx-word-mastered:hover {
+    background: rgba(45, 106, 79, 0.18);
+    color: #1b4332;
+}
+
+.glossx-word.glossx-grade-flash {
+    animation: glossx-grade-flash 0.65s ease;
+}
+
+.glossx-word.glossx-word-review-flash {
+    animation: glossx-review-flash 0.9s ease;
+}
+
+@keyframes glossx-grade-flash {
+    0% {
+        box-shadow: 0 0 0 0 rgba(45, 106, 79, 0.45);
+        transform: scale(1);
+    }
+    40% {
+        box-shadow: 0 0 0 8px rgba(45, 106, 79, 0.12);
+        transform: scale(1.04);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(45, 106, 79, 0);
+        transform: scale(1);
+    }
+}
+
+@keyframes glossx-review-flash {
+    0%, 100% {
+        background: rgba(27, 67, 50, 0.08);
+    }
+    50% {
+        background: rgba(255, 193, 7, 0.35);
+    }
+}
+
+.glossx-sentence {
+    color: #1b4332;
+}
+
+.glossx-sentence-block {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 12px;
+    margin-block: 0.55em;
+    padding: 8px 10px;
+    border-inline-start: 3px solid rgba(27, 67, 50, 0.35);
+    background: rgba(27, 67, 50, 0.05);
+    border-radius: 8px;
+}
+
+.glossx-sentence-en,
+.glossx-sentence-cn {
+    display: block;
+    flex: 1 1 0;
+    min-width: 0;
+    line-height: 1.6;
+}
+
+.glossx-sentence-en {
+    color: #1b4332;
+    font-weight: 500;
+}
+
+.glossx-sentence-secondary {
+    color: #486581;
+    font-size: 0.92em;
+    font-weight: 400;
+    border-inline-start: 1px solid rgba(27, 67, 50, 0.14);
+    padding-inline-start: 12px;
+}
+
+.glossx-sentence-loading {
+    opacity: 0.7;
+}
+
+.glossx-sentence-failed {
+    outline: 1px dashed rgba(188, 71, 73, 0.45);
+}
+
+.glossx-sentence[data-source="fallback"] .glossx-sentence-en::after {
+    content: " · 备用翻译";
+    color: #829ab1;
+    font-size: 0.78em;
+    font-weight: 400;
+}
+
+.glossx-vocab-word {
+    cursor: pointer;
+    border-radius: 3px;
+    transition: background 0.15s ease;
+    pointer-events: auto;
+}
+
+.glossx-sentence-en .glossx-vocab-word {
+    border-bottom: 1px dashed rgba(27, 67, 50, 0.35);
+}
+
+.glossx-vocab-word:hover {
+    background: rgba(45, 106, 79, 0.12);
+}
+
+.glossx-vocab-word.glossx-vocab-saved {
+    color: #2d6a4f;
+    text-decoration: underline;
+    text-decoration-color: rgba(45, 106, 79, 0.45);
+    text-underline-offset: 2px;
+}
+
+.glossx-vocab-word.glossx-vocab-saved::after {
+    content: "★";
+    font-size: 0.65em;
+    margin-inline-start: 1px;
+    color: #40916c;
+    vertical-align: super;
+}
+
+.glossx-snippet-saved {
+    background: rgba(52, 152, 219, 0.14);
+    border-inline-start: 2px solid #3498db;
+    padding-inline-start: 2px;
+    border-radius: 2px;
+    color: inherit;
+}
+
+.glossx-word-save-panel {
+    position: absolute;
+    z-index: 2147483646;
+    display: none;
+    width: min(300px, calc(100vw - 24px));
+    padding: 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.98);
+    color: #102a43;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.glossx-word-save-panel.visible {
+    display: block;
+}
+
+.glossx-word-save-word {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1b4332;
+}
+
+.glossx-word-save-lemma {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #2d6a4f;
+    font-weight: 600;
+}
+
+.glossx-word-save-lemma.hidden {
+    display: none;
+}
+
+.glossx-word-save-phonetic,
+.glossx-word-save-translation {
+    margin-top: 6px;
+    color: #486581;
+}
+
+.glossx-word-save-translation {
+    font-size: 15px;
+    color: #102a43;
+}
+
+.glossx-word-save-context-label {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #627d98;
+    font-weight: 600;
+}
+
+.glossx-word-save-context-en {
+    margin-top: 4px;
+    color: #1b4332;
+    line-height: 1.5;
+}
+
+.glossx-word-save-context-cn {
+    margin-top: 4px;
+    color: #627d98;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.glossx-word-save-actions {
+    margin-top: 12px;
+}
+
+.glossx-word-save-btn {
+    width: 100%;
+    border: 1px solid rgba(27, 67, 50, 0.12);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #f0fdf4;
+    color: #1b4332;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.glossx-word-save-btn:hover {
+    background: #dcfce7;
+}
+
+.glossx-word-save-btn.glossx-word-save-btn-saved {
+    background: #2d6a4f;
+    border-color: #2d6a4f;
+    color: #fff;
+}
+
+.glossx-vocab-toast {
+    position: fixed;
+    z-index: 2147483647;
+    bottom: 24px;
+    inset-inline-start: 50%;
+    transform: translateX(-50%);
+    background: rgba(27, 67, 50, 0.94);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.glossx-vocab-toast.visible {
+    opacity: 1;
+}
+
+.glossx-hint-banner {
+    position: fixed;
+    inset-block-end: 56px;
+    inset-inline-end: 24px;
+    z-index: 2147483645;
+    display: none;
+    max-width: min(320px, calc(100vw - 48px));
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(27, 67, 50, 0.92);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    font: 12px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.glossx-hint-banner.visible {
+    display: block;
+}
+
+.glossx-floating-control {
+    position: fixed;
+    inset-block-end: 24px;
+    inset-inline-end: 24px;
+    z-index: 2147483646;
+    width: 14px;
+    height: 14px;
+    padding: 0;
+    border: none;
+    border-radius: 999px;
+    background: rgba(120, 120, 120, 0.55);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+    cursor: pointer;
+    transition: transform 120ms ease, background-color 120ms ease, box-shadow 120ms ease;
+}
+
+.glossx-floating-control:hover {
+    transform: scale(1.15);
+}
+
+.glossx-floating-control.active {
+    background: #2d6a4f;
+    box-shadow: 0 0 0 4px rgba(45, 106, 79, 0.18);
+}
+
+.glossx-floating-menu {
+    position: fixed;
+    inset-block-end: 48px;
+    inset-inline-end: 24px;
+    z-index: 2147483646;
+    display: none;
+    min-width: 148px;
+    padding: 8px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+    backdrop-filter: blur(10px);
+}
+
+.glossx-floating-menu.visible {
+    display: grid;
+    gap: 4px;
+}
+
+.glossx-floating-menu button {
+    border: none;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: transparent;
+    color: #1b4332;
+    font: 13px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-align: start;
+    cursor: pointer;
+}
+
+.glossx-floating-menu button:hover {
+    background: rgba(27, 67, 50, 0.08);
+}
+
+.glossx-decode-panel {
+    position: absolute;
+    z-index: 2147483647;
+    display: none;
+    width: min(280px, calc(100vw - 24px));
+    padding: 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.98);
+    color: #102a43;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.glossx-decode-panel.visible {
+    display: block;
+}
+
+.glossx-decode-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.glossx-decode-word {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1b4332;
+}
+
+.glossx-decode-speak {
+    border: none;
+    background: rgba(27, 67, 50, 0.08);
+    border-radius: 999px;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+}
+
+.glossx-decode-phonetic {
+    margin-top: 4px;
+    color: #486581;
+}
+
+.glossx-decode-translation {
+    margin-top: 8px;
+    font-size: 15px;
+}
+
+.glossx-decode-pos {
+    margin-top: 4px;
+    color: #627d98;
+}
+
+.glossx-decode-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.glossx-decode-actions button {
+    border: 1px solid rgba(27, 67, 50, 0.12);
+    border-radius: 8px;
+    padding: 6px 4px;
+    background: #f0fdf4;
+    color: #1b4332;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+.glossx-decode-actions button:hover {
+    background: #dcfce7;
+}
+
+.glossx-decode-actions button.glossx-decode-action-done {
+    background: #2d6a4f;
+    border-color: #2d6a4f;
+    color: #fff;
+    font-weight: 600;
+}
+
+@media (prefers-color-scheme: dark) {
+    .glossx-word {
+        color: #95d5b2;
+        border-bottom-color: rgba(149, 213, 178, 0.45);
+    }
+
+    .glossx-word:hover {
+        background: rgba(149, 213, 178, 0.12);
+        color: #d8f3dc;
+    }
+
+    .glossx-word.glossx-word-mastered {
+        color: #95d5b2;
+        background: rgba(149, 213, 178, 0.16);
+    }
+
+    .glossx-word.glossx-word-mastered::after {
+        color: #74c69d;
+    }
+
+    .glossx-floating-menu,
+    .glossx-decode-panel,
+    .glossx-word-save-panel {
+        background: rgba(28, 36, 34, 0.96);
+        color: #d8f3dc;
+    }
+
+    .glossx-floating-menu button,
+    .glossx-decode-actions button {
+        color: #d8f3dc;
+    }
+
+    .glossx-decode-word {
+        color: #95d5b2;
+    }
+
+    .glossx-decode-phonetic,
+    .glossx-decode-pos {
+        color: #adb5bd;
+    }
+
+    .glossx-snippet-save-panel {
+        background: rgba(28, 36, 34, 0.96);
+        color: #d8f3dc;
+    }
+
+    .glossx-snippet-save-btn {
+        background: rgba(149, 213, 178, 0.12);
+        color: #d8f3dc;
+    }
+
+    .glossx-snippet-save-btn:hover {
+        background: rgba(149, 213, 178, 0.2);
+    }
+
+    .glossx-snippet-save-translation-retry {
+        color: #f0b429;
+    }
+
+    .glossx-snippet-saved {
+        background: rgba(52, 152, 219, 0.22);
+        border-inline-start-color: #5dade2;
+    }
+}
+
+.glossx-snippet-save-panel {
+    position: fixed;
+    z-index: 2147483646;
+    display: none;
+    max-width: min(320px, calc(100vw - 24px));
+    padding: 12px;
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.98);
+    color: #102a43;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+    font: 13px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.glossx-snippet-save-panel.visible {
+    display: block;
+}
+
+.glossx-snippet-save-text {
+    font-weight: 600;
+    font-size: 15px;
+    color: #1b4332;
+}
+
+.glossx-snippet-type-badge {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 11px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.glossx-snippet-type-phrase {
+    background: rgba(59, 130, 246, 0.14);
+    color: #1d4ed8;
+}
+
+.glossx-snippet-type-sentence {
+    background: rgba(139, 92, 246, 0.14);
+    color: #6d28d9;
+}
+
+.glossx-snippet-save-translation {
+    margin-top: 6px;
+    font-size: 15px;
+    color: #102a43;
+}
+
+.glossx-snippet-save-translation-retry {
+    color: #b45309;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.glossx-snippet-save-context-label {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #627d98;
+    font-weight: 600;
+}
+
+.glossx-snippet-save-context-en {
+    margin-top: 4px;
+    color: #1b4332;
+    line-height: 1.5;
+}
+
+.glossx-snippet-save-context-cn {
+    margin-top: 4px;
+    color: #627d98;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.glossx-snippet-save-source {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #829ab1;
+}
+
+.glossx-snippet-save-actions {
+    margin-top: 12px;
+}
+
+.glossx-snippet-save-btn {
+    width: 100%;
+    border: 1px solid rgba(27, 67, 50, 0.12);
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: #f0fdf4;
+    color: #1b4332;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.glossx-snippet-save-btn:hover {
+    background: #dcfce7;
+}
+
+.glossx-snippet-save-btn.glossx-snippet-save-btn-saved {
+    background: #2d6a4f;
+    border-color: #2d6a4f;
+    color: #fff;
+}

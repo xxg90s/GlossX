@@ -1,0 +1,17 @@
+[
+  {"id":"ielts_accommodation","zh":"住宿","en":"accommodation","pos":"n","phonetic":"/əˌkɑːməˈdeɪʃn/","lexicon":"ielts"},
+  {"id":"ielts_biodiversity","zh":"生物多样性","en":"biodiversity","pos":"n","phonetic":"/ˌbaɪoʊdaɪˈvɜːrsəti/","lexicon":"ielts"},
+  {"id":"ielts_curriculum","zh":"课程","en":"curriculum","pos":"n","phonetic":"/kəˈrɪkjələm/","lexicon":"ielts"},
+  {"id":"ielts_demographic","zh":"人口","en":"demographic","pos":"adj","phonetic":"/ˌdeməˈɡræfɪk/","lexicon":"ielts"},
+  {"id":"ielts_ecosystem","zh":"生态系统","en":"ecosystem","pos":"n","phonetic":"/ˈiːkoʊsɪstəm/","lexicon":"ielts"},
+  {"id":"ielts_fluency","zh":"流利","en":"fluency","pos":"n","phonetic":"/ˈfluːənsi/","lexicon":"ielts"},
+  {"id":"ielts_globalization","zh":"全球化","en":"globalization","pos":"n","phonetic":"/ˌɡloʊbələˈzeɪʃn/","lexicon":"ielts"},
+  {"id":"ielts_immigration","zh":"移民","en":"immigration","pos":"n","phonetic":"/ˌɪmɪˈɡreɪʃn/","lexicon":"ielts"},
+  {"id":"ielts_infrastructure","zh":"基础设施","en":"infrastructure","pos":"n","phonetic":"/ˈɪnfrəstrʌktʃər/","lexicon":"ielts"},
+  {"id":"ielts_literacy","zh":"读写能力","en":"literacy","pos":"n","phonetic":"/ˈlɪtərəsi/","lexicon":"ielts"},
+  {"id":"ielts_migration","zh":"迁徙","en":"migration","pos":"n","phonetic":"/maɪˈɡreɪʃn/","lexicon":"ielts"},
+  {"id":"ielts_urbanization","zh":"城市化","en":"urbanization","pos":"n","phonetic":"/ˌɜːrbənəˈzeɪʃn/","lexicon":"ielts"},
+  {"id":"ielts_welfare","zh":"福利","en":"welfare","pos":"n","phonetic":"/ˈwelfer/","lexicon":"ielts"},
+  {"id":"ielts_sustainable","zh":"可持续","en":"sustainable","pos":"adj","phonetic":"/səˈsteɪnəbl/","lexicon":"ielts"},
+  {"id":"ielts_heritage","zh":"遗产","en":"heritage","pos":"n","phonetic":"/ˈherɪtɪdʒ/","lexicon":"ielts"}
+]

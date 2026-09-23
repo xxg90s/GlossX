@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>导出预览</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="export.css">
+</head>
+<body class="export-page">
+    <header class="export-toolbar">
+        <button type="button" id="export-back" class="vocab-back-btn">← 返回</button>
+        <div class="export-toolbar-copy">
+            <div class="popup-title" id="export-heading">导出预览</div>
+            <div class="export-hint" id="export-hint">确认内容后下载 Markdown 文件。</div>
+        </div>
+        <button type="button" id="export-download" class="export-download-btn">下载 Markdown</button>
+    </header>
+
+    <main class="export-sheet" id="export-sheet">
+        <header class="export-doc-header">
+            <div class="export-doc-kicker">GlossX 学习库</div>
+            <h1 class="export-doc-title" id="export-doc-title">生词本</h1>
+            <div class="export-doc-meta" id="export-doc-meta"></div>
+        </header>
+        <section id="export-body" class="export-body"></section>
+    </main>
+
+    <script src="learning-export.js" charset="utf-8"></script>
+    <script src="export.js" charset="utf-8"></script>
+</body>
+</html>

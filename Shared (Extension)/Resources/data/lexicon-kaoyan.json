@@ -1,0 +1,22 @@
+[
+  {"id":"ky_paradigm","zh":"范式","en":"paradigm","pos":"n","phonetic":"/ˈpærədaɪm/","lexicon":"kaoyan"},
+  {"id":"ky_methodology","zh":"方法论","en":"methodology","pos":"n","phonetic":"/ˌmeθəˈdɑːlədʒi/","lexicon":"kaoyan"},
+  {"id":"ky_epistemology","zh":"认识论","en":"epistemology","pos":"n","phonetic":"/ɪˌpɪstəˈmɑːlədʒi/","lexicon":"kaoyan"},
+  {"id":"ky_empirical","zh":"经验","en":"empirical","pos":"adj","phonetic":"/ɪmˈpɪrɪkl/","lexicon":"kaoyan"},
+  {"id":"ky_theoretical","zh":"理论","en":"theoretical","pos":"adj","phonetic":"/ˌθiːəˈretɪkl/","lexicon":"kaoyan"},
+  {"id":"ky_correlation","zh":"相关性","en":"correlation","pos":"n","phonetic":"/ˌkɔːrəˈleɪʃn/","lexicon":"kaoyan"},
+  {"id":"ky_causality","zh":"因果","en":"causality","pos":"n","phonetic":"/kɔːˈzæləti/","lexicon":"kaoyan"},
+  {"id":"ky_inference","zh":"推断","en":"inference","pos":"n","phonetic":"/ˈɪnfərəns/","lexicon":"kaoyan"},
+  {"id":"ky_synthesis","zh":"综合","en":"synthesis","pos":"n","phonetic":"/ˈsɪnθəsɪs/","lexicon":"kaoyan"},
+  {"id":"ky_dialectic","zh":"辩证","en":"dialectic","pos":"adj","phonetic":"/ˌdaɪəˈlektɪk/","lexicon":"kaoyan"},
+  {"id":"ky_discourse","zh":"论述","en":"discourse","pos":"n","phonetic":"/ˈdɪskɔːrs/","lexicon":"kaoyan"},
+  {"id":"ky_framework","zh":"框架","en":"framework","pos":"n","phonetic":"/ˈfreɪmwɜːrk/","lexicon":"kaoyan"},
+  {"id":"ky_implication","zh":"含义","en":"implication","pos":"n","phonetic":"/ˌɪmplɪˈkeɪʃn/","lexicon":"kaoyan"},
+  {"id":"ky_interpretation","zh":"解释","en":"interpretation","pos":"n","phonetic":"/ɪnˌtɜːrprəˈteɪʃn/","lexicon":"kaoyan"},
+  {"id":"ky_proposition","zh":"命题","en":"proposition","pos":"n","phonetic":"/ˌprɑːpəˈzɪʃn/","lexicon":"kaoyan"},
+  {"id":"ky_abstract","zh":"抽象","en":"abstract","pos":"adj","phonetic":"/ˈæbstrækt/","lexicon":"kaoyan"},
+  {"id":"ky_construct","zh":"建构","en":"construct","pos":"v","phonetic":"/kənˈstrʌkt/","lexicon":"kaoyan"},
+  {"id":"ky_validate","zh":"验证","en":"validate","pos":"v","phonetic":"/ˈvælɪdeɪt/","lexicon":"kaoyan"},
+  {"id":"ky_quantitative","zh":"定量","en":"quantitative","pos":"adj","phonetic":"/ˈkwɑːntəteɪtɪv/","lexicon":"kaoyan"},
+  {"id":"ky_qualitative","zh":"定性","en":"qualitative","pos":"adj","phonetic":"/ˈkwɑːlɪteɪtɪv/","lexicon":"kaoyan"}
+]

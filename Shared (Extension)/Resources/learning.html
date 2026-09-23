@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlossX 学习</title>
+    <link rel="stylesheet" href="popup.css">
+    <link rel="stylesheet" href="vocabulary.css">
+    <link rel="stylesheet" href="learning.css">
+</head>
+<body class="vocab-page learning-page">
+    <header class="vocab-header">
+        <button type="button" id="vocab-back" class="vocab-back-btn">← 返回</button>
+        <div class="vocab-header-title">
+            <div class="popup-title">学习</div>
+        </div>
+        <div class="vocab-header-actions">
+            <button type="button" id="learning-export" class="vocab-back-btn" title="导出当前列表为 Markdown">导出</button>
+            <button type="button" id="vocab-open-options" class="vocab-icon-btn" title="设置">⚙</button>
+        </div>
+    </header>
+
+    <nav class="learning-tabs" id="learning-tabs">
+        <button type="button" class="learning-tab active" data-tab="vocab">生词本</button>
+        <button type="button" class="learning-tab" data-tab="snippets">句库</button>
+    </nav>
+
+    <section id="learning-panel-vocab">
+        <section class="popup-section stats vocab-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="vocab-stat-new">0</div>
+                <div class="stat-label">今日新增</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="vocab-stat-learning">0</div>
+                <div class="stat-label">学习中</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="vocab-stat-due">0</div>
+                <div class="stat-label">待复习</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="vocab-stat-mastered">0</div>
+                <div class="stat-label">已掌握</div>
+            </div>
+        </section>
+
+        <section class="vocab-tabs" id="vocab-tabs">
+            <button type="button" class="vocab-tab active" data-filter="today">今日新增</button>
+            <button type="button" class="vocab-tab" data-filter="all">全部</button>
+            <button type="button" class="vocab-tab" data-filter="learning">学习中</button>
+            <button type="button" class="vocab-tab" data-filter="mastered">已掌握</button>
+        </section>
+
+        <section class="vocab-list-section" id="vocab-list-section">
+            <div id="vocab-list" class="vocab-list"></div>
+            <div id="vocab-empty" class="vocab-empty hidden">
+                <div class="vocab-empty-title">还没有生词</div>
+                <div class="vocab-empty-text">浏览网页时，点击翻译句中的英文词即可加入生词本。</div>
+            </div>
+        </section>
+
+        <footer class="vocab-footer">
+            <button type="button" id="vocab-start-learn" class="primary-btn full-width">开始今日学习</button>
+        </footer>
+
+        <div id="vocab-learn-overlay" class="vocab-learn-overlay hidden">
+            <div class="vocab-learn-card">
+                <div class="vocab-learn-top">
+                    <button type="button" id="vocab-learn-close" class="vocab-learn-close">×</button>
+                    <div class="vocab-learn-progress" id="vocab-learn-progress">1 / 1</div>
+                    <div class="vocab-learn-steps">
+                        <span class="vocab-step-dot active" data-step="1">1</span>
+                        <span class="vocab-step-line"></span>
+                        <span class="vocab-step-dot" data-step="2">2</span>
+                        <span class="vocab-step-line"></span>
+                        <span class="vocab-step-dot" data-step="3">3</span>
+                    </div>
+                </div>
+
+                <div class="vocab-learn-body" id="vocab-learn-body"></div>
+
+                <div class="vocab-learn-actions" id="vocab-learn-actions">
+                    <button type="button" id="vocab-learn-prev" class="secondary-btn">上一步</button>
+                    <button type="button" id="vocab-learn-next" class="primary-btn">下一步</button>
+                </div>
+
+                <div class="vocab-learn-grade hidden" id="vocab-learn-grade">
+                    <button type="button" id="vocab-grade-review" class="secondary-btn">还不会</button>
+                    <button type="button" id="vocab-grade-mastered" class="primary-btn">会了 ✓</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="learning-panel-snippets" class="hidden">
+        <section class="popup-section stats snippets-stats">
+            <div class="stat-item">
+                <div class="stat-value" id="snippets-stat-new">0</div>
+                <div class="stat-label">今日新增</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="snippets-stat-phrase">0</div>
+                <div class="stat-label">短语</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="snippets-stat-sentence">0</div>
+                <div class="stat-label">整句</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="snippets-stat-familiar">0</div>
+                <div class="stat-label">已熟悉</div>
+            </div>
+        </section>
+
+        <section class="snippets-tabs" id="snippets-tabs">
+            <button type="button" class="snippets-tab active" data-filter="today">今日新增</button>
+            <button type="button" class="snippets-tab" data-filter="all">全部</button>
+            <button type="button" class="snippets-tab" data-filter="phrase">短语</button>
+            <button type="button" class="snippets-tab" data-filter="sentence">整句</button>
+            <button type="button" class="snippets-tab" data-filter="familiar">已熟悉</button>
+        </section>
+
+        <div id="snippets-root" class="snippets-list-section">
+            <div id="snippets-list" class="snippets-list"></div>
+            <div id="snippets-empty" class="snippets-empty hidden">
+                <div class="snippets-empty-title">还没有收藏</div>
+                <div class="snippets-empty-text">浏览网页时，在翻译句中拖拽选中英文短语或句子即可加入句库。</div>
+            </div>
+        </div>
+
+        <footer class="vocab-footer snippets-footer">
+            <button type="button" id="snippets-start-learn" class="primary-btn full-width">开始短语学习</button>
+        </footer>
+
+        <div id="snippets-learn-overlay" class="vocab-learn-overlay hidden">
+            <div class="vocab-learn-card">
+                <div class="vocab-learn-top">
+                    <button type="button" id="snippets-learn-close" class="vocab-learn-close">×</button>
+                    <div class="vocab-learn-progress" id="snippets-learn-progress">1 / 1</div>
+                    <div class="vocab-learn-steps">
+                        <span class="snippets-step-dot active" data-step="1">1</span>
+                        <span class="vocab-step-line"></span>
+                        <span class="snippets-step-dot" data-step="2">2</span>
+                        <span class="vocab-step-line"></span>
+                        <span class="snippets-step-dot" data-step="3">3</span>
+                    </div>
+                </div>
+
+                <div class="vocab-learn-body" id="snippets-learn-body"></div>
+
+                <div class="vocab-learn-actions" id="snippets-learn-actions">
+                    <button type="button" id="snippets-learn-prev" class="secondary-btn">上一步</button>
+                    <button type="button" id="snippets-learn-next" class="primary-btn">下一步</button>
+                </div>
+
+                <div class="vocab-learn-grade hidden" id="snippets-learn-grade">
+                    <button type="button" id="snippets-grade-review" class="secondary-btn">还不会</button>
+                    <button type="button" id="snippets-grade-mastered" class="primary-btn">会了 ✓</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="browser-shim.js" charset="utf-8"></script>
+    <script src="opencc-t2cn.js" charset="utf-8"></script>
+    <script src="text-normalize.js" charset="utf-8"></script>
+    <script src="snippet-utils.js" charset="utf-8"></script>
+    <script src="snippet-storage.js" charset="utf-8"></script>
+    <script src="vocabulary.js" charset="utf-8"></script>
+    <script src="snippets.js" charset="utf-8"></script>
+    <script src="learning.js" charset="utf-8"></script>
+</body>
+</html>

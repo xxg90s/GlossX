@@ -1,0 +1,10 @@
+GlossXCore/.build/
+GlossXCore/.swiftpm/
+dist/
+
+.flipword-log.txt
+.flipword-log2.txt
+.glossx-log.txt
+.glossx-log2.txt
+.superpowers/
+xcuserdata/
