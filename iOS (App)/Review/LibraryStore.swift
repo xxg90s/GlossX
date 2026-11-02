@@ -10,9 +10,12 @@ final class LibraryStore: ObservableObject {
     @Published var isReviewing = false
     @Published var reminderEnabled: Bool
     @Published var lastError: String = ""
+    @Published var celebrationStreak: Int?
 
     private var pushTask: Task<Void, Never>?
     private var downloadRetries = 0
+    private var pendingReviewLaunch = false
+    private let streakStore = StreakStore()
 
     init() {
         if let cached = LocalLibraryCache.load() {
@@ -23,6 +26,10 @@ final class LibraryStore: ObservableObject {
             sync = .loading
         }
         reminderEnabled = ReviewReminder.isEnabled
+        streakStore.onExternalChange = { [weak self] in
+            self?.objectWillChange.send()
+            self?.rescheduleReminder()
+        }
     }
 
     var items: [ReviewSourceItem] {
@@ -30,11 +37,24 @@ final class LibraryStore: ObservableObject {
     }
 
     var queue: ReviewQueue.Summary {
-        ReviewQueue.build(from: items, now: Self.now)
+        ReviewQueue.build(
+            from: items,
+            now: Self.now,
+            goal: streakStatus.remaining,
+            excludedIds: todayReviewedIds
+        )
+    }
+
+    var streakStatus: StreakStatus {
+        StreakEngine.status(streakStore.record, reviewableCount: reviewableCount, today: Self.today)
     }
 
     var streak: Int {
-        JSONValue.int(snapshot.payload.stats["streak"])
+        streakStatus.streak
+    }
+
+    var dailyGoal: Int {
+        streakStore.record.goal
     }
 
     var homeState: TodayHomeState {
@@ -45,6 +65,15 @@ final class LibraryStore: ObservableObject {
             remainingOverride: session.map(\.remaining),
             hasCollectibles: !items.isEmpty
         )
+    }
+
+    private var todayReviewedIds: Set<String> {
+        let progress = streakStore.record.today
+        return progress.date == Self.today ? Set(progress.reviewedIds) : []
+    }
+
+    private var reviewableCount: Int {
+        ReviewQueue.reviewableCount(in: items, includingReviewed: todayReviewedIds)
     }
 
     var syncLabel: String {
@@ -69,8 +98,11 @@ final class LibraryStore: ObservableObject {
         }
         let result = await Self.readCloud()
         applyRead(result)
-        if reminderEnabled {
-            await ReviewReminder.sync(enabled: true)
+        streakStore.refreshReviewableCount(reviewableCount)
+        rescheduleReminder()
+        if pendingReviewLaunch {
+            pendingReviewLaunch = false
+            startReview()
         }
     }
 
@@ -79,6 +111,33 @@ final class LibraryStore: ObservableObject {
         guard !summary.cards.isEmpty else { return }
         session = ReviewSession(cards: summary.cards)
         isReviewing = true
+    }
+
+    /// Opened from the widget: start right away from the local cache, or once the iCloud read lands.
+    func openReviewFromWidget() {
+        guard !isReviewing else { return }
+        if queue.cards.isEmpty {
+            pendingReviewLaunch = true
+        } else {
+            startReview()
+        }
+    }
+
+    func setDailyGoal(_ goal: Int) {
+        let next = StreakEngine.setGoal(
+            streakStore.record,
+            goal: goal,
+            reviewableCount: reviewableCount,
+            today: Self.today,
+            now: Self.now
+        )
+        streakStore.update(next, reviewableCount: reviewableCount)
+        objectWillChange.send()
+        rescheduleReminder()
+    }
+
+    func dismissCelebration() {
+        celebrationStreak = nil
     }
 
     func closeReview() {
@@ -94,13 +153,15 @@ final class LibraryStore: ObservableObject {
 
     func grade(_ grade: ReviewGrade) {
         guard let card = session?.current else { return }
+        let wasCompleted = streakStatus.todayCompleted
         snapshot = LibraryMutator.applyGrade(
             to: snapshot,
             id: card.id,
             grade: grade,
             now: Self.now,
-            today: DayStamp.string(fromMilliseconds: Self.now)
+            today: Self.today
         )
+        recordStreakReview(id: card.id, wasCompleted: wasCompleted)
         session?.advanceAfterGrade()
         persistLocal()
         schedulePush()
@@ -113,6 +174,7 @@ final class LibraryStore: ObservableObject {
 
     func markFamiliar(id: String) {
         snapshot = LibraryMutator.markFamiliar(in: snapshot, id: id, now: Self.now)
+        streakStore.refreshReviewableCount(reviewableCount)
         persistLocal()
         schedulePush()
     }
@@ -120,6 +182,37 @@ final class LibraryStore: ObservableObject {
     func setReminderEnabled(_ enabled: Bool) {
         reminderEnabled = enabled
         ReviewReminder.isEnabled = enabled
+        rescheduleReminder()
+    }
+
+    private func recordStreakReview(id: String, wasCompleted: Bool) {
+        var reviewed = todayReviewedIds
+        reviewed.insert(id)
+        let count = ReviewQueue.reviewableCount(in: items, includingReviewed: reviewed)
+        let next = StreakEngine.recordReview(
+            streakStore.record,
+            id: id,
+            reviewableCount: count,
+            today: Self.today,
+            now: Self.now
+        )
+        streakStore.update(next, reviewableCount: count)
+        let status = streakStatus
+        if !wasCompleted && status.todayCompleted {
+            celebrationStreak = status.streak
+        }
+        rescheduleReminder()
+    }
+
+    private func rescheduleReminder() {
+        let record = streakStore.record
+        let count = reviewableCount
+        let enabled = reminderEnabled
+        Task {
+            await ReviewReminder.sync(enabled: enabled) { day in
+                StreakEngine.status(record, reviewableCount: count, today: day)
+            }
+        }
     }
 
     private func applyRead(_ result: ICloudReadResult) {
@@ -217,6 +310,10 @@ final class LibraryStore: ObservableObject {
 
     private static var now: Double {
         Date().timeIntervalSince1970 * 1000
+    }
+
+    private static var today: String {
+        DayStamp.string(fromMilliseconds: now)
     }
 
     private static func localHasNewerReviews(local: LibrarySnapshot, cloud: LibrarySnapshot) -> Bool {

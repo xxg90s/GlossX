@@ -14,6 +14,7 @@ struct TodayView: View {
             .navigationBarTitleDisplayMode(.inline)
         }
         .navigationViewStyle(.stack)
+        .streakCelebration()
         .fullScreenCover(isPresented: $store.isReviewing) {
             ReviewView()
                 .environmentObject(store)
@@ -67,10 +68,8 @@ struct TodayView: View {
     ) -> some View {
         VStack(spacing: 18) {
             Spacer()
-            if let streak {
-                Text("连续 \(streak) 天")
-                    .font(.subheadline.weight(.medium))
-                    .foregroundColor(GlossXPalette.green)
+            if streak != nil {
+                StreakSummaryView(status: store.streakStatus)
             }
             Text(title)
                 .font(.system(size: 28, weight: .semibold))

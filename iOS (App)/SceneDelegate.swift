@@ -1,5 +1,6 @@
 import UIKit
 import SwiftUI
+import GlossXCore
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
@@ -13,10 +14,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.rootViewController = UIHostingController(rootView: root)
         self.window = window
         window.makeKeyAndVisible()
+        handle(connectionOptions.urlContexts)
         Task { await store.refresh() }
+    }
+
+    func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        handle(URLContexts)
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
         Task { await store.refresh() }
+    }
+
+    private func handle(_ contexts: Set<UIOpenURLContext>) {
+        let reviewURL = StreakSharedState.reviewURL
+        guard contexts.contains(where: { $0.url.scheme == reviewURL.scheme && $0.url.host == reviewURL.host }) else {
+            return
+        }
+        store.openReviewFromWidget()
     }
 }

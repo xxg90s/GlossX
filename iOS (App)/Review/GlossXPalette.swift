@@ -8,4 +8,6 @@ enum GlossXPalette {
     static let paper = Color(red: 247 / 255, green: 250 / 255, blue: 246 / 255)
     static let muted = Color(red: 90 / 255, green: 110 / 255, blue: 100 / 255)
     static let danger = Color(red: 140 / 255, green: 70 / 255, blue: 70 / 255)
+    static let flame = Color(red: 255 / 255, green: 140 / 255, blue: 40 / 255)
+    static let flameIdle = Color(red: 176 / 255, green: 186 / 255, blue: 180 / 255)
 }

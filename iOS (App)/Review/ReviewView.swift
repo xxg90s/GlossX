@@ -48,6 +48,7 @@ struct ReviewView: View {
                 }
             }
         }
+        .streakCelebration()
     }
 
     private func header(session: ReviewSession) -> some View {
