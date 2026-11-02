@@ -18,7 +18,7 @@ assert.match(panelJs, /global\.GlossX\.SnippetSavePanel\s*=\s*SnippetSavePanel/)
 assert.match(panelJs, /id\s*=\s*"glossx-snippet-save-panel"/);
 assert.match(panelJs, /insetInlineStart/);
 assert.match(panelJs, /function escapeHtml/);
-assert.match(panelJs, /onSave\(\{[\s\S]*text:[\s\S]*context:/);
+assert.match(panelJs, /onSave\(\{[\s\S]*text[,:][\s\S]*context:/);
 assert.match(panelJs, /await onRemove\(snippetId\)/);
 assert.match(panelJs, /PANEL_VERSION/);
 assert.match(panelJs, /正在翻译/);

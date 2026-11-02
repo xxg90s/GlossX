@@ -7,11 +7,13 @@
     let hideTimer = null;
     let onSave = null;
     let onRemove = null;
+    let onUpdateTranslation = null;
     let lookupToken = 0;
     let isTranslating = false;
     let listenersBound = false;
     let pendingHide = false;
     let lastRequest = null;
+    let pendingTranslation = null;
 
     function escapeHtml(text) {
         return String(text || "")
@@ -85,20 +87,27 @@
                     button.textContent = "★ 加入句库";
                     button.classList.remove("glossx-snippet-save-btn-saved");
                 } else if (!isSaved && onSave) {
+                    const text = panel.dataset.currentText;
                     const translation = panel.dataset.translation || "";
-                    const skipLookup = !isRealTranslation(translation);
+                    const hasTranslation = isRealTranslation(translation);
+                    const inflight = !hasTranslation && pendingTranslation?.text === text
+                        ? pendingTranslation.promise
+                        : null;
                     const saveResult = await onSave({
-                        text: panel.dataset.currentText,
+                        text,
                         context: JSON.parse(panel.dataset.context || "{}"),
-                        translation: skipLookup ? undefined : translation,
+                        translation: hasTranslation ? translation : undefined,
                         type: panel.dataset.snippetType || "phrase",
                         preference: panel.dataset.pronunciation || "us",
-                        skipLookup
+                        skipLookup: hasTranslation || !!inflight
                     });
                     if (!saveResult?.ok) return;
                     panel.dataset.saved = "1";
                     if (saveResult.item?.id) {
                         panel.dataset.snippetId = saveResult.item.id;
+                        if (inflight && !saveResult.item.translation) {
+                            backfillTranslation(saveResult.item.id, inflight);
+                        }
                     }
                     if (saveResult.item?.translation) {
                         renderTranslation(String(saveResult.item.translation), true);
@@ -236,21 +245,28 @@
             });
         };
 
-        return withTimeout(runTranslate(), TRANSLATE_TIMEOUT_MS)
+        // Resolves to the translation text, or "" on failure, regardless of whether
+        // the panel has moved on — a saved snippet may still be waiting for it.
+        const promise = withTimeout(runTranslate(), TRANSLATE_TIMEOUT_MS)
             .then((result) => {
-                if (token !== lookupToken) return;
-                if (result?.ok && result.translation) {
-                    renderTranslation(String(result.translation).trim(), true);
+                const translation = result?.ok && result.translation
+                    ? String(result.translation).trim()
+                    : "";
+                if (token !== lookupToken) return translation;
+                if (translation) {
+                    renderTranslation(translation, true);
                 } else {
                     const errorText = String(result?.error || "AI 翻译失败").trim();
                     renderTranslation(errorText, false, true);
                 }
+                return translation;
             })
             .catch((error) => {
                 console.warn("[GlossX] Snippet translation failed:", error);
-                if (token !== lookupToken) return;
+                if (token !== lookupToken) return "";
                 const timedOut = error?.message === "snippet_translate_timeout";
                 renderTranslation(timedOut ? TRANSLATE_RETRY_TEXT : "暂无释义", false, timedOut);
+                return "";
             })
             .finally(() => {
                 if (token !== lookupToken) return;
@@ -261,19 +277,35 @@
                     SnippetSavePanel.hide(true);
                 }
             });
+        pendingTranslation = { text, promise };
+        return promise;
+    }
+
+    function backfillTranslation(snippetId, translationPromise) {
+        if (!snippetId || !onUpdateTranslation) return;
+        Promise.resolve(translationPromise).then((translation) => {
+            if (!isRealTranslation(translation)) return;
+            return onUpdateTranslation(snippetId, translation);
+        }).catch((error) => {
+            console.warn("[GlossX] Snippet translation backfill failed:", error);
+        });
     }
 
     function retryTranslation() {
         if (!lastRequest || isTranslating) return;
         lookupToken += 1;
         renderTranslation(TRANSLATE_LOADING_TEXT, false);
-        fetchTranslation({ ...lastRequest, token: lookupToken });
+        const promise = fetchTranslation({ ...lastRequest, token: lookupToken });
+        if (panel?.dataset.saved === "1") {
+            backfillTranslation(panel.dataset.snippetId, promise);
+        }
     }
 
     const SnippetSavePanel = {
         init(handlers) {
             onSave = handlers?.onSave || null;
             onRemove = handlers?.onRemove || null;
+            onUpdateTranslation = handlers?.onUpdateTranslation || null;
             bindGlobalListeners();
             ensurePanel();
         },
@@ -340,15 +372,19 @@
             positionPanel(anchorRect);
 
             if (needsTranslation) {
-                fetchTranslation({
+                const promise = fetchTranslation({
                     text,
                     context,
                     type: snippetType,
                     preference: pronunciation || "us",
                     token
                 });
+                if (saved) backfillTranslation(snippetId, promise);
             } else {
                 isTranslating = false;
+                if (saved && !savedTranslation) {
+                    backfillTranslation(snippetId, contextTranslation);
+                }
             }
         },
 

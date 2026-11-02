@@ -99,7 +99,10 @@
             }
 
             if (!settings?.globalEnabled) {
-                banner.textContent = "GlossX：请在 Safari 工具栏打开扩展，开启总开关并启用当前网站。";
+                const toolbarName = typeof browser.runtime.sendNativeMessage === "function"
+                    ? "Safari 工具栏"
+                    : "浏览器工具栏";
+                banner.textContent = `GlossX：请在${toolbarName}打开扩展，开启总开关并启用当前网站。`;
             } else {
                 banner.textContent = "GlossX：点击右下角圆点，或选择「加入白名单」以启用当前页面。";
             }

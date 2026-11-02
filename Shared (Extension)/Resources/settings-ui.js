@@ -47,7 +47,16 @@
             aiTest: root.querySelector("#ai-test"),
             aiTestResult: root.querySelector("#ai-test-result"),
             icloudSyncStatus: root.querySelector("#icloud-sync-status"),
-            icloudSyncNow: root.querySelector("#icloud-sync-now")
+            icloudSyncNow: root.querySelector("#icloud-sync-now"),
+            icloudSectionHeading: root.querySelector("#icloud-section-heading"),
+            icloudSyncHint: root.querySelector("#icloud-sync-hint"),
+            learningOpenHint: root.querySelector("#learning-open-hint"),
+            pageAssistHint: root.querySelector("#page-assist-hint"),
+            optionsPrivacy: root.querySelector("#options-privacy"),
+            libraryExport: root.querySelector("#library-export"),
+            libraryImport: root.querySelector("#library-import"),
+            libraryImportFile: root.querySelector("#library-import-file"),
+            libraryTransferStatus: root.querySelector("#library-transfer-status")
         };
 
         let currentHostname = "";
@@ -756,9 +765,95 @@
             }
         });
 
+        function applyLocalOnlyLibrary(status) {
+            if (refs.icloudSectionHeading) refs.icloudSectionHeading.textContent = "学习库";
+            if (refs.icloudSyncStatus) {
+                refs.icloudSyncStatus.textContent = status?.label || "仅保存在本机";
+            }
+            if (refs.icloudSyncNow) refs.icloudSyncNow.classList.add("hidden");
+            if (refs.icloudSyncHint) {
+                refs.icloudSyncHint.textContent = "学习库保存在本机。可用下方的导出和导入，在浏览器之间搬运。";
+            }
+            if (refs.learningOpenHint) {
+                refs.learningOpenHint.textContent = "从浏览器工具栏点击「学习」展开收藏内容时生效。默认为插入标签页。";
+            }
+            if (refs.pageAssistHint) {
+                refs.pageAssistHint.textContent = "关闭后隐藏页面右下角的圆点按钮和操作提示条，仍可通过浏览器工具栏管理开关。";
+            }
+            if (refs.optionsPrivacy) {
+                refs.optionsPrivacy.textContent = "学习数据保存在本机。启用 AI 或语句英文化后，会将短句上下文或选中语句文本发送至所选模型服务商或备用翻译服务。";
+            }
+        }
+
+        function downloadViaFrame(filename, content) {
+            return new Promise((resolve, reject) => {
+                const frameUrl = browser.runtime.getURL("download-frame.html");
+                const iframe = document.createElement("iframe");
+                iframe.style.display = "none";
+                iframe.src = frameUrl;
+                let settled = false;
+                const finish = (fn, value) => {
+                    if (settled) return;
+                    settled = true;
+                    iframe.remove();
+                    fn(value);
+                };
+                iframe.onload = () => {
+                    try {
+                        iframe.contentWindow.postMessage({
+                            type: "glossx-download",
+                            filename,
+                            content
+                        }, "*");
+                        setTimeout(() => finish(resolve, { mode: "download" }), 600);
+                    } catch (error) {
+                        finish(reject, error);
+                    }
+                };
+                iframe.onerror = () => finish(reject, new Error("下载框架加载失败"));
+                document.body.appendChild(iframe);
+            });
+        }
+
+        async function exportLibrary() {
+            const Sync = global.GlossX?.ICloudSync;
+            const Transfer = global.GlossX?.LibraryTransfer;
+            if (!Sync || !Transfer) throw new Error("学习库模块未加载");
+            const stored = await browser.storage.local.get(Sync.SYNC_KEYS);
+            const snapshot = Transfer.planExport(stored, Date.now());
+            await downloadViaFrame("GlossX-library.json", JSON.stringify(snapshot, null, 2));
+            if (refs.libraryTransferStatus) {
+                refs.libraryTransferStatus.textContent = "已导出 GlossX-library.json";
+            }
+        }
+
+        async function importLibraryText(text) {
+            const Sync = global.GlossX?.ICloudSync;
+            const Transfer = global.GlossX?.LibraryTransfer;
+            if (!Sync || !Transfer) throw new Error("学习库模块未加载");
+            const stored = await browser.storage.local.get([...Sync.SYNC_KEYS, "icloudMeta"]);
+            const plan = Transfer.planImport(text, stored);
+            if (!plan.ok) throw new Error(plan.error || "无法导入");
+            const meta = {
+                ...(stored.icloudMeta || {}),
+                localUpdatedAt: plan.localUpdatedAt
+            };
+            await browser.storage.local.set({
+                ...plan.storage,
+                icloudMeta: meta
+            });
+            if (refs.libraryTransferStatus) refs.libraryTransferStatus.textContent = "已导入学习库";
+            await loadState();
+        }
+
         async function refreshIcloudStatus(syncFirst) {
             if (!refs.icloudSyncStatus && !syncFirst) return null;
             const Sync = global.GlossX?.ICloudSync;
+            if (Sync?.shouldRunNativeSync && !Sync.shouldRunNativeSync(browser.runtime)) {
+                const status = Sync.localOnlyStatus();
+                applyLocalOnlyLibrary(status);
+                return status;
+            }
             if (refs.icloudSyncStatus) {
                 refs.icloudSyncStatus.textContent = syncFirst ? "正在同步…" : "正在检查同步状态…";
             }
@@ -817,6 +912,35 @@
                 Promise.resolve(syncIcloudAndReload()).catch((error) => {
                     console.warn("[GlossX] manual iCloud sync failed:", error);
                     if (refs.icloudSyncNow) refs.icloudSyncNow.disabled = false;
+                });
+            });
+        }
+
+        if (refs.libraryExport) {
+            refs.libraryExport.addEventListener("click", () => {
+                Promise.resolve(exportLibrary()).catch((error) => {
+                    if (refs.libraryTransferStatus) {
+                        refs.libraryTransferStatus.textContent = `导出失败：${error?.message || "未知错误"}`;
+                    }
+                });
+            });
+        }
+
+        if (refs.libraryImport && refs.libraryImportFile) {
+            refs.libraryImport.addEventListener("click", () => {
+                refs.libraryImportFile.value = "";
+                refs.libraryImportFile.click();
+            });
+            refs.libraryImportFile.addEventListener("change", () => {
+                const file = refs.libraryImportFile.files?.[0];
+                if (!file) return;
+                if (!window.confirm("导入会用文件中的生词本、句库和设置覆盖本机学习库。继续？")) {
+                    return;
+                }
+                Promise.resolve(file.text().then((text) => importLibraryText(text))).catch((error) => {
+                    if (refs.libraryTransferStatus) {
+                        refs.libraryTransferStatus.textContent = `导入失败：${error?.message || "未知错误"}`;
+                    }
                 });
             });
         }

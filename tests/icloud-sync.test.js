@@ -239,6 +239,19 @@ assert.equal(
     "已同步 · 刚才"
 );
 
+assert.equal(S.shouldRunNativeSync(undefined), false);
+assert.equal(S.shouldRunNativeSync({}), false);
+assert.equal(S.shouldRunNativeSync({ sendNativeMessage() {} }), true);
+const localOnly = S.localOnlyStatus();
+assert.equal(localOnly.ok, true);
+assert.equal(localOnly.supported, false);
+assert.equal(localOnly.lastStatus, "unsupported");
+assert.equal(localOnly.label, "仅保存在本机");
+assert.equal(S.isLocalOnlyStatus(localOnly), true);
+assert.equal(S.isLocalOnlyStatus({ lastStatus: "synced" }), false);
+assert.equal(S.formatSyncLabel({ lastStatus: "unsupported" }), "仅保存在本机");
+assert.equal(S.labelFromMeta({ lastStatus: "unsupported", lastLabel: "正在同步…" }), "仅保存在本机");
+
 (async () => {
     const store = {
         icloudMeta: { syncEpoch: 1, lastStatus: "pushing" }

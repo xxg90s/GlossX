@@ -120,6 +120,7 @@
             lastPullAt,
             now
         } = input || {};
+        if (lastStatus === "unsupported") return "\u4ec5\u4fdd\u5b58\u5728\u672c\u673a";
         if (lastStatus === "signedOut") return "\u672a\u767b\u5f55 iCloud\uff0c\u6536\u85cf\u4ec5\u4fdd\u5b58\u5728\u672c\u673a";
         if (lastStatus === "downloading") return "\u6b63\u5728\u4ece iCloud \u6062\u590d\u2026";
         if (lastStatus === "unavailable") return "\u8bf7\u5148\u6253\u5f00\u4e00\u6b21 GlossX \u5e94\u7528";
@@ -142,6 +143,23 @@
 
     function isTransientStatus(status) {
         return status === "pushing" || status === "downloading";
+    }
+
+    function shouldRunNativeSync(runtime) {
+        return typeof runtime?.sendNativeMessage === "function";
+    }
+
+    function localOnlyStatus() {
+        return {
+            ok: true,
+            supported: false,
+            lastStatus: "unsupported",
+            label: "\u4ec5\u4fdd\u5b58\u5728\u672c\u673a"
+        };
+    }
+
+    function isLocalOnlyStatus(status) {
+        return status?.supported === false || status?.lastStatus === "unsupported";
     }
 
     function labelFromMeta(meta, now) {
@@ -247,6 +265,9 @@
         formatSyncLabel,
         resolveDisplayStatus,
         isTransientStatus,
+        shouldRunNativeSync,
+        localOnlyStatus,
+        isLocalOnlyStatus,
         labelFromMeta,
         beginSyncRequest,
         waitForSyncResult

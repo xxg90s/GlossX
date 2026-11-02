@@ -166,6 +166,22 @@
         return { ok: true };
     }
 
+    async function updateTranslation(id, translation) {
+        const snippetId = String(id || "");
+        const text = String(translation || "").trim();
+        if (!snippetId || !text) return { ok: false, error: "参数无效" };
+
+        const items = await getSnippetItems();
+        const record = items[snippetId];
+        if (!record) return { ok: false, error: "未找到该句子" };
+        if (String(record.translation || "").trim()) {
+            return { ok: true, item: record };
+        }
+        items[snippetId] = { ...record, translation: text };
+        await saveSnippetItems(items);
+        return { ok: true, item: items[snippetId] };
+    }
+
     async function markFamiliar(id) {
         const snippetId = String(id || "");
         if (!snippetId) return { ok: false, error: "句子无效" };
@@ -262,6 +278,7 @@
         getItems,
         saveItem,
         removeItem,
+        updateTranslation,
         markFamiliar,
         gradeItem
     };

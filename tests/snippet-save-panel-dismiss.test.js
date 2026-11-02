@@ -56,7 +56,7 @@ function createElementStub() {
     };
 }
 
-function createHarness(translateSnippet, onSave) {
+function createHarness(translateSnippet, onSave, onUpdateTranslation) {
     let panelEl = null;
     const documentListeners = {};
     const sandbox = {
@@ -99,17 +99,18 @@ function createHarness(translateSnippet, onSave) {
     vm.runInContext(panelSource, sandbox, { filename: "snippet-save-panel.js" });
 
     const SnippetSavePanel = sandbox.GlossX.SnippetSavePanel;
-    SnippetSavePanel.init({ onSave });
+    SnippetSavePanel.init({ onSave, onUpdateTranslation });
 
     return {
         SnippetSavePanel,
-        show() {
+        show(overrides = {}) {
             SnippetSavePanel.show({
                 text: "kick the bucket",
                 type: "phrase",
                 context: {},
                 anchorRect: { top: 40, left: 40, bottom: 60, width: 120, height: 20 },
-                saved: false
+                saved: false,
+                ...overrides
             });
         },
         isVisible: () => panelEl.classList.contains("visible"),
@@ -186,6 +187,72 @@ const insideClick = {
         assert.equal(saves[0].skipLookup, true, "in-flight translation must not trigger a second lookup");
         assert.equal(h.saveButton().disabled, false, "save button must re-enable after a loading save");
         assert.equal(h.isVisible(), true);
+    }
+
+    // Saving before the translation arrives must backfill it onto the saved record,
+    // even if the panel is closed in the meantime.
+    {
+        let resolveTranslate = null;
+        const updates = [];
+        const h = createHarness(
+            () => new Promise((resolve) => { resolveTranslate = resolve; }),
+            async () => ({ ok: true, item: { id: "snip_1" } }),
+            async (id, translation) => {
+                updates.push({ id, translation });
+                return { ok: true };
+            }
+        );
+
+        h.show();
+        await h.saveButton().click();
+        h.SnippetSavePanel.hide(true);
+
+        resolveTranslate({ ok: true, translation: "翘辫子" });
+        await wait(50);
+        assert.deepEqual(
+            updates.map((u) => ({ ...u })),
+            [{ id: "snip_1", translation: "翘辫子" }],
+            "late translation must be written back to the saved snippet"
+        );
+    }
+
+    // Re-opening a saved snippet that lacks a translation must repair the record.
+    {
+        const updates = [];
+        const h = createHarness(
+            async () => ({ ok: true, translation: "翘辫子" }),
+            null,
+            async (id, translation) => {
+                updates.push({ id, translation });
+                return { ok: true };
+            }
+        );
+
+        h.show({ saved: true, snippetId: "snip_1" });
+        await wait(50);
+        assert.deepEqual(
+            updates.map((u) => ({ ...u })),
+            [{ id: "snip_1", translation: "翘辫子" }],
+            "saved snippet without translation must be backfilled when re-opened"
+        );
+    }
+
+    // A failed translation must not write anything back.
+    {
+        const updates = [];
+        const h = createHarness(
+            async () => ({ ok: false, error: "AI 翻译失败" }),
+            async () => ({ ok: true, item: { id: "snip_1" } }),
+            async (id, translation) => {
+                updates.push({ id, translation });
+                return { ok: true };
+            }
+        );
+
+        h.show();
+        await h.saveButton().click();
+        await wait(50);
+        assert.equal(updates.length, 0, "failed translation must not be backfilled");
     }
 
     // A late translation response must not revive a panel the user already closed.

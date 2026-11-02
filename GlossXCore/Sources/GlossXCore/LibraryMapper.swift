@@ -48,7 +48,16 @@ public enum LibraryMapper {
         let type = JSONValue.string(json["type"])
         let text = JSONValue.string(json["text"])
         let translation = JSONValue.string(json["translation"])
+        let fullEnglish = JSONValue.string(context["fullEnglish"])
         let fullChinese = JSONValue.string(context["fullChinese"])
+        let definitions: [String]
+        if !translation.isEmpty {
+            definitions = [translation]
+        } else if !fullChinese.isEmpty && coversContext(text: text, fullEnglish: fullEnglish) {
+            definitions = [fullChinese]
+        } else {
+            definitions = []
+        }
         return ReviewSourceItem(
             id: JSONValue.string(json["id"]).ifEmpty(id),
             kind: type == "sentence" ? .sentence : .phrase,
@@ -56,8 +65,8 @@ public enum LibraryMapper {
             lemma: "",
             phonetic: "",
             pos: "",
-            definitions: translation.isEmpty ? (fullChinese.isEmpty ? [] : [fullChinese]) : [translation],
-            english: firstNonEmpty([JSONValue.string(context["fullEnglish"]), text]),
+            definitions: definitions,
+            english: firstNonEmpty([fullEnglish, text]),
             chinese: fullChinese,
             hostname: JSONValue.string(context["hostname"]),
             status: JSONValue.string(json["status"]).ifEmpty("new"),
@@ -94,6 +103,20 @@ public enum LibraryMapper {
             next["learnedAt"] = record.learnedAt
         }
         return next
+    }
+
+    /// Mirrors `SENTENCE_COVERAGE_RATIO` in the extension's snippet-utils.js.
+    private static let sentenceCoverageRatio = 0.8
+
+    private static func coversContext(text: String, fullEnglish: String) -> Bool {
+        let selected = collapseWhitespace(text)
+        let full = collapseWhitespace(fullEnglish)
+        guard !selected.isEmpty, !full.isEmpty else { return false }
+        return Double(selected.count) / Double(full.count) >= sentenceCoverageRatio
+    }
+
+    private static func collapseWhitespace(_ value: String) -> String {
+        value.split(whereSeparator: { $0.isWhitespace }).joined(separator: " ")
     }
 
     private static func firstNonEmpty(_ values: [String]) -> String {

@@ -128,6 +128,20 @@ document.addEventListener("DOMContentLoaded", () => {
     async function refreshIcloudStatus(syncFirst) {
         if (!icloudSyncStatus) return;
         const Sync = window.GlossX?.ICloudSync;
+        if (Sync?.shouldRunNativeSync && !Sync.shouldRunNativeSync(browser.runtime)) {
+            const status = Sync.localOnlyStatus();
+            const heading = document.getElementById("icloud-section-heading");
+            const hint = document.getElementById("icloud-sync-hint");
+            const privacy = document.getElementById("popup-privacy");
+            if (heading) heading.textContent = "学习库";
+            icloudSyncStatus.textContent = status.label;
+            if (icloudSyncNow) icloudSyncNow.classList.add("hidden");
+            if (hint) hint.textContent = "学习库保存在本机。可在设置中导出或导入。";
+            if (privacy) {
+                privacy.textContent = "启用扩展后，还需在此开启总开关并将网站加入白名单。也可点击网页右下角的灰色圆点快速启用。";
+            }
+            return;
+        }
         icloudSyncStatus.textContent = syncFirst ? "正在同步…" : "正在检查同步状态…";
 
         if (syncFirst && Sync?.beginSyncRequest && Sync?.waitForSyncResult) {

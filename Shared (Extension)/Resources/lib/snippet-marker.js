@@ -169,6 +169,27 @@
         }
     }
 
+    async function handleUpdateTranslation(snippetId, translation) {
+        try {
+            let result = null;
+            if (global.GlossX?.SnippetStorage?.updateTranslation) {
+                result = await global.GlossX.SnippetStorage.updateTranslation(snippetId, translation);
+            } else {
+                result = await browser.runtime.sendMessage({
+                    type: "updateSnippetTranslation",
+                    payload: { id: snippetId, translation }
+                });
+            }
+            if (result?.ok && result.item?.id) {
+                snippetItems[result.item.id] = result.item;
+            }
+            return result;
+        } catch (error) {
+            console.warn("[GlossX] Snippet translation update failed:", error);
+            return { ok: false, error: error?.message || "更新失败" };
+        }
+    }
+
     function handleMouseUp(event) {
         const enElement = event.target.closest(".glossx-sentence-en");
         if (!enElement) return;
@@ -234,7 +255,8 @@
                 document.addEventListener("mouseup", handleMouseUp);
                 global.GlossX?.SnippetSavePanel?.init({
                     onSave: handleSave,
-                    onRemove: handleRemove
+                    onRemove: handleRemove,
+                    onUpdateTranslation: handleUpdateTranslation
                 });
             }
         },

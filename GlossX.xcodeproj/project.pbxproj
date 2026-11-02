@@ -138,6 +138,7 @@
 				"Resources/lib/decode-panel.js",
 				"Resources/lib/floating-control.js",
 				"Resources/lib/learning-export.js",
+				"Resources/lib/library-transfer.js",
 				Resources/lib/lexicon.js,
 				"Resources/lib/opencc-LICENSE.txt",
 				"Resources/lib/opencc-t2cn.js",
@@ -164,6 +165,7 @@
 				Resources/snippets.js,
 				Resources/vocabulary.css,
 				Resources/vocabulary.html,
+				"Resources/vocabulary-redirect.js",
 				Resources/vocabulary.js,
 				SafariWebExtensionHandler.swift,
 			);
@@ -200,6 +202,7 @@
 				"Resources/lib/decode-panel.js",
 				"Resources/lib/floating-control.js",
 				"Resources/lib/learning-export.js",
+				"Resources/lib/library-transfer.js",
 				Resources/lib/lexicon.js,
 				"Resources/lib/opencc-LICENSE.txt",
 				"Resources/lib/opencc-t2cn.js",
@@ -226,6 +229,7 @@
 				Resources/snippets.js,
 				Resources/vocabulary.css,
 				Resources/vocabulary.html,
+				"Resources/vocabulary-redirect.js",
 				Resources/vocabulary.js,
 				SafariWebExtensionHandler.swift,
 			);

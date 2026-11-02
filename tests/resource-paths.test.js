@@ -48,8 +48,22 @@ const vocabularyHtml = fs.readFileSync(
 );
 assert.match(
     vocabularyHtml,
+    /src="vocabulary-redirect\.js"/,
+    "vocabulary.html must load an external redirect script for Chrome extension CSP"
+);
+assert.doesNotMatch(
+    vocabularyHtml,
+    /<script>/,
+    "vocabulary.html must not contain an inline script"
+);
+const vocabularyRedirect = fs.readFileSync(
+    path.join(resources, "vocabulary-redirect.js"),
+    "utf8"
+);
+assert.match(
+    vocabularyRedirect,
     /learning\.html#vocab/,
-    "vocabulary.html must redirect to learning.html#vocab"
+    "vocabulary-redirect.js must redirect to learning.html#vocab"
 );
 
 const learningHtml = fs.readFileSync(

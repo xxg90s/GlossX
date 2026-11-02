@@ -1501,6 +1501,22 @@ async function removeSnippetItem(payload) {
     return { ok: true };
 }
 
+async function updateSnippetTranslation(payload) {
+    const id = String(payload?.id || "");
+    const translation = String(payload?.translation || "").trim();
+    if (!id || !translation) return { ok: false, error: "参数无效" };
+
+    const items = await getSnippetItems();
+    const record = items[id];
+    if (!record) return { ok: false, error: "未找到该句子" };
+    if (String(record.translation || "").trim()) {
+        return { ok: true, item: record };
+    }
+    items[id] = { ...record, translation };
+    await saveSnippetItems(items);
+    return { ok: true, item: items[id] };
+}
+
 async function markSnippetFamiliar(payload) {
     const id = String(payload?.id || "");
     if (!id) return { ok: false, error: "句子无效" };
@@ -1806,6 +1822,10 @@ async function runIcloudSync({
     force = false,
     requestedEpoch = null
 } = {}) {
+    const nativeSync = getICloudSync();
+    if (nativeSync?.shouldRunNativeSync && !nativeSync.shouldRunNativeSync(browser.runtime)) {
+        return nativeSync.localOnlyStatus();
+    }
     const syncEpoch = Number(requestedEpoch) || Date.now();
     if (icloudSyncInFlight) {
         const age = Date.now() - icloudSyncInFlightStartedAt;
@@ -2008,6 +2028,9 @@ function scheduleIcloudPush() {
 
 async function getIcloudStatusForUi() {
     const Sync = getICloudSync();
+    if (Sync?.shouldRunNativeSync && !Sync.shouldRunNativeSync(browser.runtime)) {
+        return Sync.localOnlyStatus();
+    }
     const meta = await getIcloudMeta();
     const nativeStatus = await sendNative({ type: "icloudStatus" }, ICLOUD_NATIVE_TIMEOUT_MS);
 
@@ -2228,6 +2251,11 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
                 return;
             }
 
+            if (message.type === "updateSnippetTranslation") {
+                sendResponse(await updateSnippetTranslation(message.payload || {}));
+                return;
+            }
+
             if (message.type === "markSnippetFamiliar") {
                 sendResponse(await markSnippetFamiliar(message.payload || {}));
                 return;
@@ -2254,6 +2282,11 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
             }
 
             if (message.type === "icloudSyncNow") {
+                const SyncNow = getICloudSync();
+                if (SyncNow?.shouldRunNativeSync && !SyncNow.shouldRunNativeSync(browser.runtime)) {
+                    sendResponse(SyncNow.localOnlyStatus());
+                    return;
+                }
                 const syncEpoch = Number(message.epoch) || Date.now();
                 sendResponse({
                     ok: true,
