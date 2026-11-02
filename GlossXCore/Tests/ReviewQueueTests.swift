@@ -60,6 +60,55 @@ final class ReviewQueueTests: XCTestCase {
         XCTAssertTrue(queue.cards.isEmpty)
     }
 
+    func testPadsToGoalWithEarliestUpcomingThenExtraNewCards() {
+        var items: [ReviewSourceItem] = [
+            word(id: "due", status: "learning", addedAt: now - 5000, nextReviewAt: now - 1, repetitions: 1),
+            word(id: "later", status: "review", addedAt: now - 5000, nextReviewAt: now + 3 * 86_400_000, repetitions: 3),
+            word(id: "soon", status: "learning", addedAt: now - 5000, nextReviewAt: now + 86_400_000, repetitions: 1)
+        ]
+        for index in 0..<12 {
+            items.append(word(id: "new-\(index)", status: "new", addedAt: now - Double(index) * 1000, nextReviewAt: now))
+        }
+
+        let queue = ReviewQueue.build(from: items, now: now, goal: 14)
+        let ids = queue.cards.map(\.id)
+
+        XCTAssertEqual(queue.cards.count, 14)
+        XCTAssertEqual(Array(ids.suffix(3)), ["soon", "later", "new-10"])
+        XCTAssertEqual(queue.cards.first { $0.id == "soon" }?.mode, .cloze)
+        XCTAssertEqual(queue.cards.first { $0.id == "new-10" }?.mode, .intro)
+        XCTAssertEqual(queue.newCount, 11)
+        XCTAssertEqual(queue.dueCount, 3)
+    }
+
+    func testPaddingSkipsCardsReviewedToday() {
+        let items = [
+            word(id: "reviewed", status: "learning", addedAt: now, nextReviewAt: now + 1000, repetitions: 1),
+            word(id: "upcoming", status: "learning", addedAt: now, nextReviewAt: now + 2000, repetitions: 1)
+        ]
+
+        let queue = ReviewQueue.build(from: items, now: now, goal: 5, excludedIds: ["reviewed"])
+        XCTAssertEqual(queue.cards.map(\.id), ["upcoming"])
+    }
+
+    func testDoesNotTruncateWhenRegularQueueExceedsGoal() {
+        let items = (0..<8).map { index in
+            word(id: "due-\(index)", status: "learning", addedAt: now, nextReviewAt: now - Double(index + 1), repetitions: 1)
+        }
+        XCTAssertEqual(ReviewQueue.build(from: items, now: now, goal: 3).cards.count, 8)
+    }
+
+    func testReviewableCountExcludesBrowsingOnlyItemsButKeepsTodaysReviews() {
+        let items = [
+            word(id: "a", status: "new", addedAt: now, nextReviewAt: now),
+            word(id: "b", status: "mastered", addedAt: now, nextReviewAt: now, repetitions: 5),
+            word(id: "c", status: "mastered", addedAt: now, nextReviewAt: now, repetitions: 5),
+            sentence(id: "s")
+        ]
+        XCTAssertEqual(ReviewQueue.reviewableCount(in: items), 1)
+        XCTAssertEqual(ReviewQueue.reviewableCount(in: items, includingReviewed: ["b", "missing"]), 2)
+    }
+
     private func word(
         id: String,
         status: String,

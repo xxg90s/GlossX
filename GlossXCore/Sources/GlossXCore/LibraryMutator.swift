@@ -74,4 +74,43 @@ public enum DayStamp {
         let parts = calendar.dateComponents([.year, .month, .day], from: date)
         return String(format: "%04d-%02d-%02d", parts.year ?? 0, parts.month ?? 0, parts.day ?? 0)
     }
+
+    public static func string(from date: Date, timeZone: TimeZone = .current) -> String {
+        string(fromMilliseconds: date.timeIntervalSince1970 * 1000, timeZone: timeZone)
+    }
+
+    /// Calendar-day arithmetic on `yyyy-MM-dd` strings; independent of the device time zone.
+    public static func adding(days: Int, to day: String) -> String {
+        guard let date = utcDate(from: day),
+              let shifted = utcCalendar.date(byAdding: .day, value: days, to: date) else {
+            return day
+        }
+        return string(from: shifted, timeZone: utcCalendar.timeZone)
+    }
+
+    /// Monday of the ISO week containing `day`.
+    public static func weekStart(of day: String) -> String {
+        guard let date = utcDate(from: day) else { return day }
+        let weekday = utcCalendar.component(.weekday, from: date)
+        let offset = (weekday + 5) % 7
+        return adding(days: -offset, to: day)
+    }
+
+    /// The next local midnight after `date`.
+    public static func nextMidnight(after date: Date, calendar: Calendar = .current) -> Date {
+        let start = calendar.startOfDay(for: date)
+        return calendar.date(byAdding: .day, value: 1, to: start) ?? date.addingTimeInterval(86_400)
+    }
+
+    private static let utcCalendar: Calendar = {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar
+    }()
+
+    private static func utcDate(from day: String) -> Date? {
+        let parts = day.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        return utcCalendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
+    }
 }
