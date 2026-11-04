@@ -4,6 +4,8 @@ import GlossXCore
 struct SettingsView: View {
     @EnvironmentObject private var store: LibraryStore
     @State private var accent = SpeechPlayer.accent
+    @State private var showsStarterPack = false
+    @State private var showsOnboarding = false
 
     private var accentBinding: Binding<SpeechPlayer.Accent> {
         Binding(
@@ -58,8 +60,13 @@ struct SettingsView: View {
                         .font(.footnote)
                         .foregroundColor(GlossXPalette.muted)
                 }
+                Section("入门") {
+                    Button("导入入门词包") { showsStarterPack = true }
+                    Button("查看新手引导") { showsOnboarding = true }
+                }
+                .foregroundColor(GlossXPalette.green)
                 Section("说明") {
-                    Text("手机用来查看和复习你在 Mac 上收藏的词与短语，不提供网页翻译。复习进度会写回同一 iCloud 学习库。")
+                    Text("在 iPhone 或 Mac 的 Safari 里点词、划句即可收藏；收藏与复习进度通过 iCloud 在两端同步。")
                         .font(.footnote)
                         .foregroundColor(GlossXPalette.muted)
                 }
@@ -67,6 +74,14 @@ struct SettingsView: View {
             .navigationTitle("我的")
         }
         .navigationViewStyle(.stack)
+        .sheet(isPresented: $showsStarterPack) {
+            StarterPackSheet()
+                .environmentObject(store)
+        }
+        .fullScreenCover(isPresented: $showsOnboarding) {
+            OnboardingView()
+                .environmentObject(store)
+        }
     }
 
     private var goalBinding: Binding<Int> {

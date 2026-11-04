@@ -254,6 +254,21 @@ final class LibraryStore: ObservableObject {
         return true
     }
 
+    /// Number of words added; 0 when the list is missing or every word is already collected.
+    @discardableResult
+    func importStarterPack(_ lexiconId: String, limit: Int = StarterPack.defaultLimit) -> Int {
+        guard let url = Bundle.main.builtInPlugInsURL?
+            .appendingPathComponent("GlossX Extension.appex")
+            .appendingPathComponent(StarterPack.fileName(for: lexiconId)),
+            let data = try? Data(contentsOf: url)
+        else { return 0 }
+        let result = StarterPack.importWords(StarterPack.parse(data), into: snapshot, limit: limit, now: Self.now)
+        guard result.added > 0 else { return 0 }
+        snapshot = result.snapshot
+        libraryDidChange()
+        return result.added
+    }
+
     private func libraryDidChange() {
         streakStore.refreshReviewableCount(reviewableCount)
         persistLocal()
@@ -296,7 +311,9 @@ final class LibraryStore: ObservableObject {
         rescheduleReminder()
     }
 
-    private func rescheduleReminder() {
+    /// Waits for onboarding so the notification permission prompt doesn't cover the welcome screens.
+    func rescheduleReminder() {
+        guard Onboarding.isDone else { return }
         let record = streakStore.record
         let count = reviewableCount
         let enabled = reminderEnabled

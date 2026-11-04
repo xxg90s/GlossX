@@ -3,6 +3,8 @@ import GlossXCore
 
 struct TodayView: View {
     @EnvironmentObject private var store: LibraryStore
+    @State private var showsStarterPack = false
+    @State private var showsSafariSetup = false
 
     var body: some View {
         NavigationView {
@@ -19,6 +21,14 @@ struct TodayView: View {
             ReviewView()
                 .environmentObject(store)
         }
+        .sheet(isPresented: $showsStarterPack) {
+            StarterPackSheet()
+                .environmentObject(store)
+        }
+        .sheet(isPresented: $showsSafariSetup) {
+            SafariSetupView()
+                .background(GlossXPalette.paper.ignoresSafeArea())
+        }
     }
 
     @ViewBuilder
@@ -29,16 +39,18 @@ struct TodayView: View {
         case .signedOut:
             statusBlock(
                 title: "还没有收藏",
-                detail: "登录同一 Apple ID 的 iCloud 后，Mac 上收藏的词会出现在这里。",
+                detail: "在 Safari 里点词即可收藏；登录 iCloud 后还会同步 Mac 上的收藏。",
                 streak: nil,
-                buttonTitle: nil
+                buttonTitle: nil,
+                showsEmptyActions: true
             )
         case .empty:
             statusBlock(
                 title: "还没有收藏",
-                detail: "在 Mac 的 Safari 里点词或划句，同步后会出现在这里。",
+                detail: "在 iPhone 或 Mac 的 Safari 里点词、划句即可收藏，也可以先导入一组入门词。",
                 streak: nil,
-                buttonTitle: nil
+                buttonTitle: nil,
+                showsEmptyActions: true
             )
         case .due(let remaining, let newCount, let reviewCount, let streak, let syncLabel):
             statusBlock(
@@ -64,7 +76,8 @@ struct TodayView: View {
         detail: String?,
         streak: Int?,
         buttonTitle: String?,
-        syncLabel: String? = nil
+        syncLabel: String? = nil,
+        showsEmptyActions: Bool = false
     ) -> some View {
         VStack(spacing: 18) {
             Spacer()
@@ -87,6 +100,17 @@ struct TodayView: View {
                 }
                 .buttonStyle(PrimaryReviewButtonStyle())
                 .padding(.top, 8)
+            }
+            if showsEmptyActions {
+                Button("导入入门词包") {
+                    showsStarterPack = true
+                }
+                .buttonStyle(PrimaryReviewButtonStyle())
+                .padding(.top, 8)
+                Button("如何开启 Safari 扩展") {
+                    showsSafariSetup = true
+                }
+                .foregroundColor(GlossXPalette.green)
             }
             Spacer()
             Text(syncLabel ?? store.syncLabel)

@@ -1,6 +1,9 @@
 import SwiftUI
 
 struct RootView: View {
+    @EnvironmentObject private var store: LibraryStore
+    @State private var showsOnboarding = !Onboarding.isDone
+
     var body: some View {
         TabView {
             TodayView()
@@ -21,5 +24,9 @@ struct RootView: View {
                 }
         }
         .tint(GlossXPalette.green)
+        .fullScreenCover(isPresented: $showsOnboarding) {
+            OnboardingView()
+                .environmentObject(store)
+        }
     }
 }

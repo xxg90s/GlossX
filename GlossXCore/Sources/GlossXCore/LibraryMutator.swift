@@ -77,6 +77,9 @@ public enum LibraryMutator {
         definition: String,
         example: String,
         exampleChinese: String,
+        phonetic: String = "",
+        pos: String = "",
+        source: String = "ios",
         now: Double
     ) -> LibrarySnapshot? {
         let word = rawWord.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -91,8 +94,8 @@ public enum LibraryMutator {
             "id": id,
             "word": word,
             "lemma": "",
-            "phonetic": "",
-            "pos": "",
+            "phonetic": phonetic,
+            "pos": pos,
             "definitions": definitionText.isEmpty ? [] : [definitionText],
             "usageExample": usage,
             "extraExample": usage,
@@ -104,7 +107,7 @@ public enum LibraryMutator {
             "interval": 0,
             "repetitions": 0,
             "nextReviewAt": now,
-            "source": "ios"
+            "source": source
         ]
         next.payload.deletedItems.removeValue(forKey: TombstoneKey.vocab(id))
         next.updatedAt = now
