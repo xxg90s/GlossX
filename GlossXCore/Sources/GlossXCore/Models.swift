@@ -202,11 +202,14 @@ public struct ReviewCard: Equatable, Identifiable {
 public struct LibrarySnapshot {
     public var version: Int
     public var updatedAt: Double
+    /// Last change to settings, aiKeys, aiProviderProfiles or wordRecords; the phone never edits these.
+    public var metaUpdatedAt: Double
     public var payload: LibraryPayload
 
-    public init(version: Int, updatedAt: Double, payload: LibraryPayload) {
+    public init(version: Int, updatedAt: Double, metaUpdatedAt: Double? = nil, payload: LibraryPayload) {
         self.version = version
         self.updatedAt = updatedAt
+        self.metaUpdatedAt = metaUpdatedAt ?? updatedAt
         self.payload = payload
     }
 }
@@ -219,6 +222,8 @@ public struct LibraryPayload {
     public var aiProviderProfiles: [Any]
     public var stats: [String: Any]
     public var wordRecords: [String: Any]
+    /// Tombstones keyed `vocab:<id>` / `snippet:<id>`, valued with the deletion time in ms.
+    public var deletedItems: [String: Double]
 
     public init(
         vocabItems: [String: [String: Any]],
@@ -227,7 +232,8 @@ public struct LibraryPayload {
         aiKeys: [String: Any],
         aiProviderProfiles: [Any],
         stats: [String: Any],
-        wordRecords: [String: Any]
+        wordRecords: [String: Any],
+        deletedItems: [String: Double] = [:]
     ) {
         self.vocabItems = vocabItems
         self.snippetItems = snippetItems
@@ -236,5 +242,11 @@ public struct LibraryPayload {
         self.aiProviderProfiles = aiProviderProfiles
         self.stats = stats
         self.wordRecords = wordRecords
+        self.deletedItems = deletedItems
     }
+}
+
+public enum TombstoneKey {
+    public static func vocab(_ id: String) -> String { "vocab:\(id)" }
+    public static func snippet(_ id: String) -> String { "snippet:\(id)" }
 }

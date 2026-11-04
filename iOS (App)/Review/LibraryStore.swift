@@ -254,7 +254,7 @@ final class LibraryStore: ObservableObject {
                 let merged = SnapshotMerge.merge(cloud: cloud, local: local, now: now)
                 snapshot = merged
                 persistLocal()
-                if Self.localHasNewerReviews(local: local, cloud: cloud) {
+                if !SnapshotCodec.samePayload(merged, cloud) {
                     schedulePush()
                 }
                 sync = .synced(label: TodayHome.formatSyncLabel(status: "synced", lastAt: now, now: now))
@@ -314,21 +314,6 @@ final class LibraryStore: ObservableObject {
 
     private static var today: String {
         DayStamp.string(fromMilliseconds: now)
-    }
-
-    private static func localHasNewerReviews(local: LibrarySnapshot, cloud: LibrarySnapshot) -> Bool {
-        let keys = Set(local.payload.vocabItems.keys).union(local.payload.snippetItems.keys)
-        for key in keys {
-            let localItem = local.payload.vocabItems[key] ?? local.payload.snippetItems[key] ?? [:]
-            let cloudItem = cloud.payload.vocabItems[key] ?? cloud.payload.snippetItems[key] ?? [:]
-            if SnapshotMerge.reviewTimestamp(localItem) > SnapshotMerge.reviewTimestamp(cloudItem) {
-                return true
-            }
-            if cloud.payload.vocabItems[key] == nil && cloud.payload.snippetItems[key] == nil {
-                return true
-            }
-        }
-        return false
     }
 
     private static func readCloud() async -> ICloudReadResult {

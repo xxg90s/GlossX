@@ -31,7 +31,8 @@ assert.equal(
         "aiKeys",
         "aiProviderProfiles",
         "stats",
-        "wordRecords"
+        "wordRecords",
+        "deletedItems"
     ])
 );
 

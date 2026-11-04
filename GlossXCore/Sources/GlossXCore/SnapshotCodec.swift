@@ -9,9 +9,12 @@ public enum SnapshotCodec {
         let version = JSONValue.int(root["version"])
         guard version == 1 else { throw CodecError.unsupportedVersion }
         let payload = JSONValue.dictionary(root["payload"])
+        let updatedAt = JSONValue.double(root["updatedAt"])
+        let metaUpdatedAt = JSONValue.double(root["metaUpdatedAt"])
         return LibrarySnapshot(
             version: version,
-            updatedAt: JSONValue.double(root["updatedAt"]),
+            updatedAt: updatedAt,
+            metaUpdatedAt: metaUpdatedAt > 0 ? metaUpdatedAt : updatedAt,
             payload: LibraryPayload(
                 vocabItems: mapObject(payload["vocabItems"]),
                 snippetItems: mapObject(payload["snippetItems"]),
@@ -20,6 +23,7 @@ public enum SnapshotCodec {
                 aiProviderProfiles: payload["aiProviderProfiles"] as? [Any] ?? [],
                 stats: JSONValue.dictionary(payload["stats"]),
                 wordRecords: mapLooseObject(payload["wordRecords"]),
+                deletedItems: mapTimestamps(payload["deletedItems"])
             )
         )
     }
@@ -28,6 +32,7 @@ public enum SnapshotCodec {
         let root: [String: Any] = [
             "version": snapshot.version,
             "updatedAt": snapshot.updatedAt,
+            "metaUpdatedAt": snapshot.metaUpdatedAt,
             "payload": [
                 "vocabItems": snapshot.payload.vocabItems,
                 "snippetItems": snapshot.payload.snippetItems,
@@ -35,16 +40,29 @@ public enum SnapshotCodec {
                 "aiKeys": snapshot.payload.aiKeys,
                 "aiProviderProfiles": snapshot.payload.aiProviderProfiles,
                 "stats": snapshot.payload.stats,
-                "wordRecords": snapshot.payload.wordRecords
+                "wordRecords": snapshot.payload.wordRecords,
+                "deletedItems": snapshot.payload.deletedItems
             ]
         ]
         return try JSONSerialization.data(withJSONObject: root, options: [.prettyPrinted, .sortedKeys])
+    }
+
+    /// True when both snapshots would sync the same content, ignoring `updatedAt`.
+    public static func samePayload(_ a: LibrarySnapshot, _ b: LibrarySnapshot) -> Bool {
+        guard a.metaUpdatedAt == b.metaUpdatedAt else { return false }
+        var left = a
+        var right = b
+        left.updatedAt = 0
+        right.updatedAt = 0
+        guard let leftData = try? encode(left), let rightData = try? encode(right) else { return false }
+        return leftData == rightData
     }
 
     public static func empty(now: Double) -> LibrarySnapshot {
         LibrarySnapshot(
             version: 1,
             updatedAt: now,
+            metaUpdatedAt: 0,
             payload: LibraryPayload(
                 vocabItems: [:],
                 snippetItems: [:],
@@ -68,6 +86,16 @@ public enum SnapshotCodec {
 
     private static func mapLooseObject(_ value: Any?) -> [String: Any] {
         value as? [String: Any] ?? [:]
+    }
+
+    private static func mapTimestamps(_ value: Any?) -> [String: Double] {
+        guard let object = value as? [String: Any] else { return [:] }
+        var result: [String: Double] = [:]
+        for (key, raw) in object {
+            let time = JSONValue.double(raw)
+            if time > 0 { result[key] = time }
+        }
+        return result
     }
 
     public enum CodecError: Error {

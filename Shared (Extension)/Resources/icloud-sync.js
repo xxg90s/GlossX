@@ -6,8 +6,20 @@
         "aiKeys",
         "aiProviderProfiles",
         "stats",
-        "wordRecords"
+        "wordRecords",
+        "deletedItems"
     ];
+    const META_KEYS = ["settings", "aiKeys", "aiProviderProfiles", "wordRecords"];
+    const ITEM_KEYS = { vocabItems: "vocab", snippetItems: "snippet" };
+    const REVIEW_FIELDS = [
+        "status", "easeFactor", "interval", "repetitions",
+        "nextReviewAt", "reviewedAt", "learnedAt", "familiarAt"
+    ];
+    const MAXED_STATS = [
+        "newWords", "reviews", "vocabNewToday", "vocabReviewedToday",
+        "snippetNewToday", "snippetReviewedToday", "streak"
+    ];
+    const TOMBSTONE_RETENTION_MS = 180 * 24 * 60 * 60 * 1000;
 
     function emptyPayload() {
         return {
@@ -17,7 +29,8 @@
             aiKeys: {},
             aiProviderProfiles: [],
             stats: {},
-            wordRecords: {}
+            wordRecords: {},
+            deletedItems: {}
         };
     }
 
@@ -71,18 +84,178 @@
         return isPlainObject(value) ? value : fallback[key];
     }
 
-    function buildSnapshot(payload, updatedAt) {
+    function buildSnapshot(payload, updatedAt, metaUpdatedAt) {
         const source = payload || {};
         const fallback = emptyPayload();
         const nextPayload = emptyPayload();
         for (const key of SYNC_KEYS) {
             nextPayload[key] = clonePayloadValue(key, source[key], fallback);
         }
-        return {
+        const snapshot = {
             version: 1,
             updatedAt,
             payload: nextPayload
         };
+        if (Number.isFinite(Number(metaUpdatedAt)) && metaUpdatedAt != null) {
+            snapshot.metaUpdatedAt = Number(metaUpdatedAt);
+        }
+        return snapshot;
+    }
+
+    function num(value) {
+        const n = Number(value);
+        return Number.isFinite(n) ? n : 0;
+    }
+
+    function isEmptyValue(value) {
+        if (Array.isArray(value)) return value.length === 0;
+        return !objectHasKeys(value);
+    }
+
+    function contentTimestamp(item) {
+        const updatedAt = num(item?.updatedAt);
+        return updatedAt > 0 ? updatedAt : num(item?.addedAt);
+    }
+
+    function reviewTimestamp(item) {
+        if (num(item?.reviewedAt) > 0) return num(item.reviewedAt);
+        if (num(item?.learnedAt) > 0) return num(item.learnedAt);
+        if (num(item?.familiarAt) > 0) return num(item.familiarAt);
+        if (num(item?.repetitions) > 0) return num(item.nextReviewAt);
+        return 0;
+    }
+
+    function mergeItem(local, cloud, preferLocalContent) {
+        const localContent = contentTimestamp(local);
+        const cloudContent = contentTimestamp(cloud);
+        const contentFromLocal = localContent === cloudContent ? preferLocalContent : localContent > cloudContent;
+        const result = { ...(contentFromLocal ? local : cloud) };
+        const reviewWinner = reviewTimestamp(local) >= reviewTimestamp(cloud) ? local : cloud;
+        for (const field of REVIEW_FIELDS) {
+            if (Object.prototype.hasOwnProperty.call(reviewWinner, field)) {
+                result[field] = reviewWinner[field];
+            } else {
+                delete result[field];
+            }
+        }
+        return result;
+    }
+
+    function mergeTombstones(a, b, now) {
+        const merged = {};
+        for (const source of [a, b]) {
+            if (!isPlainObject(source)) continue;
+            for (const [key, value] of Object.entries(source)) {
+                const time = num(value);
+                if (time <= 0 || now - time > TOMBSTONE_RETENTION_MS) continue;
+                merged[key] = Math.max(merged[key] || 0, time);
+            }
+        }
+        return merged;
+    }
+
+    function mergeItemMap(local, cloud, tombstones, prefix, preferLocalContent) {
+        const localItems = isPlainObject(local) ? local : {};
+        const cloudItems = isPlainObject(cloud) ? cloud : {};
+        const merged = {};
+        const ids = new Set([...Object.keys(localItems), ...Object.keys(cloudItems)]);
+        for (const id of ids) {
+            const l = localItems[id];
+            const c = cloudItems[id];
+            const item = l && c ? mergeItem(l, c, preferLocalContent) : (l || c);
+            if (!item) continue;
+            const deletedAt = tombstones[`${prefix}:${id}`];
+            if (deletedAt != null && deletedAt >= num(item.addedAt)) continue;
+            merged[id] = item;
+        }
+        return merged;
+    }
+
+    function mergeStats(a, b) {
+        const left = isPlainObject(a) ? a : {};
+        const right = isPlainObject(b) ? b : {};
+        if (!objectHasKeys(right)) return left;
+        if (!objectHasKeys(left)) return right;
+        const leftDate = String(left.date || "");
+        const rightDate = String(right.date || "");
+        if (leftDate !== rightDate) {
+            return leftDate > rightDate ? left : right;
+        }
+        const stats = { ...left };
+        for (const key of MAXED_STATS) {
+            if (key in left || key in right) {
+                stats[key] = Math.max(num(left[key]), num(right[key]));
+            }
+        }
+        return stats;
+    }
+
+    /**
+     * Mirrors SnapshotMerge.swift. Items merge per entry; meta keys follow metaUpdatedAt.
+     * `preferLocalContent` breaks content ties: the Mac owns item content, the phone does not.
+     */
+    function mergePayloads({ local, localMetaUpdatedAt, cloud, preferLocalContent = true, now = Date.now() }) {
+        const localPayload = local || {};
+        const cloudPayload = cloud?.payload || {};
+        const cloudMeta = num(cloud?.metaUpdatedAt) || num(cloud?.updatedAt);
+        const localMeta = num(localMetaUpdatedAt);
+        const deletedItems = mergeTombstones(localPayload.deletedItems, cloudPayload.deletedItems, now);
+        const payload = emptyPayload();
+        for (const [key, prefix] of Object.entries(ITEM_KEYS)) {
+            payload[key] = mergeItemMap(localPayload[key], cloudPayload[key], deletedItems, prefix, preferLocalContent);
+        }
+        const metaFromLocal = localMeta > cloudMeta;
+        const primary = metaFromLocal ? localPayload : cloudPayload;
+        const secondary = metaFromLocal ? cloudPayload : localPayload;
+        const fallback = emptyPayload();
+        for (const key of META_KEYS) {
+            const chosen = isEmptyValue(primary[key]) ? secondary[key] : primary[key];
+            payload[key] = clonePayloadValue(key, chosen, fallback);
+        }
+        payload.stats = mergeStats(localPayload.stats, cloudPayload.stats);
+        payload.deletedItems = deletedItems;
+        return { payload, metaUpdatedAt: Math.max(localMeta, cloudMeta) };
+    }
+
+    /** Tombstones for items removed by a storage.onChanged event, or null when nothing changed. */
+    function collectTombstones(changes, existing, now) {
+        let changed = false;
+        const next = { ...(isPlainObject(existing) ? existing : {}) };
+        for (const [key, prefix] of Object.entries(ITEM_KEYS)) {
+            const change = changes?.[key];
+            if (!change) continue;
+            const before = isPlainObject(change.oldValue) ? change.oldValue : {};
+            const after = isPlainObject(change.newValue) ? change.newValue : {};
+            for (const id of Object.keys(before)) {
+                if (!(id in after)) {
+                    next[`${prefix}:${id}`] = now;
+                    changed = true;
+                }
+            }
+            for (const id of Object.keys(after)) {
+                const tombKey = `${prefix}:${id}`;
+                if (tombKey in next && !(id in before)) {
+                    delete next[tombKey];
+                    changed = true;
+                }
+            }
+        }
+        return changed ? next : null;
+    }
+
+    function stableStringify(value) {
+        if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+        if (isPlainObject(value)) {
+            const keys = Object.keys(value).filter((k) => value[k] !== undefined).sort();
+            return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(",")}}`;
+        }
+        return JSON.stringify(value === undefined ? null : value);
+    }
+
+    function payloadsEqual(a, b) {
+        const fallback = emptyPayload();
+        return SYNC_KEYS.every((key) => stableStringify(clonePayloadValue(key, a?.[key], fallback))
+            === stableStringify(clonePayloadValue(key, b?.[key], fallback)));
     }
 
     function applySnapshot(snapshot, existingStorage) {
@@ -258,10 +431,15 @@
     global.GlossX = global.GlossX || {};
     global.GlossX.ICloudSync = {
         SYNC_KEYS,
+        META_KEYS,
         hasUserData,
         decideSyncAction,
         buildSnapshot,
         applySnapshot,
+        mergePayloads,
+        mergeStats,
+        collectTombstones,
+        payloadsEqual,
         formatSyncLabel,
         resolveDisplayStatus,
         isTransientStatus,

@@ -1929,43 +1929,87 @@ async function runIcloudSync({
             return;
         }
 
-        if (action === "pull") {
-            const applied = Sync.applySnapshot(cloud.snapshot, { ...payload, icloudMeta: meta });
-            if (!applied.ok) {
-                await saveIcloudMeta({ lastStatus: "error", lastError: applied.error });
+        const pushSnapshot = async (snapshot) => {
+            const written = await sendNative({
+                type: "icloudWrite",
+                content: JSON.stringify(snapshot)
+            }, ICLOUD_NATIVE_TIMEOUT_MS);
+            if (!stillCurrent()) return false;
+            if (written?.status === "signedOut" || written?.status === "unavailable") {
+                await saveIcloudMeta({ lastStatus: written.status, lastError: written.error });
+                return false;
+            }
+            if (!written?.ok) {
+                await saveIcloudMeta({
+                    lastStatus: "error",
+                    lastError: written?.error || "\u4e0a\u4f20\u5931\u8d25"
+                });
+                return false;
+            }
+            return true;
+        };
+
+        if (cloud.cloudExists) {
+            if (cloud.snapshot?.version !== 1) {
+                await saveIcloudMeta({
+                    lastStatus: "error",
+                    lastError: "\u4e91\u7aef\u6570\u636e\u7248\u672c\u8fc7\u65b0\uff0c\u8bf7\u66f4\u65b0 GlossX"
+                });
                 return;
             }
-            if (!stillCurrent()) return;
-            const applyGeneration = ++icloudApplyGeneration;
-            applyingCloud = true;
-            try {
-                const toWrite = {};
-                for (const key of Sync.SYNC_KEYS) {
-                    toWrite[key] = applied.storage[key];
-                }
-                toWrite.icloudMeta = {
-                    ...meta,
-                    syncEpoch,
-                    localUpdatedAt: applied.localUpdatedAt,
-                    lastPullAt: Date.now(),
-                    lastStatus: "synced",
-                    lastError: undefined,
-                    lastLabel: Sync.formatSyncLabel({
-                        lastStatus: "synced",
-                        lastPushAt: meta.lastPushAt,
-                        lastPullAt: Date.now(),
-                        now: Date.now()
-                    })
-                };
-                await browser.storage.local.set(toWrite);
-            } finally {
-                // Safari may deliver onChanged after set() resolves; keep suppress briefly.
-                setTimeout(() => {
-                    if (icloudApplyGeneration === applyGeneration) {
-                        applyingCloud = false;
+            const merged = Sync.mergePayloads({
+                local: payload,
+                localMetaUpdatedAt: meta.localMetaUpdatedAt ?? meta.localUpdatedAt,
+                cloud: cloud.snapshot,
+                preferLocalContent: true,
+                now: Date.now()
+            });
+            const localChanged = !Sync.payloadsEqual(merged.payload, payload);
+            const cloudChanged = !Sync.payloadsEqual(merged.payload, cloud.snapshot.payload)
+                || Number(cloud.snapshot.metaUpdatedAt) !== merged.metaUpdatedAt;
+            const mergedAt = Date.now();
+
+            if (localChanged) {
+                if (!stillCurrent()) return;
+                const applyGeneration = ++icloudApplyGeneration;
+                applyingCloud = true;
+                try {
+                    const toWrite = {};
+                    for (const key of Sync.SYNC_KEYS) {
+                        toWrite[key] = merged.payload[key];
                     }
-                }, 500);
+                    toWrite.icloudMeta = {
+                        ...(await getIcloudMeta()),
+                        syncEpoch,
+                        localUpdatedAt: mergedAt,
+                        localMetaUpdatedAt: merged.metaUpdatedAt,
+                        lastPullAt: mergedAt
+                    };
+                    await browser.storage.local.set(toWrite);
+                } finally {
+                    // Safari may deliver onChanged after set() resolves; keep suppress briefly.
+                    setTimeout(() => {
+                        if (icloudApplyGeneration === applyGeneration) {
+                            applyingCloud = false;
+                        }
+                    }, 500);
+                }
             }
+
+            if (cloudChanged) {
+                await saveIcloudMeta({ lastStatus: "pushing" });
+                const pushed = await pushSnapshot(Sync.buildSnapshot(merged.payload, mergedAt, merged.metaUpdatedAt));
+                if (!pushed) return;
+            }
+
+            await saveIcloudMeta({
+                syncEpoch,
+                localMetaUpdatedAt: merged.metaUpdatedAt,
+                lastPushAt: cloudChanged ? Date.now() : meta.lastPushAt,
+                lastPullAt: localChanged ? mergedAt : meta.lastPullAt,
+                lastStatus: "synced",
+                lastError: undefined
+            });
             return;
         }
 
@@ -1975,23 +2019,8 @@ async function runIcloudSync({
                 localUpdatedAt = Date.now();
             }
             await saveIcloudMeta({ localUpdatedAt, lastStatus: "pushing" });
-            const snapshot = Sync.buildSnapshot(payload, localUpdatedAt);
-            const written = await sendNative({
-                type: "icloudWrite",
-                content: JSON.stringify(snapshot)
-            }, ICLOUD_NATIVE_TIMEOUT_MS);
-            if (!stillCurrent()) return;
-            if (written?.status === "signedOut" || written?.status === "unavailable") {
-                await saveIcloudMeta({ lastStatus: written.status, lastError: written.error });
-                return;
-            }
-            if (!written?.ok) {
-                await saveIcloudMeta({
-                    lastStatus: "error",
-                    lastError: written?.error || "\u4e0a\u4f20\u5931\u8d25"
-                });
-                return;
-            }
+            const snapshot = Sync.buildSnapshot(payload, localUpdatedAt, meta.localMetaUpdatedAt ?? localUpdatedAt);
+            if (!(await pushSnapshot(snapshot))) return;
             await saveIcloudMeta({
                 lastPushAt: Date.now(),
                 lastStatus: "synced",
@@ -2092,8 +2121,27 @@ browser.storage.onChanged.addListener((changes, area) => {
     const keys = Sync?.SYNC_KEYS || [];
     const touched = keys.some((key) => Object.prototype.hasOwnProperty.call(changes, key));
     if (!touched) return;
-    saveIcloudMeta({ localUpdatedAt: Date.now() }).then(() => scheduleIcloudPush());
+    const now = Date.now();
+    const metaTouched = (Sync?.META_KEYS || []).some((key) => Object.prototype.hasOwnProperty.call(changes, key));
+    recordTombstones(changes, now);
+    saveIcloudMeta(metaTouched ? { localUpdatedAt: now, localMetaUpdatedAt: now } : { localUpdatedAt: now })
+        .then(() => scheduleIcloudPush());
 });
+
+let tombstoneWriteChain = Promise.resolve();
+
+function recordTombstones(changes, now) {
+    const Sync = getICloudSync();
+    if (!Sync?.collectTombstones || (!changes.vocabItems && !changes.snippetItems)) return;
+    const run = async () => {
+        const { deletedItems } = await browser.storage.local.get("deletedItems");
+        const next = Sync.collectTombstones(changes, deletedItems, now);
+        if (next) {
+            await browser.storage.local.set({ deletedItems: next });
+        }
+    };
+    tombstoneWriteChain = tombstoneWriteChain.then(run, run);
+}
 
 browser.runtime.onStartup.addListener(() => {
     runIcloudSync();
