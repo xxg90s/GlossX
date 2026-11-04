@@ -37,14 +37,21 @@ struct ReviewView: View {
                     speakIfNeeded(card)
                 }
             } else {
-                VStack {
-                    Text("今日复习完成")
+                VStack(spacing: 16) {
+                    Text("本轮复习完成")
                         .font(.title2.weight(.semibold))
                         .foregroundColor(GlossXPalette.ink)
                     Button("完成") {
                         store.closeReview()
                     }
-                    .padding(.top, 16)
+                    .buttonStyle(PrimaryReviewButtonStyle())
+                    .padding(.horizontal, 48)
+                    if store.undoStep != nil {
+                        Button("撤销上一张") {
+                            store.undoLastGrade()
+                        }
+                        .foregroundColor(GlossXPalette.muted)
+                    }
                 }
             }
         }
@@ -64,7 +71,15 @@ struct ReviewView: View {
                 .font(.subheadline.weight(.medium))
                 .foregroundColor(GlossXPalette.muted)
             Spacer()
-            Color.clear.frame(width: 44, height: 44)
+            Button(action: { store.undoLastGrade() }) {
+                Image(systemName: "arrow.uturn.backward")
+                    .font(.body.weight(.semibold))
+                    .foregroundColor(GlossXPalette.ink)
+                    .frame(width: 44, height: 44)
+            }
+            .opacity(store.undoStep == nil ? 0 : 1)
+            .disabled(store.undoStep == nil)
+            .accessibilityLabel("撤销上一张")
         }
         .padding(.horizontal, 8)
     }
@@ -78,13 +93,20 @@ struct ReviewView: View {
             lemma: card.lemma
         )
         VStack(alignment: .leading, spacing: 20) {
-            Text(card.kind == .phrase ? "短语" : "单词")
-                .font(.caption.weight(.semibold))
-                .foregroundColor(GlossXPalette.green)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .background(GlossXPalette.wash)
-                .clipShape(Capsule())
+            HStack(spacing: 8) {
+                Text(card.kind == .phrase ? "短语" : "单词")
+                    .font(.caption.weight(.semibold))
+                    .foregroundColor(GlossXPalette.green)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(GlossXPalette.wash)
+                    .clipShape(Capsule())
+                if !session.isFirstAttempt {
+                    Text("再练一次")
+                        .font(.caption.weight(.semibold))
+                        .foregroundColor(GlossXPalette.danger)
+                }
+            }
 
             if card.mode == .intro || session.showsAnswer {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {

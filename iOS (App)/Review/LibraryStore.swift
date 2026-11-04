@@ -11,6 +11,17 @@ final class LibraryStore: ObservableObject {
     @Published var reminderEnabled: Bool
     @Published var lastError: String = ""
     @Published var celebrationStreak: Int?
+    @Published private(set) var undoStep: UndoStep?
+
+    struct UndoStep {
+        let session: ReviewSession
+        let itemId: String
+        let vocabItem: [String: Any]?
+        let snippetItem: [String: Any]?
+        let stats: [String: Any]
+        let streak: StreakRecord
+        let celebration: Int?
+    }
 
     private var pushTask: Task<Void, Never>?
     private var downloadRetries = 0
@@ -110,6 +121,7 @@ final class LibraryStore: ObservableObject {
         let summary = queue
         guard !summary.cards.isEmpty else { return }
         session = ReviewSession(cards: summary.cards)
+        undoStep = nil
         isReviewing = true
     }
 
@@ -143,6 +155,7 @@ final class LibraryStore: ObservableObject {
     func closeReview() {
         isReviewing = false
         session = nil
+        undoStep = nil
         objectWillChange.send()
     }
 
@@ -152,23 +165,47 @@ final class LibraryStore: ObservableObject {
     }
 
     func grade(_ grade: ReviewGrade) {
-        guard let card = session?.current else { return }
-        let wasCompleted = streakStatus.todayCompleted
-        snapshot = LibraryMutator.applyGrade(
-            to: snapshot,
-            id: card.id,
-            grade: grade,
-            now: Self.now,
-            today: Self.today
+        guard let current = session, let card = current.current else { return }
+        undoStep = UndoStep(
+            session: current,
+            itemId: card.id,
+            vocabItem: snapshot.payload.vocabItems[card.id],
+            snippetItem: snapshot.payload.snippetItems[card.id],
+            stats: snapshot.payload.stats,
+            streak: streakStore.record,
+            celebration: celebrationStreak
         )
-        recordStreakReview(id: card.id, wasCompleted: wasCompleted)
-        session?.advanceAfterGrade()
+        if current.isFirstAttempt {
+            let wasCompleted = streakStatus.todayCompleted
+            snapshot = LibraryMutator.applyGrade(
+                to: snapshot,
+                id: card.id,
+                grade: grade,
+                now: Self.now,
+                today: Self.today
+            )
+            recordStreakReview(id: card.id, wasCompleted: wasCompleted)
+            persistLocal()
+            schedulePush()
+        }
+        session?.advanceAfterGrade(grade)
+        objectWillChange.send()
+    }
+
+    func undoLastGrade() {
+        guard let step = undoStep else { return }
+        undoStep = nil
+        snapshot.payload.vocabItems[step.itemId] = step.vocabItem
+        snapshot.payload.snippetItems[step.itemId] = step.snippetItem
+        snapshot.payload.stats = step.stats
+        snapshot.updatedAt = Self.now
+        streakStore.update(step.streak, reviewableCount: reviewableCount)
+        celebrationStreak = step.celebration
+        session = step.session
+        isReviewing = true
         persistLocal()
         schedulePush()
-        if session?.isFinished == true {
-            isReviewing = false
-            session = nil
-        }
+        rescheduleReminder()
         objectWillChange.send()
     }
 
