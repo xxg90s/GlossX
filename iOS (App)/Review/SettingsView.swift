@@ -40,7 +40,10 @@ struct SettingsView: View {
                         .font(.footnote)
                         .foregroundColor(GlossXPalette.muted)
                     Toggle("每日提醒", isOn: reminderBinding)
-                    Text("晚上 8 点提醒；当天目标完成后不再提醒。")
+                    if store.reminderEnabled {
+                        DatePicker("提醒时间", selection: reminderTimeBinding, displayedComponents: .hourAndMinute)
+                    }
+                    Text("每天 \(ReviewReminder.timeLabel) 提醒；当天目标完成后不再提醒。")
                         .font(.footnote)
                         .foregroundColor(GlossXPalette.muted)
                 }
@@ -70,6 +73,21 @@ struct SettingsView: View {
         Binding(
             get: { store.dailyGoal },
             set: { store.setDailyGoal($0) }
+        )
+    }
+
+    private var reminderTimeBinding: Binding<Date> {
+        Binding(
+            get: {
+                let minutes = store.reminderMinutes
+                return Calendar.current.date(
+                    bySettingHour: minutes / 60, minute: minutes % 60, second: 0, of: Date()
+                ) ?? Date()
+            },
+            set: { date in
+                let parts = Calendar.current.dateComponents([.hour, .minute], from: date)
+                store.setReminderMinutes((parts.hour ?? 20) * 60 + (parts.minute ?? 0))
+            }
         )
     }
 

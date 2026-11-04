@@ -263,6 +263,16 @@ final class LibraryStore: ObservableObject {
         rescheduleReminder()
     }
 
+    var reminderMinutes: Int {
+        ReviewReminder.minutesOfDay
+    }
+
+    func setReminderMinutes(_ minutes: Int) {
+        ReviewReminder.minutesOfDay = minutes
+        objectWillChange.send()
+        rescheduleReminder()
+    }
+
     private func recordStreakReview(id: String, wasCompleted: Bool) {
         var reviewed = todayReviewedIds
         reviewed.insert(id)

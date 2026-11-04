@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 import GlossXCore
 
 struct StreakSummaryView: View {
@@ -67,6 +68,7 @@ private struct CelebrationOverlay: ViewModifier {
                     .transition(.move(edge: .top).combined(with: .opacity))
                     .onTapGesture { store.dismissCelebration() }
                     .task(id: streak) {
+                        UINotificationFeedbackGenerator().notificationOccurred(.success)
                         try? await Task.sleep(nanoseconds: 2_500_000_000)
                         withAnimation { store.dismissCelebration() }
                     }

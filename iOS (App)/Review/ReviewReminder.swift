@@ -5,8 +5,24 @@ import UserNotifications
 enum ReviewReminder {
     static let identifierPrefix = "glossx.daily-review"
     private static let enabledKey = "glossx.dailyReminderEnabled"
-    private static let reminderHour = 20
+    private static let minutesKey = "glossx.dailyReminderMinutes"
+    private static let defaultMinutes = 20 * 60
     private static let daysAhead = 7
+
+    /// Minutes after local midnight; 20:00 by default.
+    static var minutesOfDay: Int {
+        get {
+            guard UserDefaults.standard.object(forKey: minutesKey) != nil else { return defaultMinutes }
+            return min(max(UserDefaults.standard.integer(forKey: minutesKey), 0), 24 * 60 - 1)
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: minutesKey)
+        }
+    }
+
+    static var timeLabel: String {
+        String(format: "%02d:%02d", minutesOfDay / 60, minutesOfDay % 60)
+    }
 
     static var isEnabled: Bool {
         get {
@@ -18,7 +34,7 @@ enum ReviewReminder {
         }
     }
 
-    /// One-shot 20:00 reminders for the next week, skipping any day whose goal is already met.
+    /// One-shot reminders at the chosen time for the next week, skipping any day whose goal is already met.
     /// Rescheduled whenever streak progress changes, so today's reminder disappears once done.
     static func sync(enabled: Bool, status: (String) -> StreakStatus) async {
         let center = UNUserNotificationCenter.current()
@@ -63,11 +79,13 @@ enum ReviewReminder {
     private static func reminderDate(for day: String, calendar: Calendar) -> Date? {
         let parts = day.split(separator: "-").compactMap { Int($0) }
         guard parts.count == 3 else { return nil }
+        let minutes = minutesOfDay
         return calendar.date(from: DateComponents(
             year: parts[0],
             month: parts[1],
             day: parts[2],
-            hour: reminderHour
+            hour: minutes / 60,
+            minute: minutes % 60
         ))
     }
 }
