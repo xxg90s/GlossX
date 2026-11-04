@@ -7,6 +7,7 @@ public enum LibraryFilter: String, CaseIterable, Equatable {
     case sentences
     case learning
     case mastered
+    case skipped
 
     public var title: String {
         switch self {
@@ -16,6 +17,7 @@ public enum LibraryFilter: String, CaseIterable, Equatable {
         case .sentences: return "整句"
         case .learning: return "学习中"
         case .mastered: return "已掌握"
+        case .skipped: return "已跳过"
         }
     }
 }
@@ -39,9 +41,11 @@ public enum LibraryCatalog {
         case .sentences:
             return item.kind == .sentence
         case .learning:
-            return item.status != "mastered" && item.status != "familiar"
+            return item.status != "mastered" && item.status != "familiar" && item.status != "skipped"
         case .mastered:
             return item.status == "mastered" || item.status == "familiar"
+        case .skipped:
+            return item.status == "skipped"
         }
     }
 

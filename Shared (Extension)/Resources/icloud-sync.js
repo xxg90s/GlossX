@@ -13,7 +13,7 @@
     const ITEM_KEYS = { vocabItems: "vocab", snippetItems: "snippet" };
     const REVIEW_FIELDS = [
         "status", "easeFactor", "interval", "repetitions",
-        "nextReviewAt", "reviewedAt", "learnedAt", "familiarAt"
+        "nextReviewAt", "reviewedAt", "learnedAt", "familiarAt", "skippedAt"
     ];
     const MAXED_STATS = [
         "newWords", "reviews", "vocabNewToday", "vocabReviewedToday",
@@ -118,9 +118,13 @@
     }
 
     function reviewTimestamp(item) {
-        if (num(item?.reviewedAt) > 0) return num(item.reviewedAt);
-        if (num(item?.learnedAt) > 0) return num(item.learnedAt);
-        if (num(item?.familiarAt) > 0) return num(item.familiarAt);
+        const latest = Math.max(
+            num(item?.reviewedAt),
+            num(item?.learnedAt),
+            num(item?.familiarAt),
+            num(item?.skippedAt)
+        );
+        if (latest > 0) return latest;
         if (num(item?.repetitions) > 0) return num(item.nextReviewAt);
         return 0;
     }

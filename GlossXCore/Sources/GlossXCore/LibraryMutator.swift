@@ -33,6 +33,84 @@ public enum LibraryMutator {
         return next
     }
 
+    public static func delete(in snapshot: LibrarySnapshot, id: String, now: Double) -> LibrarySnapshot {
+        var next = snapshot
+        if next.payload.vocabItems.removeValue(forKey: id) != nil {
+            next.payload.deletedItems[TombstoneKey.vocab(id)] = now
+        } else if next.payload.snippetItems.removeValue(forKey: id) != nil {
+            next.payload.deletedItems[TombstoneKey.snippet(id)] = now
+        } else {
+            return snapshot
+        }
+        next.updatedAt = now
+        return next
+    }
+
+    /// Skipped cards leave review; restoring puts them back where their progress left off.
+    public static func setSkipped(in snapshot: LibrarySnapshot, id: String, skipped: Bool, now: Double) -> LibrarySnapshot {
+        var next = snapshot
+        let update: (inout [String: Any]) -> Void = { item in
+            if skipped {
+                item["status"] = "skipped"
+            } else {
+                item["status"] = JSONValue.int(item["repetitions"]) > 0 ? "learning" : "new"
+            }
+            item["skippedAt"] = now
+        }
+        if var item = next.payload.vocabItems[id] {
+            update(&item)
+            next.payload.vocabItems[id] = item
+        } else if var item = next.payload.snippetItems[id] {
+            update(&item)
+            next.payload.snippetItems[id] = item
+        } else {
+            return snapshot
+        }
+        next.updatedAt = now
+        return next
+    }
+
+    /// Adds a word typed on the phone, shaped like the extension's vocab records. Nil for blanks or duplicates.
+    public static func addWord(
+        to snapshot: LibrarySnapshot,
+        word rawWord: String,
+        definition: String,
+        example: String,
+        exampleChinese: String,
+        now: Double
+    ) -> LibrarySnapshot? {
+        let word = rawWord.trimmingCharacters(in: .whitespacesAndNewlines)
+        let id = word.lowercased()
+        guard !id.isEmpty, snapshot.payload.vocabItems[id] == nil else { return nil }
+        let definitionText = definition.trimmingCharacters(in: .whitespacesAndNewlines)
+        let english = example.trimmingCharacters(in: .whitespacesAndNewlines)
+        let chinese = exampleChinese.trimmingCharacters(in: .whitespacesAndNewlines)
+        let usage: Any = english.isEmpty ? NSNull() : ["english": english, "chinese": chinese]
+        var next = snapshot
+        next.payload.vocabItems[id] = [
+            "id": id,
+            "word": word,
+            "lemma": "",
+            "phonetic": "",
+            "pos": "",
+            "definitions": definitionText.isEmpty ? [] : [definitionText],
+            "usageExample": usage,
+            "extraExample": usage,
+            "exampleFromContext": NSNull(),
+            "status": "new",
+            "addedAt": now,
+            "updatedAt": now,
+            "easeFactor": 2.5,
+            "interval": 0,
+            "repetitions": 0,
+            "nextReviewAt": now,
+            "source": "ios"
+        ]
+        next.payload.deletedItems.removeValue(forKey: TombstoneKey.vocab(id))
+        next.updatedAt = now
+        return next
+    }
+
     public static func rolloverStats(_ snapshot: LibrarySnapshot, now: Double, today: String) -> LibrarySnapshot {
         var next = snapshot
         var stats = next.payload.stats

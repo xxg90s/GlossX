@@ -221,9 +221,40 @@ final class LibraryStore: ObservableObject {
 
     func markFamiliar(id: String) {
         snapshot = LibraryMutator.markFamiliar(in: snapshot, id: id, now: Self.now)
+        libraryDidChange()
+    }
+
+    func deleteItem(id: String) {
+        snapshot = LibraryMutator.delete(in: snapshot, id: id, now: Self.now)
+        libraryDidChange()
+    }
+
+    func setSkipped(id: String, skipped: Bool) {
+        snapshot = LibraryMutator.setSkipped(in: snapshot, id: id, skipped: skipped, now: Self.now)
+        libraryDidChange()
+    }
+
+    /// False when the word is blank or already collected.
+    @discardableResult
+    func addWord(_ word: String, definition: String, example: String, exampleChinese: String) -> Bool {
+        guard let next = LibraryMutator.addWord(
+            to: snapshot,
+            word: word,
+            definition: definition,
+            example: example,
+            exampleChinese: exampleChinese,
+            now: Self.now
+        ) else { return false }
+        snapshot = next
+        libraryDidChange()
+        return true
+    }
+
+    private func libraryDidChange() {
         streakStore.refreshReviewableCount(reviewableCount)
         persistLocal()
         schedulePush()
+        rescheduleReminder()
     }
 
     func setReminderEnabled(_ enabled: Bool) {

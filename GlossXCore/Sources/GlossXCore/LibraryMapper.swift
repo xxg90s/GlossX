@@ -39,7 +39,8 @@ public enum LibraryMapper {
             status: JSONValue.string(json["status"]).ifEmpty("new"),
             addedAt: JSONValue.double(json["addedAt"]),
             repetitions: JSONValue.int(json["repetitions"]),
-            nextReviewAt: JSONValue.double(json["nextReviewAt"])
+            nextReviewAt: JSONValue.double(json["nextReviewAt"]),
+            sourceURL: JSONValue.string(context["pageUrl"])
         )
     }
 
@@ -72,7 +73,8 @@ public enum LibraryMapper {
             status: JSONValue.string(json["status"]).ifEmpty("new"),
             addedAt: JSONValue.double(json["addedAt"]),
             repetitions: JSONValue.int(json["repetitions"]),
-            nextReviewAt: JSONValue.double(json["nextReviewAt"])
+            nextReviewAt: JSONValue.double(json["nextReviewAt"]),
+            sourceURL: JSONValue.string(context["pageUrl"])
         )
     }
 

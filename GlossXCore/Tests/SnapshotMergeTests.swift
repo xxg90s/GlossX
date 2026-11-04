@@ -108,6 +108,19 @@ final class SnapshotMergeTests: XCTestCase {
         XCTAssertEqual(int(merged.payload.vocabItems["hello"], "repetitions"), 5)
     }
 
+    func testNewerSkipOrFamiliarWinsOverOlderReview() {
+        var cloudItem = vocabJSON("hello", word: "hello", definitions: ["你好"], repetitions: 2, reviewedAt: 100, nextReviewAt: 200)
+        cloudItem["status"] = "skipped"
+        cloudItem["skippedAt"] = 500.0
+        let localItem = vocabJSON("hello", word: "hello", definitions: ["你好"], repetitions: 2, reviewedAt: 300, nextReviewAt: 400)
+        let cloud = snapshot(vocab: ["hello": cloudItem], snippets: [:], settings: [:], updatedAt: 500)
+        let local = snapshot(vocab: ["hello": localItem], snippets: [:], settings: [:], updatedAt: 300)
+
+        let merged = SnapshotMerge.merge(cloud: cloud, local: local, now: 1000)
+
+        XCTAssertEqual(merged.payload.vocabItems["hello"]?["status"] as? String, "skipped")
+    }
+
     func testMetaKeysFollowMetaUpdatedAtNotSnapshotTime() {
         var cloud = snapshot(vocab: [:], snippets: [:], settings: ["pronunciation": "uk"], updatedAt: 900)
         cloud.metaUpdatedAt = 100

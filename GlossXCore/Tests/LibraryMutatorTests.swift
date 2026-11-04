@@ -53,4 +53,65 @@ final class LibraryMutatorTests: XCTestCase {
         XCTAssertEqual(JSONValue.string(next.payload.snippetItems["s1"]?["status"]), "familiar")
         XCTAssertEqual(JSONValue.double(next.payload.snippetItems["s1"]?["familiarAt"]), now)
     }
+
+    func testDeleteRemovesItemAndWritesTombstone() {
+        var snapshot = SnapshotCodec.empty(now: 0)
+        snapshot.payload.vocabItems["hello"] = ["id": "hello", "word": "hello"]
+        snapshot.payload.snippetItems["s1"] = ["id": "s1", "text": "take off"]
+
+        var next = LibraryMutator.delete(in: snapshot, id: "hello", now: now)
+        next = LibraryMutator.delete(in: next, id: "s1", now: now + 1)
+
+        XCTAssertNil(next.payload.vocabItems["hello"])
+        XCTAssertNil(next.payload.snippetItems["s1"])
+        XCTAssertEqual(next.payload.deletedItems["vocab:hello"], now)
+        XCTAssertEqual(next.payload.deletedItems["snippet:s1"], now + 1)
+    }
+
+    func testSkipAndRestore() {
+        var snapshot = SnapshotCodec.empty(now: 0)
+        snapshot.payload.vocabItems["hello"] = ["id": "hello", "status": "learning", "repetitions": 2]
+        snapshot.payload.vocabItems["fresh"] = ["id": "fresh", "status": "new", "repetitions": 0]
+
+        var next = LibraryMutator.setSkipped(in: snapshot, id: "hello", skipped: true, now: now)
+        XCTAssertEqual(JSONValue.string(next.payload.vocabItems["hello"]?["status"]), "skipped")
+        XCTAssertEqual(JSONValue.double(next.payload.vocabItems["hello"]?["skippedAt"]), now)
+
+        next = LibraryMutator.setSkipped(in: next, id: "hello", skipped: false, now: now + 1)
+        XCTAssertEqual(JSONValue.string(next.payload.vocabItems["hello"]?["status"]), "learning")
+
+        next = LibraryMutator.setSkipped(in: next, id: "fresh", skipped: true, now: now)
+        next = LibraryMutator.setSkipped(in: next, id: "fresh", skipped: false, now: now)
+        XCTAssertEqual(JSONValue.string(next.payload.vocabItems["fresh"]?["status"]), "new")
+    }
+
+    func testAddWordCreatesNewCardAndClearsTombstone() throws {
+        var snapshot = SnapshotCodec.empty(now: 0)
+        snapshot.payload.deletedItems["vocab:serendipity"] = now - 10
+
+        let next = try XCTUnwrap(LibraryMutator.addWord(
+            to: snapshot,
+            word: "  Serendipity ",
+            definition: "意外发现珍宝的运气",
+            example: "It was pure serendipity.",
+            exampleChinese: "这纯属机缘巧合。",
+            now: now
+        ))
+
+        let item = try XCTUnwrap(next.payload.vocabItems["serendipity"])
+        XCTAssertEqual(JSONValue.string(item["word"]), "Serendipity")
+        XCTAssertEqual(JSONValue.stringArray(item["definitions"]), ["意外发现珍宝的运气"])
+        XCTAssertEqual(JSONValue.string(item["status"]), "new")
+        XCTAssertEqual(JSONValue.double(item["addedAt"]), now)
+        XCTAssertEqual(JSONValue.string(JSONValue.dictionary(item["usageExample"])["english"]), "It was pure serendipity.")
+        XCTAssertNil(next.payload.deletedItems["vocab:serendipity"])
+        XCTAssertEqual(LibraryMapper.items(from: next).first?.english, "It was pure serendipity.")
+    }
+
+    func testAddWordRejectsDuplicatesAndBlanks() {
+        var snapshot = SnapshotCodec.empty(now: 0)
+        snapshot.payload.vocabItems["hello"] = ["id": "hello"]
+        XCTAssertNil(LibraryMutator.addWord(to: snapshot, word: "Hello", definition: "你好", example: "", exampleChinese: "", now: now))
+        XCTAssertNil(LibraryMutator.addWord(to: snapshot, word: "  ", definition: "空", example: "", exampleChinese: "", now: now))
+    }
 }

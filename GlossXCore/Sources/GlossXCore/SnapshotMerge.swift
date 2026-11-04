@@ -6,7 +6,7 @@ public enum SnapshotMerge {
 
     private static let reviewFields: Set<String> = [
         "status", "easeFactor", "interval", "repetitions",
-        "nextReviewAt", "reviewedAt", "learnedAt", "familiarAt"
+        "nextReviewAt", "reviewedAt", "learnedAt", "familiarAt", "skippedAt"
     ]
 
     private static let maxedStats = [
@@ -94,13 +94,12 @@ public enum SnapshotMerge {
         return updatedAt > 0 ? updatedAt : JSONValue.double(item["addedAt"])
     }
 
+    /// Latest change to the item's review state: a grade, mastering, marking familiar or skipping.
     public static func reviewTimestamp(_ item: [String: Any]) -> Double {
-        let reviewedAt = JSONValue.double(item["reviewedAt"])
-        if reviewedAt > 0 { return reviewedAt }
-        let learnedAt = JSONValue.double(item["learnedAt"])
-        if learnedAt > 0 { return learnedAt }
-        let familiarAt = JSONValue.double(item["familiarAt"])
-        if familiarAt > 0 { return familiarAt }
+        let latest = ["reviewedAt", "learnedAt", "familiarAt", "skippedAt"]
+            .map { JSONValue.double(item[$0]) }
+            .max() ?? 0
+        if latest > 0 { return latest }
         if JSONValue.int(item["repetitions"]) > 0 {
             return JSONValue.double(item["nextReviewAt"])
         }

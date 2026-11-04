@@ -3,6 +3,8 @@ import GlossXCore
 
 struct LibraryDetailView: View {
     @EnvironmentObject private var store: LibraryStore
+    @Environment(\.dismiss) private var dismiss
+    @State private var confirmsDelete = false
     let item: ReviewSourceItem
     private let speaker = SpeechPlayer.shared
 
@@ -50,18 +52,58 @@ struct LibraryDetailView: View {
                     detailBlock(title: "下次复习", text: formatted(liveItem.nextReviewAt))
                 }
 
+                if let url = sourceURL {
+                    Link(destination: url) {
+                        Label("打开原文", systemImage: "safari")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(SecondaryReviewButtonStyle())
+                    .padding(.top, 8)
+                }
+
                 if liveItem.kind == .sentence && liveItem.status != "familiar" && liveItem.status != "mastered" {
                     Button("标记已熟悉") {
                         store.markFamiliar(id: liveItem.id)
                     }
                     .buttonStyle(PrimaryReviewButtonStyle())
-                    .padding(.top, 8)
                 }
+
+                if liveItem.status == "skipped" {
+                    Button("恢复复习") {
+                        store.setSkipped(id: liveItem.id, skipped: false)
+                    }
+                    .buttonStyle(PrimaryReviewButtonStyle())
+                } else if liveItem.status != "familiar" {
+                    Button("太简单，跳过") {
+                        store.setSkipped(id: liveItem.id, skipped: true)
+                    }
+                    .buttonStyle(SecondaryReviewButtonStyle())
+                }
+
+                Button("删除", role: .destructive) {
+                    confirmsDelete = true
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 8)
             }
             .padding(20)
         }
         .background(GlossXPalette.paper.ignoresSafeArea())
         .navigationBarTitleDisplayMode(.inline)
+        .confirmationDialog("删除“\(liveItem.target)”？", isPresented: $confirmsDelete, titleVisibility: .visible) {
+            Button("删除", role: .destructive) {
+                store.deleteItem(id: liveItem.id)
+                dismiss()
+            }
+        } message: {
+            Text("会同时从 Mac 和其他设备的词库中删除，复习进度不会保留。")
+        }
+    }
+
+    private var sourceURL: URL? {
+        guard let url = URL(string: liveItem.sourceURL), let scheme = url.scheme?.lowercased(),
+              scheme == "http" || scheme == "https" else { return nil }
+        return url
     }
 
     private func detailBlock(title: String, text: String) -> some View {

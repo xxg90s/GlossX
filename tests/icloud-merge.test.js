@@ -71,6 +71,16 @@ assert.ok(S.SYNC_KEYS.includes("deletedItems"));
     assert.equal(merged.payload.vocabItems.hello.repetitions, 5);
 }
 
+// A newer skip/familiar change wins over an older review on the other side.
+{
+    const merged = S.mergePayloads({
+        local: { snippetItems: { s1: { status: "learning", repetitions: 2, reviewedAt: 300 } } },
+        cloud: snap({ snippetItems: { s1: { status: "familiar", repetitions: 2, reviewedAt: 100, familiarAt: 500 } } }, 500),
+        now: 1000
+    });
+    assert.equal(merged.payload.snippetItems.s1.status, "familiar");
+}
+
 // Tombstones delete on either side; re-collecting after deletion survives.
 {
     const deleted = S.mergePayloads({

@@ -110,6 +110,8 @@ public struct ReviewSourceItem: Equatable, Identifiable {
     public var addedAt: Double
     public var repetitions: Int
     public var nextReviewAt: Double
+    /// Page the item was collected from, when the extension recorded it.
+    public var sourceURL: String
 
     public init(
         id: String,
@@ -125,8 +127,10 @@ public struct ReviewSourceItem: Equatable, Identifiable {
         status: String,
         addedAt: Double,
         repetitions: Int,
-        nextReviewAt: Double
+        nextReviewAt: Double,
+        sourceURL: String = ""
     ) {
+        self.sourceURL = sourceURL
         self.id = id
         self.kind = kind
         self.target = target
@@ -152,6 +156,7 @@ public struct ReviewSourceItem: Equatable, Identifiable {
         case "mastered": return "已掌握"
         case "familiar": return "已熟悉"
         case "learning", "review": return "学习中"
+        case "skipped": return "已跳过"
         default: return "新词"
         }
     }
