@@ -39,7 +39,7 @@ struct TodayView: View {
         case .signedOut:
             statusBlock(
                 title: "还没有收藏",
-                detail: "在 Safari 里点词即可收藏；登录 iCloud 后还会同步 Mac 上的收藏。",
+                detail: "在 Safari 里点词即可收藏，也可以选中文字后通过“分享”存入；登录 iCloud 后还会同步 Mac 上的收藏。",
                 streak: nil,
                 buttonTitle: nil,
                 showsEmptyActions: true
@@ -47,7 +47,7 @@ struct TodayView: View {
         case .empty:
             statusBlock(
                 title: "还没有收藏",
-                detail: "在 iPhone 或 Mac 的 Safari 里点词、划句即可收藏，也可以先导入一组入门词。",
+                detail: "在 Safari 里点词、划句，或在任意 App 选中文字后点“分享 → GlossX”。也可以先导入一组入门词。",
                 streak: nil,
                 buttonTitle: nil,
                 showsEmptyActions: true

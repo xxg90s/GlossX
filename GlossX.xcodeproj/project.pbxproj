@@ -12,6 +12,8 @@
 		376CAB722FF0ED1C002E1FC2 /* GlossXCore in Frameworks */ = {isa = PBXBuildFile; productRef = 376CAB712FF0ED1C002E1FC2 /* GlossXCore */; };
 		5A10F0000000000000000001 /* GlossX Widget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A10F0000000000000000004 /* GlossX Widget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		5A10F0000000000000000002 /* GlossXCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5A10F000000000000000000F /* GlossXCore */; };
+		5A20F0000000000000000001 /* GlossX Share.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 5A20F0000000000000000004 /* GlossX Share.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		5A20F0000000000000000002 /* GlossXCore in Frameworks */ = {isa = PBXBuildFile; productRef = 5A20F000000000000000000F /* GlossXCore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -36,6 +38,13 @@
 			remoteGlobalIDString = 5A10F000000000000000000A;
 			remoteInfo = "GlossX Widget (iOS)";
 		};
+		5A20F0000000000000000003 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 376CAAE02FF0ED1A002E1FC2 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5A20F000000000000000000A;
+			remoteInfo = "GlossX Share (iOS)";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -47,6 +56,7 @@
 			files = (
 				376CAB1A2FF0ED1C002E1FC2 /* GlossX Extension.appex in Embed Foundation Extensions */,
 				5A10F0000000000000000001 /* GlossX Widget.appex in Embed Foundation Extensions */,
+				5A20F0000000000000000001 /* GlossX Share.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -70,6 +80,7 @@
 		376CAB192FF0ED1C002E1FC2 /* GlossX Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "GlossX Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		376CAB232FF0ED1C002E1FC2 /* GlossX Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "GlossX Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5A10F0000000000000000004 /* GlossX Widget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "GlossX Widget.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5A20F0000000000000000004 /* GlossX Share.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "GlossX Share.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -253,6 +264,13 @@
 			);
 			target = 5A10F000000000000000000A /* GlossX Widget (iOS) */;
 		};
+		5A20F0000000000000000005 /* Exceptions for "iOS (Share)" folder in "GlossX Share (iOS)" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 5A20F000000000000000000A /* GlossX Share (iOS) */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -315,6 +333,14 @@
 			path = "iOS (Widget)";
 			sourceTree = "<group>";
 		};
+		5A20F0000000000000000006 /* iOS (Share) */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				5A20F0000000000000000005 /* Exceptions for "iOS (Share)" folder in "GlossX Share (iOS)" target */,
+			);
+			path = "iOS (Share)";
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -355,6 +381,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A20F0000000000000000007 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5A20F0000000000000000002 /* GlossXCore in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -368,6 +402,7 @@
 				376CAB1D2FF0ED1C002E1FC2 /* iOS (Extension) */,
 				376CAB272FF0ED1C002E1FC2 /* macOS (Extension) */,
 				5A10F0000000000000000006 /* iOS (Widget) */,
+				5A20F0000000000000000006 /* iOS (Share) */,
 				376CAAFD2FF0ED1C002E1FC2 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -380,6 +415,7 @@
 				376CAB192FF0ED1C002E1FC2 /* GlossX Extension.appex */,
 				376CAB232FF0ED1C002E1FC2 /* GlossX Extension.appex */,
 				5A10F0000000000000000004 /* GlossX Widget.appex */,
+				5A20F0000000000000000004 /* GlossX Share.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -401,6 +437,7 @@
 			dependencies = (
 				376CAB1C2FF0ED1C002E1FC2 /* PBXTargetDependency */,
 				5A10F000000000000000000B /* PBXTargetDependency */,
+				5A20F000000000000000000B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				376CAAFE2FF0ED1C002E1FC2 /* iOS (App) */,
@@ -504,6 +541,29 @@
 			productReference = 5A10F0000000000000000004 /* GlossX Widget.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		5A20F000000000000000000A /* GlossX Share (iOS) */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5A20F000000000000000000E /* Build configuration list for PBXNativeTarget "GlossX Share (iOS)" */;
+			buildPhases = (
+				5A20F0000000000000000009 /* Sources */,
+				5A20F0000000000000000007 /* Frameworks */,
+				5A20F0000000000000000008 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				5A20F0000000000000000006 /* iOS (Share) */,
+			);
+			name = "GlossX Share (iOS)";
+			packageProductDependencies = (
+				5A20F000000000000000000F /* GlossXCore */,
+			);
+			productName = "GlossX Share (iOS)";
+			productReference = 5A20F0000000000000000004 /* GlossX Share.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -527,6 +587,9 @@
 						CreatedOnToolsVersion = 26.1;
 					};
 					5A10F000000000000000000A = {
+						CreatedOnToolsVersion = 26.1;
+					};
+					5A20F000000000000000000A = {
 						CreatedOnToolsVersion = 26.1;
 					};
 				};
@@ -553,6 +616,7 @@
 				376CAB182FF0ED1C002E1FC2 /* GlossX Extension (iOS) */,
 				376CAB222FF0ED1C002E1FC2 /* GlossX Extension (macOS) */,
 				5A10F000000000000000000A /* GlossX Widget (iOS) */,
+				5A20F000000000000000000A /* GlossX Share (iOS) */,
 			);
 		};
 /* End PBXProject section */
@@ -587,6 +651,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		5A10F0000000000000000008 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5A20F0000000000000000008 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -631,6 +702,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		5A20F0000000000000000009 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -648,6 +726,11 @@
 			isa = PBXTargetDependency;
 			target = 5A10F000000000000000000A /* GlossX Widget (iOS) */;
 			targetProxy = 5A10F0000000000000000003 /* PBXContainerItemProxy */;
+		};
+		5A20F000000000000000000B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5A20F000000000000000000A /* GlossX Share (iOS) */;
+			targetProxy = 5A20F0000000000000000003 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1143,6 +1226,69 @@
 			};
 			name = Release;
 		};
+		5A20F000000000000000000C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "iOS (Share)/GlossXShare.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (Share)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = GlossX;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xxg.Flipword.Share;
+				PRODUCT_NAME = "GlossX Share";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		5A20F000000000000000000D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = "iOS (Share)/GlossXShare.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 4CEAMHPC5F;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "iOS (Share)/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = GlossX;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.1;
+				PRODUCT_BUNDLE_IDENTIFIER = com.xxg.Flipword.Share;
+				PRODUCT_NAME = "GlossX Share";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1200,6 +1346,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		5A20F000000000000000000E /* Build configuration list for PBXNativeTarget "GlossX Share (iOS)" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5A20F000000000000000000C /* Debug */,
+				5A20F000000000000000000D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
@@ -1215,6 +1370,10 @@
 			productName = GlossXCore;
 		};
 		5A10F000000000000000000F /* GlossXCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = GlossXCore;
+		};
+		5A20F000000000000000000F /* GlossXCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = GlossXCore;
 		};

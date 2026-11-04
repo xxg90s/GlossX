@@ -114,6 +114,64 @@ public enum LibraryMutator {
         return next
     }
 
+    /// Imports selected text from the share inbox. Nil when the text is invalid or already collected.
+    public static func importSharedText(_ raw: String, into snapshot: LibrarySnapshot, now: Double) -> LibrarySnapshot? {
+        switch ShareInbox.classify(raw) {
+        case .word:
+            return addWord(
+                to: snapshot,
+                word: ShareInbox.normalize(raw),
+                definition: "",
+                example: "",
+                exampleChinese: "",
+                source: "share",
+                now: now
+            )
+        case .phrase, .sentence:
+            return addSnippet(to: snapshot, text: ShareInbox.normalize(raw), type: "phrase", now: now)
+        case nil:
+            return nil
+        }
+    }
+
+    public static func addSnippet(
+        to snapshot: LibrarySnapshot,
+        text: String,
+        type: String,
+        now: Double
+    ) -> LibrarySnapshot? {
+        let normalized = ShareInbox.normalize(text)
+        let id = ShareInbox.snippetId(normalized)
+        guard !normalized.isEmpty, snapshot.payload.snippetItems[id] == nil else { return nil }
+        var record: [String: Any] = [
+            "id": id,
+            "text": normalized,
+            "type": type,
+            "translation": "",
+            "context": [
+                "hostname": ShareInbox.hostname,
+                "fullEnglish": normalized,
+                "fullChinese": "",
+                "pageUrl": ""
+            ],
+            "status": "new",
+            "addedAt": now,
+            "updatedAt": now,
+            "source": "share"
+        ]
+        if type == "phrase" {
+            record["easeFactor"] = 2.5
+            record["interval"] = 0
+            record["repetitions"] = 0
+            record["nextReviewAt"] = now
+        }
+        var next = snapshot
+        next.payload.snippetItems[id] = record
+        next.payload.deletedItems.removeValue(forKey: TombstoneKey.snippet(id))
+        next.updatedAt = now
+        return next
+    }
+
     /// Sets the review example for a word. Nil when the id is not a vocab item or the English is blank.
     public static func setExtraExample(
         in snapshot: LibrarySnapshot,

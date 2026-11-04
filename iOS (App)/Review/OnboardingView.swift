@@ -99,7 +99,7 @@ struct SafariSetupView: View {
             Text("开启 Safari 扩展")
                 .font(.title2.weight(.semibold))
                 .foregroundColor(GlossXPalette.ink)
-            Text("开启后在 Safari 里点按单词即可查看释义并收藏，收藏会自动进入每日复习。")
+            Text("开启后在 Safari 里点按单词即可查看释义并收藏。任意 App 里选中文字后，也可以通过“分享”存入 GlossX。")
                 .foregroundColor(GlossXPalette.muted)
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(Array(steps.enumerated()), id: \.offset) { index, step in

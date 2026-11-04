@@ -268,6 +268,26 @@ final class LibraryStore: ObservableObject {
         return true
     }
 
+    func importShareInbox() {
+        guard let container = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: StreakSharedState.appGroupID
+        ) else { return }
+        let records = (try? ShareInbox.consume(in: container)) ?? []
+        guard !records.isEmpty else { return }
+        var next = snapshot
+        var added = 0
+        for record in records {
+            let now = record.addedAt > 0 ? record.addedAt : Self.now
+            if let updated = LibraryMutator.importSharedText(record.text, into: next, now: now) {
+                next = updated
+                added += 1
+            }
+        }
+        guard added > 0 else { return }
+        snapshot = next
+        libraryDidChange()
+    }
+
     /// Number of words added; 0 when the list is missing or every word is already collected.
     @discardableResult
     func importStarterPack(_ lexiconId: String, limit: Int = StarterPack.defaultLimit) -> Int {

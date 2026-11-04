@@ -85,7 +85,7 @@ struct LibraryView: View {
                     .font(.headline)
                     .foregroundColor(GlossXPalette.ink)
                 Text(store.items.isEmpty
-                     ? "在 Safari 里点词或划句收藏，或点右上角手动添加。"
+                     ? "在 Safari 里点词或划句，或在任意 App 选中文字后点“分享 → GlossX”。也可以点右上角手动添加。"
                      : "试试其他筛选或关键词。")
                     .font(.subheadline)
                     .foregroundColor(GlossXPalette.muted)

@@ -66,7 +66,7 @@ struct SettingsView: View {
                 }
                 .foregroundColor(GlossXPalette.green)
                 Section("说明") {
-                    Text("在 iPhone 或 Mac 的 Safari 里点词、划句即可收藏；收藏与复习进度通过 iCloud 在两端同步。")
+                    Text("在 iPhone 或 Mac 的 Safari 里点词、划句即可收藏；任意 App 选中文字后也可以通过“分享”存入。收藏与复习进度通过 iCloud 在两端同步。")
                         .font(.footnote)
                         .foregroundColor(GlossXPalette.muted)
                 }

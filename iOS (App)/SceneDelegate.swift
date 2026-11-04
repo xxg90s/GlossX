@@ -15,6 +15,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.window = window
         window.makeKeyAndVisible()
         handle(connectionOptions.urlContexts)
+        store.importShareInbox()
         Task { await store.refresh() }
     }
 
@@ -23,6 +24,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
+        store.importShareInbox()
         Task { await store.refresh() }
     }
 
