@@ -99,7 +99,8 @@ public enum ReviewQueue {
             definitions: item.definitions,
             english: item.english,
             chinese: item.chinese,
-            hostname: item.hostname
+            hostname: item.hostname,
+            repetitions: item.repetitions
         )
     }
 

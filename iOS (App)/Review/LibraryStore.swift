@@ -130,7 +130,7 @@ final class LibraryStore: ObservableObject {
     func startReview() {
         let summary = queue
         guard !summary.cards.isEmpty else { return }
-        session = ReviewSession(cards: summary.cards)
+        session = ReviewSession(cards: QuizBuilder.prepare(summary.cards, pool: items))
         undoStep = nil
         isReviewing = true
     }

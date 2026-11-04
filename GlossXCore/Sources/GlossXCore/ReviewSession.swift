@@ -40,8 +40,10 @@ public struct ReviewSession: Equatable {
         return current.mode == .intro || revealed
     }
 
+    /// Self-grade buttons; auto-graded modes grade from the answer instead.
     public var showsGradeButtons: Bool {
-        current != nil && showsAnswer
+        guard let current else { return false }
+        return showsAnswer && !current.mode.isAutoGraded
     }
 
     public var progressText: String {

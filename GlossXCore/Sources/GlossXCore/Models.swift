@@ -7,8 +7,21 @@ public enum ItemKind: String, Equatable {
 }
 
 public enum CardMode: String, Equatable {
+    /// New card: everything shown, self-graded.
     case intro
+    /// Fill the blank in the source sentence, self-graded.
     case cloze
+    /// Pick the Chinese definition for the English word; auto-graded.
+    case choice
+    /// Pick the Chinese definition after hearing the word; auto-graded.
+    case listen
+    /// Type the word from its definition and sentence; auto-graded.
+    case spell
+
+    /// Objective modes grade themselves from the user's answer.
+    public var isAutoGraded: Bool {
+        self == .choice || self == .listen || self == .spell
+    }
 }
 
 public enum ReviewGrade: String, Equatable {
@@ -149,6 +162,11 @@ public struct ReviewCard: Equatable, Identifiable {
     public var english: String
     public var chinese: String
     public var hostname: String
+    public var repetitions: Int
+    /// Choice/listen options; empty for other modes.
+    public var options: [String]
+    /// The correct option for choice/listen.
+    public var answer: String
 
     public init(
         id: String,
@@ -161,7 +179,10 @@ public struct ReviewCard: Equatable, Identifiable {
         definitions: [String],
         english: String,
         chinese: String,
-        hostname: String
+        hostname: String,
+        repetitions: Int = 0,
+        options: [String] = [],
+        answer: String = ""
     ) {
         self.id = id
         self.kind = kind
@@ -174,6 +195,9 @@ public struct ReviewCard: Equatable, Identifiable {
         self.english = english
         self.chinese = chinese
         self.hostname = hostname
+        self.repetitions = repetitions
+        self.options = options
+        self.answer = answer
     }
 
     public var isNew: Bool { mode == .intro }

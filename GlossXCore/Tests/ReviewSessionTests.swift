@@ -57,6 +57,15 @@ final class ReviewSessionTests: XCTestCase {
         XCTAssertTrue(session.isFinished)
     }
 
+    func testAutoGradedModesHideSelfGradeButtons() {
+        var choice = ReviewCard.stub(id: "c", isNew: false)
+        choice.mode = .choice
+        var session = ReviewSession(cards: [choice])
+        session.handleTap()
+        XCTAssertFalse(session.showsAnswer)
+        XCTAssertFalse(session.showsGradeButtons)
+    }
+
     func testForgottenIntroCardReturnsAsRecallCard() {
         var session = ReviewSession(cards: [ReviewCard.stub(id: "fresh", isNew: true)])
         session.advanceAfterGrade(.forgot)
