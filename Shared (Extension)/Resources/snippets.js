@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function isDue(item) {
         if (!item || item.type !== "phrase") return false;
-        if (item.status === "mastered" || item.status === "familiar") return false;
+        if (item.status === "familiar") return false;
         return (item.nextReviewAt || 0) <= Date.now();
     }
 
@@ -151,7 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function buildPhraseLearnQueue() {
         const phrases = getPhraseItems().filter((item) => (
-            item.status !== "mastered" && item.status !== "familiar"
+            item.status !== "familiar" && (item.status !== "mastered" || isDue(item))
         ));
         const todayNew = phrases.filter((item) => item.status === "new" && isToday(item.addedAt));
         const due = phrases.filter((item) => isDue(item) && item.status !== "new");
@@ -210,7 +210,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startLearning(queue) {
         learnQueue = (queue && queue.length)
-            ? queue.filter((item) => item.type === "phrase" && item.status !== "mastered" && item.status !== "familiar")
+            ? queue.filter((item) => item.type === "phrase" && item.status !== "familiar" && (item.status !== "mastered" || isDue(item)))
             : buildPhraseLearnQueue();
         if (!learnQueue.length) return;
 

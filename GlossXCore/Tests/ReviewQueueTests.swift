@@ -51,13 +51,25 @@ final class ReviewQueueTests: XCTestCase {
         XCTAssertEqual(cards.first { $0.id == "repeat" }?.mode, .cloze)
     }
 
-    func testSkipsMasteredAndFamiliar() {
+    func testSkipsFamiliarAndMasteredThatIsNotDue() {
         let items = [
-            word(id: "done", status: "mastered", addedAt: now, nextReviewAt: now, repetitions: 5),
+            word(id: "done", status: "mastered", addedAt: now, nextReviewAt: now + 1, repetitions: 5),
             phrase(id: "known", status: "familiar", addedAt: now, nextReviewAt: now)
         ]
-        let queue = ReviewQueue.build(from: items, now: now)
+        let queue = ReviewQueue.build(from: items, now: now, goal: 10)
         XCTAssertTrue(queue.cards.isEmpty)
+        XCTAssertEqual(ReviewQueue.reviewableCount(in: items, now: now), 0)
+    }
+
+    func testDueMasteredCardsReturnForLongTermReview() {
+        let items = [
+            word(id: "done", status: "mastered", addedAt: now, nextReviewAt: now - 1, repetitions: 5)
+        ]
+        let queue = ReviewQueue.build(from: items, now: now)
+        XCTAssertEqual(queue.cards.map(\.id), ["done"])
+        XCTAssertEqual(queue.cards.first?.mode, .cloze)
+        XCTAssertEqual(queue.dueCount, 1)
+        XCTAssertEqual(ReviewQueue.reviewableCount(in: items, now: now), 1)
     }
 
     func testPadsToGoalWithEarliestUpcomingThenExtraNewCards() {
@@ -101,12 +113,12 @@ final class ReviewQueueTests: XCTestCase {
     func testReviewableCountExcludesBrowsingOnlyItemsButKeepsTodaysReviews() {
         let items = [
             word(id: "a", status: "new", addedAt: now, nextReviewAt: now),
-            word(id: "b", status: "mastered", addedAt: now, nextReviewAt: now, repetitions: 5),
-            word(id: "c", status: "mastered", addedAt: now, nextReviewAt: now, repetitions: 5),
+            word(id: "b", status: "mastered", addedAt: now, nextReviewAt: now + 1, repetitions: 5),
+            word(id: "c", status: "mastered", addedAt: now, nextReviewAt: now + 1, repetitions: 5),
             sentence(id: "s")
         ]
-        XCTAssertEqual(ReviewQueue.reviewableCount(in: items), 1)
-        XCTAssertEqual(ReviewQueue.reviewableCount(in: items, includingReviewed: ["b", "missing"]), 2)
+        XCTAssertEqual(ReviewQueue.reviewableCount(in: items, now: now), 1)
+        XCTAssertEqual(ReviewQueue.reviewableCount(in: items, includingReviewed: ["b", "missing"], now: now), 2)
     }
 
     private func word(

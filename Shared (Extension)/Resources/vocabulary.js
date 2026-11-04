@@ -41,8 +41,12 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function isDue(item) {
-        if (!item || item.status === "mastered") return false;
+        if (!item) return false;
         return (item.nextReviewAt || 0) <= Date.now();
+    }
+
+    function isLearnable(item) {
+        return item.status !== "mastered" || isDue(item);
     }
 
     function speak(text) {
@@ -160,7 +164,7 @@ document.addEventListener("DOMContentLoaded", () => {
         startLearnBtn.textContent = dueCount
             ? `开始今日学习 · ${dueCount} 词待复习`
             : "开始今日学习";
-        startLearnBtn.disabled = !items.some((item) => item.status !== "mastered");
+        startLearnBtn.disabled = !items.some(isLearnable);
     }
 
     function buildLearnQueue() {
@@ -270,7 +274,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function startLearning(queue) {
-        learnQueue = queue.length ? queue : buildLearnQueue().filter((item) => item.status !== "mastered");
+        learnQueue = queue.length ? queue : buildLearnQueue().filter(isLearnable);
         if (!learnQueue.length) return;
 
         learnIndex = 0;

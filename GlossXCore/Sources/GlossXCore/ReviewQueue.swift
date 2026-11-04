@@ -28,7 +28,7 @@ public enum ReviewQueue {
         goal: Int = 0,
         excludedIds: Set<String> = []
     ) -> Summary {
-        let reviewable = items.filter(isReviewable)
+        let reviewable = items.filter { isReviewable($0, now: now) }
 
         let newItems = reviewable
             .filter { isNew($0) }
@@ -69,15 +69,18 @@ public enum ReviewQueue {
 
     /// Cards that count toward the daily goal; cards reviewed today stay counted even if
     /// that review graduated them out of the queue.
-    public static func reviewableCount(in items: [ReviewSourceItem], includingReviewed reviewedIds: Set<String> = []) -> Int {
-        items.filter { isReviewable($0) || (reviewedIds.contains($0.id) && $0.kind != .sentence) }.count
+    public static func reviewableCount(
+        in items: [ReviewSourceItem],
+        includingReviewed reviewedIds: Set<String> = [],
+        now: Double
+    ) -> Int {
+        items.filter { isReviewable($0, now: now) || (reviewedIds.contains($0.id) && $0.kind != .sentence) }.count
     }
 
-    public static func isReviewable(_ item: ReviewSourceItem) -> Bool {
-        item.kind != .sentence
-            && item.status != "mastered"
-            && item.status != "familiar"
-            && item.status != "skipped"
+    /// Mastered cards rest until due, then return for long-term review; they are never pulled early.
+    public static func isReviewable(_ item: ReviewSourceItem, now: Double) -> Bool {
+        guard item.kind != .sentence, item.status != "familiar", item.status != "skipped" else { return false }
+        return item.status != "mastered" || item.nextReviewAt <= now
     }
 
     public static func isNew(_ item: ReviewSourceItem) -> Bool {

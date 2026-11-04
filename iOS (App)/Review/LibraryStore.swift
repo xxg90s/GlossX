@@ -73,7 +73,7 @@ final class LibraryStore: ObservableObject {
     }
 
     private var reviewableCount: Int {
-        ReviewQueue.reviewableCount(in: items, includingReviewed: todayReviewedIds)
+        ReviewQueue.reviewableCount(in: items, includingReviewed: todayReviewedIds, now: Self.now)
     }
 
     var syncLabel: String {
@@ -188,7 +188,7 @@ final class LibraryStore: ObservableObject {
     private func recordStreakReview(id: String, wasCompleted: Bool) {
         var reviewed = todayReviewedIds
         reviewed.insert(id)
-        let count = ReviewQueue.reviewableCount(in: items, includingReviewed: reviewed)
+        let count = ReviewQueue.reviewableCount(in: items, includingReviewed: reviewed, now: Self.now)
         let next = StreakEngine.recordReview(
             streakStore.record,
             id: id,

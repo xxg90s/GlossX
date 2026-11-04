@@ -59,6 +59,11 @@ for (const file of ["snippet-utils.js", "snippet-storage.js"]) {
     assert.equal(mastered.ok, true);
     assert.equal(mastered.item.status, "mastered");
     assert.ok(mastered.item.learnedAt);
+    assert.equal(mastered.item.interval, 21);
+
+    const again = await S.gradeItem(saved.item.id, "mastered");
+    assert.equal(again.item.status, "mastered");
+    assert.ok(again.item.interval > 21, "mastered interval keeps growing on long-term review");
 
     const sentence = await S.saveItem({
         text: "We must take into account all factors in this decision today.",

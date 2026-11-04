@@ -208,7 +208,9 @@
             next.status = "mastered";
             next.learnedAt = Date.now();
             next.repetitions = (next.repetitions || 0) + 1;
-            next.interval = Math.max(next.interval || 0, 21);
+            next.interval = record.status === "mastered"
+                ? Math.max(21, Math.round((next.interval || 0) * (next.easeFactor || 2.5)))
+                : Math.max(next.interval || 0, 21);
             next.nextReviewAt = Date.now() + next.interval * MS_PER_DAY;
             return next;
         }

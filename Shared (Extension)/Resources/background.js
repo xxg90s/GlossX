@@ -841,6 +841,13 @@ function createInitialVocabRecord(payload) {
     };
 }
 
+/** Mastered cards come back when due; each further "mastered" grade keeps stretching the interval. */
+function masteredInterval(record) {
+    const interval = Number(record.interval) || 0;
+    if (record.status !== "mastered") return Math.max(interval, 21);
+    return Math.max(21, Math.round(interval * (Number(record.easeFactor) || 2.5)));
+}
+
 function applyVocabReview(record, grade) {
     const quality = grade === "mastered" ? 5 : grade === "review" ? 3 : 3;
     const next = { ...record };
@@ -849,7 +856,7 @@ function applyVocabReview(record, grade) {
         next.status = "mastered";
         next.learnedAt = Date.now();
         next.repetitions += 1;
-        next.interval = Math.max(next.interval, 21);
+        next.interval = masteredInterval(record);
         next.nextReviewAt = Date.now() + next.interval * MS_PER_DAY;
         return next;
     }
@@ -1542,7 +1549,7 @@ function applySnippetReview(record, grade) {
         next.status = "mastered";
         next.learnedAt = Date.now();
         next.repetitions = (next.repetitions || 0) + 1;
-        next.interval = Math.max(next.interval || 0, 21);
+        next.interval = masteredInterval(record);
         next.nextReviewAt = Date.now() + next.interval * MS_PER_DAY;
         return next;
     }

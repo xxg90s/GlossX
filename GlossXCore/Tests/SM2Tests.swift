@@ -52,6 +52,13 @@ final class SM2Tests: XCTestCase {
 
         record = SM2.apply(record, grade: .remembered, now: record.nextReviewAt)
         XCTAssertEqual(record.status, "mastered")
+
+        let longTerm = SM2.apply(record, grade: .remembered, now: 0)
+        XCTAssertEqual(longTerm.status, "mastered")
+        XCTAssertGreaterThan(longTerm.interval, record.interval)
+
+        let lapsed = SM2.apply(record, grade: .forgot, now: 0)
+        XCTAssertEqual(lapsed.status, "learning")
         XCTAssertEqual(record.learnedAt, record.reviewedAt)
         XCTAssertGreaterThanOrEqual(record.interval, 21)
     }
