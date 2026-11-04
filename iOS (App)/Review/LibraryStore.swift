@@ -4,8 +4,12 @@ import GlossXCore
 import SwiftUI
 
 final class LibraryStore: ObservableObject {
-    @Published var snapshot: LibrarySnapshot
+    @Published var snapshot: LibrarySnapshot {
+        didSet { rebuildItems() }
+    }
     @Published var sync: SyncStatus
+    private(set) var items: [ReviewSourceItem] = []
+    private var itemsById: [String: ReviewSourceItem] = [:]
     @Published var session: ReviewSession?
     @Published var isReviewing = false
     @Published var reminderEnabled: Bool
@@ -37,14 +41,20 @@ final class LibraryStore: ObservableObject {
             sync = .loading
         }
         reminderEnabled = ReviewReminder.isEnabled
+        rebuildItems()
         streakStore.onExternalChange = { [weak self] in
             self?.objectWillChange.send()
             self?.rescheduleReminder()
         }
     }
 
-    var items: [ReviewSourceItem] {
-        LibraryMapper.items(from: snapshot)
+    func item(id: String) -> ReviewSourceItem? {
+        itemsById[id]
+    }
+
+    private func rebuildItems() {
+        items = LibraryMapper.items(from: snapshot)
+        itemsById = Dictionary(items.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
     }
 
     var queue: ReviewQueue.Summary {

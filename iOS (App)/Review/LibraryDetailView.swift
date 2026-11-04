@@ -7,7 +7,7 @@ struct LibraryDetailView: View {
     private let speaker = SpeechPlayer()
 
     private var liveItem: ReviewSourceItem {
-        store.items.first(where: { $0.id == item.id }) ?? item
+        store.item(id: item.id) ?? item
     }
 
     var body: some View {
