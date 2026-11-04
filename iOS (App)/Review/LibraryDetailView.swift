@@ -15,7 +15,7 @@ struct LibraryDetailView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .firstTextBaseline) {
                     Text(liveItem.target)
-                        .font(.system(size: 30, weight: .bold))
+                        .font(.largeTitle.weight(.bold))
                         .foregroundColor(GlossXPalette.ink)
                     Button {
                         speaker.speak(liveItem.target)
@@ -24,6 +24,7 @@ struct LibraryDetailView: View {
                             .foregroundColor(GlossXPalette.green)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("朗读")
                 }
                 if !liveItem.phonetic.isEmpty {
                     Text(liveItem.phonetic)
@@ -74,7 +75,7 @@ struct LibraryDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(14)
-        .background(Color.white)
+        .background(GlossXPalette.card)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 

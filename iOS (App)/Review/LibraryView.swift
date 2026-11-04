@@ -34,8 +34,8 @@ struct LibraryView: View {
                             .font(.subheadline.weight(.medium))
                             .padding(.horizontal, 12)
                             .padding(.vertical, 8)
-                            .foregroundColor(filter == item ? .white : GlossXPalette.ink)
-                            .background(filter == item ? GlossXPalette.green : Color.white)
+                            .foregroundColor(filter == item ? GlossXPalette.onAccent : GlossXPalette.ink)
+                            .background(filter == item ? GlossXPalette.green : GlossXPalette.card)
                             .clipShape(Capsule())
                     }
                     .buttonStyle(.plain)
@@ -69,7 +69,7 @@ struct LibraryView: View {
                 NavigationLink(destination: LibraryDetailView(item: item)) {
                     LibraryRow(item: item)
                 }
-                .listRowBackground(Color.white)
+                .listRowBackground(GlossXPalette.card)
             }
             .listStyle(.plain)
         }

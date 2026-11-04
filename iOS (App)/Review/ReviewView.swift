@@ -66,6 +66,7 @@ struct ReviewView: View {
                     .foregroundColor(GlossXPalette.ink)
                     .frame(width: 44, height: 44)
             }
+            .accessibilityLabel("关闭")
             Spacer()
             Text(session.progressText)
                 .font(.subheadline.weight(.medium))
@@ -111,7 +112,7 @@ struct ReviewView: View {
             if card.mode == .intro || session.showsAnswer {
                 HStack(alignment: .firstTextBaseline, spacing: 12) {
                     Text(card.target)
-                        .font(.system(size: 32, weight: .bold))
+                        .font(.largeTitle.weight(.bold))
                         .foregroundColor(GlossXPalette.ink)
                     Button {
                         speaker.speak(card.target)
@@ -120,6 +121,7 @@ struct ReviewView: View {
                             .foregroundColor(GlossXPalette.green)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel("朗读")
                 }
                 if !card.phonetic.isEmpty {
                     Text(card.phonetic)
@@ -147,7 +149,7 @@ struct ReviewView: View {
                     .foregroundColor(GlossXPalette.ink)
                     .padding(16)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color.white)
+                    .background(GlossXPalette.card)
                     .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
 
@@ -198,8 +200,8 @@ struct ReviewView: View {
                 .font(.headline)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .foregroundColor(kind == .remembered ? .white : GlossXPalette.ink)
-                .background(kind == .remembered ? GlossXPalette.green : Color.white)
+                .foregroundColor(kind == .remembered ? GlossXPalette.onAccent : GlossXPalette.ink)
+                .background(kind == .remembered ? GlossXPalette.green : GlossXPalette.card)
                 .overlay(
                     RoundedRectangle(cornerRadius: 12, style: .continuous)
                         .stroke(kind == .forgot ? GlossXPalette.danger.opacity(0.35) : GlossXPalette.mint, lineWidth: 1)

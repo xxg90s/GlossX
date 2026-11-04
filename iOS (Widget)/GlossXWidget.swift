@@ -40,13 +40,20 @@ struct StreakProvider: TimelineProvider {
 }
 
 private enum WidgetPalette {
-    static let ink = Color(red: 27 / 255, green: 67 / 255, blue: 50 / 255)
-    static let green = Color(red: 45 / 255, green: 106 / 255, blue: 79 / 255)
-    static let muted = Color(red: 90 / 255, green: 110 / 255, blue: 100 / 255)
-    static let paper = Color(red: 247 / 255, green: 250 / 255, blue: 246 / 255)
+    static let ink = adaptive(light: (27, 67, 50), dark: (220, 236, 226))
+    static let green = adaptive(light: (45, 106, 79), dark: (116, 198, 157))
+    static let muted = adaptive(light: (90, 110, 100), dark: (150, 170, 160))
+    static let paper = adaptive(light: (247, 250, 246), dark: (16, 22, 19))
     static let flame = Color(red: 255 / 255, green: 140 / 255, blue: 40 / 255)
-    static let idle = Color(red: 176 / 255, green: 186 / 255, blue: 180 / 255)
-    static let track = Color(red: 225 / 255, green: 232 / 255, blue: 227 / 255)
+    static let idle = adaptive(light: (176, 186, 180), dark: (90, 100, 95))
+    static let track = adaptive(light: (225, 232, 227), dark: (48, 58, 53))
+
+    private static func adaptive(light: (Int, Int, Int), dark: (Int, Int, Int)) -> Color {
+        Color(UIColor { traits in
+            let rgb = traits.userInterfaceStyle == .dark ? dark : light
+            return UIColor(red: CGFloat(rgb.0) / 255, green: CGFloat(rgb.1) / 255, blue: CGFloat(rgb.2) / 255, alpha: 1)
+        })
+    }
 }
 
 private extension StreakStatus {

@@ -49,7 +49,7 @@ struct CelebrationBanner: View {
             Spacer(minLength: 0)
         }
         .padding(16)
-        .background(Color.white)
+        .background(GlossXPalette.card)
         .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
         .shadow(color: Color.black.opacity(0.12), radius: 12, y: 4)
         .padding(.horizontal, 16)

@@ -72,7 +72,7 @@ struct TodayView: View {
                 StreakSummaryView(status: store.streakStatus)
             }
             Text(title)
-                .font(.system(size: 28, weight: .semibold))
+                .font(.title.weight(.semibold))
                 .foregroundColor(GlossXPalette.ink)
                 .multilineTextAlignment(.center)
             if let detail {
@@ -102,7 +102,7 @@ struct PrimaryReviewButtonStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.headline)
-            .foregroundColor(.white)
+            .foregroundColor(GlossXPalette.onAccent)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
             .background(GlossXPalette.green.opacity(configuration.isPressed ? 0.82 : 1))
