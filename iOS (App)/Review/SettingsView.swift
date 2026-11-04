@@ -3,6 +3,18 @@ import GlossXCore
 
 struct SettingsView: View {
     @EnvironmentObject private var store: LibraryStore
+    @State private var accent = SpeechPlayer.accent
+
+    private var accentBinding: Binding<SpeechPlayer.Accent> {
+        Binding(
+            get: { accent },
+            set: {
+                accent = $0
+                SpeechPlayer.accent = $0
+                SpeechPlayer.shared.speak("pronunciation")
+            }
+        )
+    }
 
     var body: some View {
         NavigationView {
@@ -29,6 +41,17 @@ struct SettingsView: View {
                         .foregroundColor(GlossXPalette.muted)
                     Toggle("每日提醒", isOn: reminderBinding)
                     Text("晚上 8 点提醒；当天目标完成后不再提醒。")
+                        .font(.footnote)
+                        .foregroundColor(GlossXPalette.muted)
+                }
+                Section("发音") {
+                    Picker("口音", selection: accentBinding) {
+                        ForEach(SpeechPlayer.Accent.allCases, id: \.self) { accent in
+                            Text(accent.title).tag(accent)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                    Text("可在 iPhone 设置 → 辅助功能 → 朗读内容 → 声音中下载“增强”英语语音，发音更自然。")
                         .font(.footnote)
                         .foregroundColor(GlossXPalette.muted)
                 }

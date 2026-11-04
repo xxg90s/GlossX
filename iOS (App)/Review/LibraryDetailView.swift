@@ -4,7 +4,7 @@ import GlossXCore
 struct LibraryDetailView: View {
     @EnvironmentObject private var store: LibraryStore
     let item: ReviewSourceItem
-    private let speaker = SpeechPlayer()
+    private let speaker = SpeechPlayer.shared
 
     private var liveItem: ReviewSourceItem {
         store.item(id: item.id) ?? item

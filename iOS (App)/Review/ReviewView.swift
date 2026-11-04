@@ -4,7 +4,7 @@ import GlossXCore
 struct ReviewView: View {
     @EnvironmentObject private var store: LibraryStore
     @State private var spokenCardID: String?
-    private let speaker = SpeechPlayer()
+    private let speaker = SpeechPlayer.shared
 
     var body: some View {
         ZStack {
