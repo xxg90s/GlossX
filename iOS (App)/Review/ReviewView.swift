@@ -90,7 +90,7 @@ private struct ReviewCardView: View {
             }
             .contentShape(Rectangle())
             .onTapGesture {
-                if card.mode == .cloze && !session.showsAnswer {
+                if card.mode.revealsOnTap && !session.showsAnswer {
                     store.handleCardTap()
                 }
             }
@@ -127,6 +127,8 @@ private struct ReviewCardView: View {
                 optionList
             case .spell:
                 spellPrompt
+            case .recall:
+                recallPrompt
             }
             if showsChinese && !prompt.chinese.isEmpty {
                 Text(prompt.chinese)
@@ -149,13 +151,14 @@ private struct ReviewCardView: View {
     private var showsChinese: Bool {
         switch card.mode {
         case .choice, .listen: return answered
+        case .recall: return false
         default: return true
         }
     }
 
     private var tags: some View {
         HStack(spacing: 8) {
-            Text(card.kind == .phrase ? "短语" : "单词")
+            Text(kindTitle)
                 .font(.caption.weight(.semibold))
                 .foregroundColor(GlossXPalette.green)
                 .padding(.horizontal, 10)
@@ -175,12 +178,21 @@ private struct ReviewCardView: View {
         }
     }
 
+    private var kindTitle: String {
+        switch card.kind {
+        case .word: return "单词"
+        case .phrase: return "短语"
+        case .sentence: return "整句"
+        }
+    }
+
     private var modeTitle: String? {
         switch card.mode {
         case .choice: return "选出释义"
         case .listen: return "听音选义"
         case .spell: return "拼写"
         case .intro: return "新词"
+        case .recall: return "回想英文"
         case .cloze: return nil
         }
     }
@@ -194,6 +206,33 @@ private struct ReviewCardView: View {
         } else {
             sentence(revealed: false)
             Text("点按查看答案")
+                .font(.subheadline)
+                .foregroundColor(GlossXPalette.muted)
+                .frame(maxWidth: .infinity)
+                .padding(.top, 12)
+        }
+    }
+
+    @ViewBuilder
+    private var recallPrompt: some View {
+        Text(card.recallPrompt)
+            .font(.title3.weight(.medium))
+            .foregroundColor(GlossXPalette.ink)
+            .lineSpacing(6)
+        if session.showsAnswer {
+            HStack(alignment: .firstTextBaseline, spacing: 12) {
+                Text(card.target)
+                    .font(.title3)
+                    .foregroundColor(GlossXPalette.green)
+                    .lineSpacing(6)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                speakButton
+            }
+            .padding(16)
+            .background(GlossXPalette.card)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        } else {
+            Text("先在心里说出英文原句，再点按查看")
                 .font(.subheadline)
                 .foregroundColor(GlossXPalette.muted)
                 .frame(maxWidth: .infinity)

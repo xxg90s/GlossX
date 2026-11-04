@@ -2,6 +2,7 @@ import Foundation
 
 public enum ReviewQueue {
     public static let maxNew = 10
+    public static let maxNewSentences = 3
     public static let maxDue = 20
 
     public struct Summary: Equatable {
@@ -30,10 +31,11 @@ public enum ReviewQueue {
     ) -> Summary {
         let reviewable = items.filter { isReviewable($0, now: now) }
 
-        let newItems = reviewable
+        let allNew = reviewable
             .filter { isNew($0) }
             .sorted { $0.addedAt > $1.addedAt }
-            .prefix(maxNew)
+        let newItems = allNew.filter { $0.kind != .sentence }.prefix(maxNew)
+            + allNew.filter { $0.kind == .sentence }.prefix(maxNewSentences)
 
         let dueItems = reviewable
             .filter { !isNew($0) && $0.nextReviewAt <= now }
@@ -74,12 +76,14 @@ public enum ReviewQueue {
         includingReviewed reviewedIds: Set<String> = [],
         now: Double
     ) -> Int {
-        items.filter { isReviewable($0, now: now) || (reviewedIds.contains($0.id) && $0.kind != .sentence) }.count
+        items.filter { isReviewable($0, now: now) || reviewedIds.contains($0.id) }.count
     }
 
     /// Mastered cards rest until due, then return for long-term review; they are never pulled early.
+    /// Sentences need a Chinese prompt to be recalled from.
     public static func isReviewable(_ item: ReviewSourceItem, now: Double) -> Bool {
-        guard item.kind != .sentence, item.status != "familiar", item.status != "skipped" else { return false }
+        guard item.status != "familiar", item.status != "skipped" else { return false }
+        if item.kind == .sentence && item.definitions.isEmpty && item.chinese.isEmpty { return false }
         return item.status != "mastered" || item.nextReviewAt <= now
     }
 
@@ -91,7 +95,7 @@ public enum ReviewQueue {
         ReviewCard(
             id: item.id,
             kind: item.kind,
-            mode: mode,
+            mode: item.kind == .sentence ? .recall : mode,
             target: item.target,
             lemma: item.lemma,
             phonetic: item.phonetic,

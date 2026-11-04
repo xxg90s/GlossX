@@ -30,14 +30,31 @@ final class ReviewQueueTests: XCTestCase {
 
         let queue = ReviewQueue.build(from: items, now: now)
 
-        XCTAssertEqual(queue.newCount, 10)
+        XCTAssertEqual(queue.newCount, 11)
         XCTAssertEqual(queue.dueCount, 20)
-        XCTAssertEqual(queue.cards.count, 30)
-        XCTAssertFalse(queue.cards.contains(where: { $0.id == "sentence-1" }))
+        XCTAssertEqual(queue.cards.count, 31)
+        XCTAssertTrue(queue.cards.contains(where: { $0.id == "sentence-1" && $0.mode == .recall }))
         XCTAssertEqual(Set(queue.cards.filter(\.isNew).map(\.id)).count, 10)
         XCTAssertTrue(queue.cards.contains(where: { $0.id == "phrase-new" && $0.mode == .intro }))
         XCTAssertTrue(queue.cards.contains(where: { $0.id == "phrase-due" && $0.mode == .cloze }))
         XCTAssertEqual(queue.cards.first?.mode, .cloze)
+    }
+
+    func testNewSentencesAreCappedAndNeedATranslation() {
+        var items = (0..<5).map { index -> ReviewSourceItem in
+            var item = sentence(id: "s\(index)")
+            item.addedAt = now - Double(index)
+            return item
+        }
+        var untranslated = sentence(id: "bare")
+        untranslated.chinese = ""
+        items.append(untranslated)
+
+        let queue = ReviewQueue.build(from: items, now: now)
+
+        XCTAssertEqual(queue.cards.map(\.id), ["s0", "s1", "s2"])
+        XCTAssertTrue(queue.cards.allSatisfy { $0.mode == .recall })
+        XCTAssertFalse(ReviewQueue.isReviewable(untranslated, now: now))
     }
 
     func testIntroForUnreviewedItemsAndClozeForReviews() {
@@ -117,8 +134,8 @@ final class ReviewQueueTests: XCTestCase {
             word(id: "c", status: "mastered", addedAt: now, nextReviewAt: now + 1, repetitions: 5),
             sentence(id: "s")
         ]
-        XCTAssertEqual(ReviewQueue.reviewableCount(in: items, now: now), 1)
-        XCTAssertEqual(ReviewQueue.reviewableCount(in: items, includingReviewed: ["b", "missing"], now: now), 2)
+        XCTAssertEqual(ReviewQueue.reviewableCount(in: items, now: now), 2)
+        XCTAssertEqual(ReviewQueue.reviewableCount(in: items, includingReviewed: ["b", "missing"], now: now), 3)
     }
 
     private func word(
@@ -175,13 +192,13 @@ final class ReviewQueueTests: XCTestCase {
         ReviewSourceItem(
             id: id,
             kind: .sentence,
-            target: "A long sentence used only for browsing.",
+            target: "A long sentence worth recalling.",
             lemma: "",
             phonetic: "",
             pos: "",
             definitions: [],
-            english: "A long sentence used only for browsing.",
-            chinese: "仅供浏览的长句。",
+            english: "A long sentence worth recalling.",
+            chinese: "一个值得回想的长句。",
             hostname: "example.com",
             status: "new",
             addedAt: now,

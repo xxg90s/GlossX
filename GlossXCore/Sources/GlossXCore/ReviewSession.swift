@@ -53,7 +53,7 @@ public struct ReviewSession: Equatable {
     }
 
     public mutating func handleTap() {
-        guard current?.mode == .cloze, !revealed else { return }
+        guard current?.mode.revealsOnTap == true, !revealed else { return }
         revealed = true
     }
 

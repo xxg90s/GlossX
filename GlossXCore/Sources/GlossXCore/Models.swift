@@ -17,6 +17,13 @@ public enum CardMode: String, Equatable {
     case listen
     /// Type the word from its definition and sentence; auto-graded.
     case spell
+    /// Whole sentence: recall the English from its Chinese, self-graded.
+    case recall
+
+    /// Modes that hide the answer until tapped.
+    public var revealsOnTap: Bool {
+        self == .cloze || self == .recall
+    }
 
     /// Objective modes grade themselves from the user's answer.
     public var isAutoGraded: Bool {
@@ -204,6 +211,11 @@ public struct ReviewCard: Equatable, Identifiable {
 
     public var definitionText: String {
         definitions.joined(separator: "；")
+    }
+
+    /// The Chinese shown on a sentence recall card.
+    public var recallPrompt: String {
+        definitions.first ?? chinese
     }
 
     public static func stub(id: String, isNew: Bool) -> ReviewCard {

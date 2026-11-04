@@ -66,6 +66,15 @@ final class ReviewSessionTests: XCTestCase {
         XCTAssertFalse(session.showsGradeButtons)
     }
 
+    func testRecallCardRevealsOnTapThenSelfGrades() {
+        var recall = ReviewCard.stub(id: "s", isNew: false)
+        recall.mode = .recall
+        var session = ReviewSession(cards: [recall])
+        XCTAssertFalse(session.showsAnswer)
+        session.handleTap()
+        XCTAssertTrue(session.showsGradeButtons)
+    }
+
     func testForgottenIntroCardReturnsAsRecallCard() {
         var session = ReviewSession(cards: [ReviewCard.stub(id: "fresh", isNew: true)])
         session.advanceAfterGrade(.forgot)

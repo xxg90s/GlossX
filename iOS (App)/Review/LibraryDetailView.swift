@@ -46,7 +46,7 @@ struct LibraryDetailView: View {
                 if !liveItem.hostname.isEmpty {
                     detailBlock(title: "来源", text: liveItem.hostname)
                 }
-                if liveItem.nextReviewAt > 0 && liveItem.kind != .sentence {
+                if liveItem.nextReviewAt > 0 && liveItem.status != "familiar" && liveItem.status != "skipped" {
                     detailBlock(title: "下次复习", text: formatted(liveItem.nextReviewAt))
                 }
 
