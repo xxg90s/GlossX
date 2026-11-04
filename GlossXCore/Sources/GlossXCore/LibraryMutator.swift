@@ -114,6 +114,25 @@ public enum LibraryMutator {
         return next
     }
 
+    /// Sets the review example for a word. Nil when the id is not a vocab item or the English is blank.
+    public static func setExtraExample(
+        in snapshot: LibrarySnapshot,
+        id: String,
+        english rawEnglish: String,
+        chinese rawChinese: String,
+        now: Double
+    ) -> LibrarySnapshot? {
+        let english = rawEnglish.trimmingCharacters(in: .whitespacesAndNewlines)
+        let chinese = rawChinese.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !english.isEmpty, var item = snapshot.payload.vocabItems[id] else { return nil }
+        var next = snapshot
+        item["extraExample"] = ["english": english, "chinese": chinese]
+        item["updatedAt"] = now
+        next.payload.vocabItems[id] = item
+        next.updatedAt = now
+        return next
+    }
+
     public static func rolloverStats(_ snapshot: LibrarySnapshot, now: Double, today: String) -> LibrarySnapshot {
         var next = snapshot
         var stats = next.payload.stats

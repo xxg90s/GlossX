@@ -254,6 +254,20 @@ final class LibraryStore: ObservableObject {
         return true
     }
 
+    @discardableResult
+    func setExtraExample(id: String, english: String, chinese: String) -> Bool {
+        guard let next = LibraryMutator.setExtraExample(
+            in: snapshot,
+            id: id,
+            english: english,
+            chinese: chinese,
+            now: Self.now
+        ) else { return false }
+        snapshot = next
+        libraryDidChange()
+        return true
+    }
+
     /// Number of words added; 0 when the list is missing or every word is already collected.
     @discardableResult
     func importStarterPack(_ lexiconId: String, limit: Int = StarterPack.defaultLimit) -> Int {

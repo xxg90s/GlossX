@@ -15,15 +15,17 @@ public enum LibraryMapper {
         let context = JSONValue.dictionary(json["exampleFromContext"])
         let usage = JSONValue.dictionary(json["usageExample"])
         let extra = JSONValue.dictionary(json["extraExample"])
+        let extraEnglish = JSONValue.string(extra["english"])
+        let extraChinese = JSONValue.string(extra["chinese"])
         let english = firstNonEmpty([
+            extraEnglish,
             JSONValue.string(context["english"]),
-            JSONValue.string(usage["english"]),
-            JSONValue.string(extra["english"])
+            JSONValue.string(usage["english"])
         ])
         let chinese = firstNonEmpty([
+            extraChinese,
             JSONValue.string(context["chinese"]),
-            JSONValue.string(usage["chinese"]),
-            JSONValue.string(extra["chinese"])
+            JSONValue.string(usage["chinese"])
         ])
         return ReviewSourceItem(
             id: JSONValue.string(json["id"]).ifEmpty(id),
@@ -40,7 +42,11 @@ public enum LibraryMapper {
             addedAt: JSONValue.double(json["addedAt"]),
             repetitions: JSONValue.int(json["repetitions"]),
             nextReviewAt: JSONValue.double(json["nextReviewAt"]),
-            sourceURL: JSONValue.string(context["pageUrl"])
+            sourceURL: JSONValue.string(context["pageUrl"]),
+            extraEnglish: extraEnglish,
+            extraChinese: extraChinese,
+            contextEnglish: JSONValue.string(context["english"]),
+            contextChinese: JSONValue.string(context["chinese"])
         )
     }
 

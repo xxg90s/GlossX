@@ -112,6 +112,11 @@ public struct ReviewSourceItem: Equatable, Identifiable {
     public var nextReviewAt: Double
     /// Page the item was collected from, when the extension recorded it.
     public var sourceURL: String
+    /// User-chosen AI example; when set it becomes the review sentence.
+    public var extraEnglish: String
+    public var extraChinese: String
+    public var contextEnglish: String
+    public var contextChinese: String
 
     public init(
         id: String,
@@ -128,9 +133,17 @@ public struct ReviewSourceItem: Equatable, Identifiable {
         addedAt: Double,
         repetitions: Int,
         nextReviewAt: Double,
-        sourceURL: String = ""
+        sourceURL: String = "",
+        extraEnglish: String = "",
+        extraChinese: String = "",
+        contextEnglish: String = "",
+        contextChinese: String = ""
     ) {
         self.sourceURL = sourceURL
+        self.extraEnglish = extraEnglish
+        self.extraChinese = extraChinese
+        self.contextEnglish = contextEnglish
+        self.contextChinese = contextChinese
         self.id = id
         self.kind = kind
         self.target = target
