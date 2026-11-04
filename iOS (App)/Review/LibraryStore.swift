@@ -74,6 +74,10 @@ final class LibraryStore: ObservableObject {
         streakStatus.streak
     }
 
+    var stats: LibraryStatsSummary {
+        LibraryStats.summarize(items: items, record: streakStore.record, today: Self.today, now: Self.now)
+    }
+
     var dailyGoal: Int {
         streakStore.record.goal
     }

@@ -11,6 +11,10 @@ struct RootView: View {
                 .tabItem {
                     Label("词库", systemImage: "books.vertical")
                 }
+            StatsView()
+                .tabItem {
+                    Label("统计", systemImage: "chart.bar.fill")
+                }
             SettingsView()
                 .tabItem {
                     Label("我的", systemImage: "person")
