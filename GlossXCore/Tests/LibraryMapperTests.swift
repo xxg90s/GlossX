@@ -36,4 +36,16 @@ final class LibraryMapperTests: XCTestCase {
 
         XCTAssertEqual(item.definitions, [paragraphChinese])
     }
+
+    func testExcerptStaysOutOfPhraseAndSentenceKinds() {
+        let item = LibraryMapper.snippetItem(id: "s1", json: [
+            "type": "excerpt",
+            "text": "reviewed every proposal before publishing the final written decision yesterday evening",
+            "translation": "审议了每项提案",
+            "context": ["fullEnglish": paragraphEnglish, "fullChinese": paragraphChinese]
+        ])
+
+        XCTAssertEqual(item.kind, .excerpt)
+        XCTAssertEqual(item.definitions, ["审议了每项提案"])
+    }
 }

@@ -40,6 +40,15 @@ final class ReviewQueueTests: XCTestCase {
         XCTAssertEqual(queue.cards.first?.mode, .cloze)
     }
 
+    func testExcerptDoesNotEnterReview() {
+        var item = phrase(id: "long", status: "new", addedAt: now, nextReviewAt: now)
+        item.kind = .excerpt
+        let queue = ReviewQueue.build(from: [item], now: now)
+
+        XCTAssertTrue(queue.cards.isEmpty)
+        XCTAssertEqual(ReviewQueue.reviewableCount(in: [item], now: now), 0)
+    }
+
     func testNewSentencesAreCappedAndNeedATranslation() {
         var items = (0..<5).map { index -> ReviewSourceItem in
             var item = sentence(id: "s\(index)")

@@ -154,6 +154,11 @@
     color: #7c3aed;
 }
 
+.snippets-row-badge-excerpt {
+    background: rgba(180, 83, 9, 0.15);
+    color: #9a3412;
+}
+
 .snippets-row-badge-familiar {
     background: rgba(45, 106, 79, 0.15);
     color: #2d6a4f;

@@ -129,7 +129,7 @@ public enum LibraryMutator {
             )
         case .phrase, .sentence:
             return addSnippet(to: snapshot, text: ShareInbox.normalize(raw), type: "phrase", now: now)
-        case nil:
+        case .excerpt, nil:
             return nil
         }
     }

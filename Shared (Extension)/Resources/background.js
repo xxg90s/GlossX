@@ -770,8 +770,7 @@ function getAiStateForPopup(settings, aiKeys) {
 const vocabExampleCache = new Map();
 const MAX_VOCAB_ITEMS = 2000;
 const MAX_SNIPPET_ITEMS = 1000;
-const SNIPPET_PHRASE_MAX_WORDS = 6;
-const SNIPPET_SENTENCE_COVERAGE_RATIO = 0.8;
+const SNIPPET_PHRASE_MAX_WORDS = 12;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const VOCAB_EXAMPLE_VERSION = 2;
 
@@ -1224,16 +1223,25 @@ function countSnippetWords(text) {
     return normalized.split(/\s+/).filter(Boolean).length;
 }
 
+function comparableSnippetText(value) {
+    return normalizeSnippetText(value)
+        .toLowerCase()
+        .replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, "");
+}
+
+function compactSnippetChinese(value) {
+    return normalizeSnippetText(value).replace(/[。！？…!?]+$/g, "");
+}
+
+function selectionCoversSnippet(text, fullEnglish) {
+    const selected = comparableSnippetText(text);
+    const full = comparableSnippetText(fullEnglish);
+    return !!selected && !!full && selected === full;
+}
+
 function detectSnippetType(text, fullEnglish) {
-    const normalized = normalizeSnippetText(text);
-    const wordCount = countSnippetWords(normalized);
-    if (fullEnglish) {
-        const full = normalizeSnippetText(fullEnglish);
-        if (full && normalized.length / full.length >= SNIPPET_SENTENCE_COVERAGE_RATIO) {
-            return "sentence";
-        }
-    }
-    return wordCount <= SNIPPET_PHRASE_MAX_WORDS ? "phrase" : "sentence";
+    if (selectionCoversSnippet(text, fullEnglish)) return "sentence";
+    return countSnippetWords(text) <= SNIPPET_PHRASE_MAX_WORDS ? "phrase" : "excerpt";
 }
 
 function buildSnippetId(text, hostname) {
@@ -1245,21 +1253,23 @@ function buildSnippetId(text, hostname) {
     return `snip_${Math.abs(hash).toString(36)}`;
 }
 
-function resolveSnippetTranslationFromContext(text, context, type) {
-    const selected = normalizeSnippetText(text);
-    const fullEn = normalizeSnippetText(context?.fullEnglish);
+function resolveSnippetTranslationFromContext(text, context) {
     const fullZh = normalizeSnippetText(context?.fullChinese);
-    if (!selected || !fullZh) return null;
+    if (!fullZh || !selectionCoversSnippet(text, context?.fullEnglish)) return null;
+    return fullZh;
+}
 
-    if (type === "sentence") return fullZh;
+function isSnippetFullSentenceEcho(text, translation, context) {
+    const fullZh = compactSnippetChinese(context?.fullChinese);
+    const translated = compactSnippetChinese(translation);
+    if (!fullZh || !translated) return false;
+    if (selectionCoversSnippet(text, context?.fullEnglish)) return false;
+    return translated === fullZh;
+}
 
-    const selectedLower = selected.toLowerCase();
-    const fullEnLower = fullEn.toLowerCase();
-    if (fullEnLower && selectedLower === fullEnLower) return fullZh;
-    if (fullEn && selected.length / fullEn.length >= SNIPPET_SENTENCE_COVERAGE_RATIO) {
-        return fullZh;
-    }
-    return null;
+function rejectSnippetEcho(text, translation, context) {
+    if (!isSnippetFullSentenceEcho(text, translation, context)) return null;
+    return { ok: false, error: "译文未对应选区，点击重试" };
 }
 
 async function translateSnippetWithMyMemory(text) {
@@ -1320,6 +1330,9 @@ async function enrichSnippetTranslationWithAi(text, context) {
             "Return the Simplified Chinese translation of the SELECTED text only.",
             "When the selection is a phrase inside the sentence, use context to pick the correct meaning."
         );
+    }
+    if (contextChinese && !selectionCoversSnippet(text, context?.fullEnglish)) {
+        lines.push("The translation must be shorter than the full Chinese sentence.");
     }
     lines.push(
         "Keep it concise and natural. Use Simplified Chinese only.",
@@ -1389,16 +1402,17 @@ async function translateSnippet(payload) {
     if (wordCount === 1) {
         const vocab = await lookupVocabWord({ word: text, preference });
         if (vocab?.ok && vocab.definitions?.length) {
-            return {
-                ok: true,
-                translation: vocab.definitions.join("；"),
-                source: "vocab"
-            };
+            const translation = vocab.definitions.join("；");
+            const echoed = rejectSnippetEcho(text, translation, context);
+            if (echoed) return echoed;
+            return { ok: true, translation, source: "vocab" };
         }
     }
 
     const aiResult = await enrichSnippetTranslationWithAi(text, context);
     if (aiResult.ok && aiResult.translation) {
+        const echoed = rejectSnippetEcho(text, aiResult.translation, context);
+        if (echoed) return echoed;
         return { ok: true, translation: aiResult.translation, source: "ai" };
     }
     return { ok: false, error: aiResult.error || "AI 翻译失败" };

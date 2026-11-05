@@ -31,5 +31,7 @@ assert.match(css, /\.glossx-snippet-save-panel\.visible/);
 assert.match(css, /\.glossx-snippet-save-text/);
 assert.match(css, /\.glossx-snippet-type-phrase/);
 assert.match(css, /\.glossx-snippet-type-sentence/);
+assert.match(css, /\.glossx-snippet-type-excerpt/);
+assert.match(panelJs, /长片段/);
 
 console.log("snippet-save-panel tests passed");

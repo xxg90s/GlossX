@@ -164,6 +164,7 @@ private struct LibraryRow: View {
         switch item.kind {
         case .word: return "单词"
         case .phrase: return "短语"
+        case .excerpt: return "长片段"
         case .sentence: return "整句"
         }
     }

@@ -65,9 +65,18 @@ public enum LibraryMapper {
         } else {
             definitions = []
         }
+        let kind: ItemKind
+        switch type {
+        case "sentence":
+            kind = .sentence
+        case "excerpt":
+            kind = .excerpt
+        default:
+            kind = .phrase
+        }
         return ReviewSourceItem(
             id: JSONValue.string(json["id"]).ifEmpty(id),
-            kind: type == "sentence" ? .sentence : .phrase,
+            kind: kind,
             target: text,
             lemma: "",
             phonetic: "",
@@ -113,7 +122,8 @@ public enum LibraryMapper {
         return next
     }
 
-    /// Mirrors `SENTENCE_COVERAGE_RATIO` in the extension's snippet-utils.js.
+    /// Display fallback for snippets saved without their own translation.
+    /// The extension no longer treats partial selections as the whole sentence.
     private static let sentenceCoverageRatio = 0.8
 
     private static func coversContext(text: String, fullEnglish: String) -> Bool {

@@ -3,6 +3,7 @@ import Foundation
 public enum ItemKind: String, Equatable {
     case word
     case phrase
+    case excerpt
     case sentence
 }
 

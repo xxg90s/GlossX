@@ -190,6 +190,36 @@
         }
     }
 
+    function rawSelectionText(selection, element) {
+        const range = typeof selection.getRangeAt === "function" ? selection.getRangeAt(0) : null;
+        if (
+            range
+            && element
+            && typeof range.compareBoundaryPoints === "function"
+            && typeof range.cloneRange === "function"
+            && typeof document.createRange === "function"
+        ) {
+            try {
+                const bounds = document.createRange();
+                bounds.selectNodeContents(element);
+                const startsAfter = range.compareBoundaryPoints(Range.END_TO_START, bounds) > 0;
+                const endsBefore = range.compareBoundaryPoints(Range.START_TO_END, bounds) < 0;
+                if (startsAfter || endsBefore) return "";
+                const clipped = range.cloneRange();
+                if (range.compareBoundaryPoints(Range.START_TO_START, bounds) < 0) {
+                    clipped.setStart(bounds.startContainer, bounds.startOffset);
+                }
+                if (range.compareBoundaryPoints(Range.END_TO_END, bounds) > 0) {
+                    clipped.setEnd(bounds.endContainer, bounds.endOffset);
+                }
+                return clipped.toString() || "";
+            } catch {
+                // Fall through to the raw selection string.
+            }
+        }
+        return selection.toString() || "";
+    }
+
     function handleMouseUp(event) {
         const enElement = event.target.closest(".glossx-sentence-en");
         if (!enElement) return;
@@ -198,15 +228,17 @@
         const selection = window.getSelection();
         if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
 
-        const text = (selection.toString() || "").trim();
-        const utils = global.GlossX?.SnippetUtils;
-        if (!utils?.isValidSelection?.(text)) return;
-
         const sentence = enElement.closest(".glossx-sentence");
         if (!sentence) return;
 
         const fullEnglish = (sentence.querySelector(".glossx-sentence-en")?.textContent || "").trim();
         const fullChinese = (sentence.querySelector(".glossx-sentence-cn")?.textContent || "").trim();
+        const utils = global.GlossX?.SnippetUtils;
+        const rawText = rawSelectionText(selection, enElement);
+        const text = utils?.clipSelectionText
+            ? utils.clipSelectionText(rawText, fullEnglish, fullChinese)
+            : String(rawText || "").trim();
+        if (!utils?.isValidSelection?.(text)) return;
         const context = {
             fullEnglish,
             fullChinese,

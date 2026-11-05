@@ -6,7 +6,7 @@ public enum QuizBuilder {
 
     public static func prepare(_ cards: [ReviewCard], pool: [ReviewSourceItem]) -> [ReviewCard] {
         let definitions = pool
-            .filter { $0.kind != .sentence && !$0.definitionText.isEmpty }
+            .filter { $0.kind != .sentence && $0.kind != .excerpt && !$0.definitionText.isEmpty }
             .map { (id: $0.id, text: $0.definitionText) }
         return cards.map { prepare($0, definitions: definitions) }
     }

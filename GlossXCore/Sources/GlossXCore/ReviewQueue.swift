@@ -83,6 +83,7 @@ public enum ReviewQueue {
     /// Sentences need a Chinese prompt to be recalled from.
     public static func isReviewable(_ item: ReviewSourceItem, now: Double) -> Bool {
         guard item.status != "familiar", item.status != "skipped" else { return false }
+        if item.kind == .excerpt { return false }
         if item.kind == .sentence && item.definitions.isEmpty && item.chinese.isEmpty { return false }
         return item.status != "mastered" || item.nextReviewAt <= now
     }

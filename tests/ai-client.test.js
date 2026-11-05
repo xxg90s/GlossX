@@ -218,6 +218,54 @@ assert.equal(parsed.english, "Hello world");
         assert.equal(capturedBody.temperature, 0.1);
     }
 
+    {
+        vm.runInContext(
+            fs.readFileSync(path.join(resources, "lib/snippet-utils.js"), "utf8"),
+            sandbox,
+            { filename: "snippet-utils.js" }
+        );
+        const context = {
+            fullEnglish: "We must take into account all factors.",
+            fullChinese: "我们必须考虑所有因素。"
+        };
+        let prompt = "";
+        sandbox.fetch = async (_url, options) => {
+            prompt = JSON.parse(options.body).messages[1].content;
+            return {
+                ok: true,
+                json: async () => ({
+                    choices: [{
+                        message: { content: '{"translation":"我们必须考虑所有因素。"}' }
+                    }]
+                })
+            };
+        };
+        const echoed = await sandbox.GlossX.AIClient.translateSnippet({
+            text: "take into account",
+            context
+        });
+        assert.equal(echoed.ok, false);
+        assert.equal(echoed.error, "译文未对应选区，点击重试");
+        assert.match(prompt, /shorter than the full Chinese sentence/);
+
+        sandbox.fetch = async () => ({
+            ok: true,
+            json: async () => ({
+                choices: [{ message: { content: '{"translation":"考虑"}' } }]
+            })
+        });
+        const partial = await sandbox.GlossX.AIClient.translateSnippet({
+            text: "take into account",
+            context
+        });
+        assert.equal(partial.ok, true);
+        assert.equal(partial.translation, "考虑");
+    }
+
+    assert.doesNotMatch(backgroundSource, /if \(type === "sentence"\) return fullZh/);
+    assert.match(backgroundSource, /shorter than the full Chinese sentence/);
+    assert.match(backgroundSource, /译文未对应选区，点击重试/);
+
     console.log("ai-client tests passed");
 })().catch((error) => {
     console.error(error);

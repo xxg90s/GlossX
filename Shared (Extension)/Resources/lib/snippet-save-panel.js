@@ -183,10 +183,11 @@
         const badgeEl = panel.querySelector(".glossx-snippet-type-badge");
         if (!badgeEl) return;
 
-        const isPhrase = type === "phrase";
-        badgeEl.textContent = isPhrase ? "短语" : "整句";
-        badgeEl.classList.toggle("glossx-snippet-type-phrase", isPhrase);
-        badgeEl.classList.toggle("glossx-snippet-type-sentence", !isPhrase);
+        const labels = { phrase: "短语", sentence: "整句", excerpt: "长片段" };
+        badgeEl.textContent = labels[type] || "短语";
+        badgeEl.classList.toggle("glossx-snippet-type-phrase", type !== "sentence" && type !== "excerpt");
+        badgeEl.classList.toggle("glossx-snippet-type-sentence", type === "sentence");
+        badgeEl.classList.toggle("glossx-snippet-type-excerpt", type === "excerpt");
     }
 
     function renderContext(context) {

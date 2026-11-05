@@ -130,6 +130,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (item.type === "sentence") {
             return '<span class="snippets-row-badge snippets-row-badge-sentence">整句</span>';
         }
+        if (item.type === "excerpt") {
+            return '<span class="snippets-row-badge snippets-row-badge-excerpt">长片段</span>';
+        }
         return '<span class="snippets-row-badge snippets-row-badge-phrase">短语</span>';
     }
 
@@ -271,6 +274,27 @@ document.addEventListener("DOMContentLoaded", () => {
         `;
     }
 
+    function renderExcerptDetail(item) {
+        const translation = item.translation ? String(item.translation) : "—";
+        const canMarkFamiliar = item.status !== "familiar" && item.status !== "mastered";
+        return `
+            <div class="snippets-detail">
+                <div class="snippets-detail-section-label">释义</div>
+                <div class="snippets-detail-cn">${escapeHtml(translation)}</div>
+                <div class="snippets-detail-section-label">原句对照</div>
+                <div class="snippets-detail-en">${escapeHtml(item.context?.fullEnglish || "—")}</div>
+                <div class="snippets-detail-cn">${escapeHtml(item.context?.fullChinese || "—")}</div>
+                <div class="snippets-detail-actions">
+                    <button type="button" class="snippets-detail-speak" data-speak="${escapeHtml(item.text)}">🔊 朗读</button>
+                    ${canMarkFamiliar
+                        ? `<button type="button" class="primary-btn snippets-detail-familiar" data-id="${escapeHtml(item.id)}">标记已熟悉</button>`
+                        : ""}
+                    <button type="button" class="secondary-btn snippets-detail-remove" data-id="${escapeHtml(item.id)}">移出句库</button>
+                </div>
+            </div>
+        `;
+    }
+
     function renderPhraseDetail(item) {
         const translation = item.translation ? String(item.translation) : "—";
         const canLearn = item.status !== "mastered" && item.status !== "familiar";
@@ -397,7 +421,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     const detailWrap = document.createElement("div");
                     detailWrap.innerHTML = item.type === "sentence"
                         ? renderSentenceDetail(item)
-                        : renderPhraseDetail(item);
+                        : item.type === "excerpt"
+                            ? renderExcerptDetail(item)
+                            : renderPhraseDetail(item);
                     bindDetailActions(detailWrap);
                     card.appendChild(detailWrap.firstElementChild);
                 }

@@ -79,7 +79,9 @@ struct LibraryDetailView: View {
                     .padding(.top, 8)
                 }
 
-                if liveItem.kind == .sentence && liveItem.status != "familiar" && liveItem.status != "mastered" {
+                if (liveItem.kind == .sentence || liveItem.kind == .excerpt)
+                    && liveItem.status != "familiar"
+                    && liveItem.status != "mastered" {
                     Button("标记已熟悉") {
                         store.markFamiliar(id: liveItem.id)
                     }

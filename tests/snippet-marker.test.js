@@ -200,6 +200,38 @@ assert.equal(marker.hasRecentSelection(), true);
     });
     assert.equal(panelShown, false);
 
+    vm.runInContext(
+        fs.readFileSync(path.join(resources, "snippet-utils.js"), "utf8"),
+        sandbox,
+        { filename: "snippet-utils.js" }
+    );
+    sandbox.GlossX.SnippetUtils.detectType = (text, fullEnglish) => (
+        text === fullEnglish ? "sentence" : "phrase"
+    );
+    sandbox.GlossX.SnippetUtils.buildSnippetId = (text, hostname) => `snip_${text}_${hostname}`;
+    panelShown = false;
+    panelOptions = null;
+    sandbox._selection = {
+        isCollapsed: false,
+        rangeCount: 1,
+        toString() {
+            return "quick brown 敏捷的棕色狐狸跳过了懒狗。";
+        },
+        getRangeAt() {
+            return {
+                getBoundingClientRect() {
+                    return { top: 10, bottom: 20, left: 5, width: 80, height: 12 };
+                }
+            };
+        },
+        removeAllRanges() {}
+    };
+    sandbox._mouseupHandler({
+        target: sentence.enEl
+    });
+    assert.equal(panelShown, true);
+    assert.equal(panelOptions.text, "quick brown");
+
     const markerJs = fs.readFileSync(path.join(resources, "snippet-marker.js"), "utf8");
     assert.match(markerJs, /global\.GlossX\.SnippetMarker\s*=\s*SnippetMarker/);
     assert.match(markerJs, /hasRecentSelection/);

@@ -11,6 +11,7 @@
         mastered: "已掌握",
         phrase: "短语",
         sentence: "整句",
+        excerpt: "长片段",
         familiar: "已熟悉"
     };
 
@@ -92,7 +93,7 @@
                 : null
         ]);
         return {
-            kind: item?.type === "sentence" ? "sentence" : "phrase",
+            kind: item?.type === "sentence" ? "sentence" : item?.type === "excerpt" ? "excerpt" : "phrase",
             term,
             lemma: "",
             phonetic: "",
@@ -237,6 +238,7 @@
     function kindLabel(kind) {
         if (kind === "phrase") return "短语";
         if (kind === "sentence") return "整句";
+        if (kind === "excerpt") return "长片段";
         return "单词";
     }
 
