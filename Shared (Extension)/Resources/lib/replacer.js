@@ -11,11 +11,16 @@
     const INTERACTIVE_SELECTOR = "a, img, video, audio, iframe, input, button, svg, canvas";
 
     const BLOCK_CONTAINER_SELECTOR = "p, li, h1, h2, h3, h4, h5, h6, blockquote, td, th, figcaption, section";
+    const SENTENCE_SELECTOR = "[data-glossx-sentence], [data-glossx-sentence-pending], [data-glossx-original], .glossx-sentence";
+
+    function containsSentence(element) {
+        return !!element?.querySelector?.(SENTENCE_SELECTOR);
+    }
 
     function isInSentenceTranslatedBlock(node) {
         const block = node.parentElement?.closest?.(BLOCK_CONTAINER_SELECTOR);
         if (!block) return false;
-        return !!block.querySelector?.("[data-glossx-sentence], [data-glossx-sentence-pending]");
+        return containsSentence(block);
     }
 
     function shouldSkipNode(node) {
@@ -85,6 +90,7 @@
         function consider(element) {
             if (!element || seen.has(element) || shouldSkipElement(element)) return;
             if (element.querySelector?.(".glossx-word")) return;
+            if (containsSentence(element)) return;
 
             const text = element.textContent || "";
             if (!/[\u4e00-\u9fff]/.test(text)) return;
@@ -193,11 +199,10 @@
         return [...selected.values()].sort((a, b) => a.index - b.index);
     }
 
-    async function buildFragmentFromMatches(text, sortedMatches, options) {
-        const { settings, onWordHover, onWordReplaced } = options;
+    function buildFragmentFromMatches(text, sortedMatches, options) {
+        const { settings, onWordHover } = options;
         const fragment = document.createDocumentFragment();
         let cursor = 0;
-        let replaced = 0;
 
         for (const match of sortedMatches) {
             if (match.index > cursor) {
@@ -205,39 +210,60 @@
             }
             fragment.appendChild(createWordSpan(match.entry, settings, onWordHover));
             cursor = match.index + match.length;
-            replaced += 1;
-            await onWordReplaced(match.entry);
         }
 
         if (cursor < text.length) {
             fragment.appendChild(document.createTextNode(text.slice(cursor)));
         }
 
-        return { fragment, replaced };
+        return fragment;
+    }
+
+    async function notifyReplaced(sortedMatches, options) {
+        for (const match of sortedMatches) {
+            await options.onWordReplaced(match.entry);
+        }
+        return sortedMatches.length;
+    }
+
+    function isReplaceableTextNode(textNode, text) {
+        return !!textNode.parentNode
+            && textNode.nodeValue === text
+            && !shouldSkipNode(textNode);
+    }
+
+    function isReplaceableBlock(element) {
+        return !!element.isConnected
+            && !shouldSkipElement(element)
+            && !element.querySelector(INTERACTIVE_SELECTOR)
+            && !element.querySelector(".glossx-word")
+            && !containsSentence(element);
     }
 
     async function replaceInTextNode(textNode, options) {
         const text = textNode.nodeValue;
+        if (!isReplaceableTextNode(textNode, text)) return 0;
         const sorted = await selectMatches(text, options);
         if (!sorted.length) return 0;
 
-        const { fragment, replaced } = await buildFragmentFromMatches(text, sorted, options);
-        textNode.parentNode.replaceChild(fragment, textNode);
-        return replaced;
+        // Matching may wait on AI; sentence translation can take over this node meanwhile.
+        if (!isReplaceableTextNode(textNode, text)) return 0;
+        textNode.parentNode.replaceChild(buildFragmentFromMatches(text, sorted, options), textNode);
+        return notifyReplaced(sorted, options);
     }
 
     async function replaceInBlockElement(element, options) {
-        if (!element.isConnected || shouldSkipElement(element)) return 0;
-        if (element.querySelector(INTERACTIVE_SELECTOR)) return 0;
+        if (!isReplaceableBlock(element)) return 0;
 
         const text = element.textContent || "";
         const sorted = await selectMatches(text, options);
         if (!sorted.length) return 0;
 
-        const { fragment, replaced } = await buildFragmentFromMatches(text, sorted, options);
-        element.replaceChildren(fragment);
+        // replaceChildren flattens the block, so it must not wipe sentence cards added while matching.
+        if (!isReplaceableBlock(element) || element.textContent !== text) return 0;
+        element.replaceChildren(buildFragmentFromMatches(text, sorted, options));
         element.setAttribute(PROCESSED_BLOCK_ATTR, "1");
-        return replaced;
+        return notifyReplaced(sorted, options);
     }
 
     async function processRoot(root, options) {

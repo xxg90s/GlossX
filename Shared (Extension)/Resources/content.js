@@ -277,6 +277,7 @@
 
             flushingAddedNodes = true;
             try {
+                ParagraphTranslator.unwrapNested?.(document.body);
                 const unique = [...new Set(nodes)];
                 for (const node of unique) {
                     if (!pageEnabled) return;

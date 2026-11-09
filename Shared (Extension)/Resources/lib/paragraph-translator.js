@@ -477,6 +477,7 @@
             });
         },
 
+        unwrapNested: unwrapNestedSentences,
         sampleSentences,
         MAX_SENTENCES,
         PARAGRAPH_RATIO

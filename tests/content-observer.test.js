@@ -39,4 +39,10 @@ assert.match(
     "selection save panel must not be treated as page content"
 );
 
+assert.match(
+    content,
+    /async function flushAddedNodes\(\)[\s\S]*?ParagraphTranslator\.unwrapNested\?\.\(document\.body\)/,
+    "page mutations must unwrap sentence cards nested inside another card"
+);
+
 console.log("content-observer tests passed");

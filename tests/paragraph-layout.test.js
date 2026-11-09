@@ -421,6 +421,22 @@ function sentenceNodes(root) {
         assert.equal(root.querySelector(".glossx-sentence-cn").textContent.trim(), "现在回想起来，自己怎么这么傻");
     }
 
+    {
+        const root = new MiniElement("h2");
+        root.innerHTML = [
+            '<span class="glossx-sentence glossx-sentence-block">',
+            '<span class="glossx-sentence-en">Pay to work</span>',
+            '<span class="glossx-sentence-cn glossx-sentence-secondary">',
+            '<span class="glossx-sentence glossx-sentence-block">',
+            '<span class="glossx-sentence-en">Pay to work</span>',
+            '<span class="glossx-sentence-cn glossx-sentence-secondary">付费上班</span>',
+            "</span></span></span>"
+        ].join("");
+        Translator.unwrapNested(root);
+        assert.equal(sentenceNodes(root).length, 1, "a card nested after translation must be unwrapped");
+        assert.equal(root.querySelector(".glossx-sentence-cn").textContent, "付费上班");
+    }
+
     console.log("paragraph-layout tests passed");
 })().catch((error) => {
     console.error(error);
