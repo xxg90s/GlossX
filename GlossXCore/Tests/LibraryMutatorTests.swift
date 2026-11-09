@@ -114,4 +114,52 @@ final class LibraryMutatorTests: XCTestCase {
         XCTAssertNil(LibraryMutator.addWord(to: snapshot, word: "Hello", definition: "你好", example: "", exampleChinese: "", now: now))
         XCTAssertNil(LibraryMutator.addWord(to: snapshot, word: "  ", definition: "空", example: "", exampleChinese: "", now: now))
     }
+
+    func testMarkIntroducedLeavesTheScheduleUntouched() {
+        var snapshot = SnapshotCodec.empty(now: 0)
+        snapshot.payload.vocabItems["hello"] = [
+            "id": "hello",
+            "status": "new",
+            "repetitions": 0,
+            "interval": 0,
+            "nextReviewAt": now - 50,
+            "easeFactor": 2.5
+        ]
+
+        let next = LibraryMutator.markIntroduced(in: snapshot, id: "hello", now: now)
+        let item = next.payload.vocabItems["hello"]
+        XCTAssertEqual(JSONValue.double(item?["introducedAt"]), now)
+        XCTAssertEqual(JSONValue.double(item?["updatedAt"]), now)
+        XCTAssertEqual(JSONValue.string(item?["status"]), "new")
+        XCTAssertEqual(JSONValue.int(item?["repetitions"]), 0)
+        XCTAssertEqual(JSONValue.int(item?["interval"]), 0)
+        XCTAssertEqual(JSONValue.double(item?["nextReviewAt"]), now - 50)
+        XCTAssertEqual(JSONValue.double(item?["easeFactor"]), 2.5)
+    }
+
+    func testFillDefinitionWritesCueAndDoesNotOverwrite() {
+        var snapshot = SnapshotCodec.empty(now: 0)
+        snapshot.payload.vocabItems["apple"] = ["id": "apple", "status": "learning", "repetitions": 2]
+        snapshot.payload.vocabItems["river"] = ["id": "river", "definitions": ["河流"], "status": "new"]
+
+        let filled = LibraryMutator.fillDefinition(
+            in: snapshot,
+            id: "apple",
+            definition: " 苹果 ",
+            phonetic: "/ˈæpl/",
+            pos: "n",
+            now: now
+        )
+        let apple = filled?.payload.vocabItems["apple"]
+        XCTAssertEqual(JSONValue.stringArray(apple?["definitions"]), ["苹果"])
+        XCTAssertEqual(JSONValue.string(apple?["phonetic"]), "/ˈæpl/")
+        XCTAssertEqual(JSONValue.string(apple?["pos"]), "n")
+        XCTAssertEqual(JSONValue.double(apple?["updatedAt"]), now)
+        XCTAssertEqual(JSONValue.string(apple?["status"]), "learning")
+        XCTAssertEqual(JSONValue.int(apple?["repetitions"]), 2)
+
+        XCTAssertNil(LibraryMutator.fillDefinition(in: snapshot, id: "river", definition: "江", now: now))
+        XCTAssertNil(LibraryMutator.fillDefinition(in: snapshot, id: "missing", definition: "无", now: now))
+        XCTAssertNil(LibraryMutator.fillDefinition(in: snapshot, id: "apple", definition: "  ", now: now))
+    }
 }

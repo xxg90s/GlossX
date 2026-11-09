@@ -8,6 +8,7 @@ struct LibraryDetailView: View {
     @State private var generatedExamples: [AIExample] = []
     @State private var isGeneratingExamples = false
     @State private var exampleMessage: String?
+    @State private var definitionDraft = ""
     let item: ReviewSourceItem
     private let speaker = SpeechPlayer.shared
 
@@ -39,7 +40,9 @@ struct LibraryDetailView: View {
                     .font(.subheadline.weight(.medium))
                     .foregroundColor(GlossXPalette.green)
 
-                if !liveItem.definitionText.isEmpty {
+                if liveItem.kind == .word && liveItem.definitionText.isEmpty {
+                    definitionEditor
+                } else if !liveItem.definitionText.isEmpty {
                     detailBlock(title: "释义", text: [liveItem.pos, liveItem.definitionText].filter { !$0.isEmpty }.joined(separator: "  "))
                 }
                 if !liveItem.contextEnglish.isEmpty {
@@ -117,6 +120,21 @@ struct LibraryDetailView: View {
             }
         } message: {
             Text("会同时从 Mac 和其他设备的词库中删除，复习进度不会保留。")
+        }
+    }
+
+    private var definitionEditor: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("这个词还没有释义，填上之后才会进入拼写练习。")
+                .font(.subheadline)
+                .foregroundColor(GlossXPalette.muted)
+            TextField("中文释义", text: $definitionDraft)
+                .textFieldStyle(.roundedBorder)
+            Button("保存释义") {
+                _ = store.saveDefinition(id: liveItem.id, definition: definitionDraft)
+            }
+            .buttonStyle(PrimaryReviewButtonStyle())
+            .disabled(definitionDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
     }
 

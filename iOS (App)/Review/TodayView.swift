@@ -61,13 +61,31 @@ struct TodayView: View {
                 syncLabel: syncLabel
             )
         case .done(let streak, let syncLabel):
-            statusBlock(
-                title: "今日复习完成",
-                detail: "可以去词库里翻看收藏。",
-                streak: streak,
-                buttonTitle: nil,
-                syncLabel: syncLabel
-            )
+            if store.wordsAwaitingDefinition > 0 && !store.hasAnythingToReview {
+                statusBlock(
+                    title: "有 \(store.wordsAwaitingDefinition) 个词还没有释义",
+                    detail: "补上释义之后才能拼写。到词库打开该词填写。",
+                    streak: streak,
+                    buttonTitle: nil,
+                    syncLabel: syncLabel
+                )
+            } else if store.wordsAwaitingDefinition > 0 && store.queue.cards.isEmpty {
+                statusBlock(
+                    title: "今日复习完成",
+                    detail: "另有 \(store.wordsAwaitingDefinition) 个词还没有释义，补上之后会进入拼写。",
+                    streak: streak,
+                    buttonTitle: nil,
+                    syncLabel: syncLabel
+                )
+            } else {
+                statusBlock(
+                    title: "今日复习完成",
+                    detail: "可以去词库里翻看收藏。",
+                    streak: streak,
+                    buttonTitle: nil,
+                    syncLabel: syncLabel
+                )
+            }
         }
     }
 

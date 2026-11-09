@@ -17,9 +17,8 @@ struct AddWordView: View {
         NavigationView {
             Form {
                 Section {
-                    TextField("单词或短语", text: $word)
-                        .textInputAutocapitalization(.never)
-                        .disableAutocorrection(true)
+                    LatinTextField(placeholder: "单词或短语", text: $word)
+                        .frame(minHeight: 36)
                     TextField("中文释义", text: $definition)
                 } footer: {
                     if !error.isEmpty {
@@ -27,7 +26,8 @@ struct AddWordView: View {
                     }
                 }
                 Section("例句（可选）") {
-                    TextField("英文例句", text: $example)
+                    LatinTextField(placeholder: "英文例句", text: $example)
+                        .frame(minHeight: 36)
                     TextField("例句中文", text: $exampleChinese)
                 }
             }

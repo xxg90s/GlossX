@@ -34,10 +34,13 @@ final class ReviewQueueTests: XCTestCase {
         XCTAssertEqual(queue.dueCount, 20)
         XCTAssertEqual(queue.cards.count, 31)
         XCTAssertTrue(queue.cards.contains(where: { $0.id == "sentence-1" && $0.mode == .recall }))
-        XCTAssertEqual(Set(queue.cards.filter(\.isNew).map(\.id)).count, 10)
-        XCTAssertTrue(queue.cards.contains(where: { $0.id == "phrase-new" && $0.mode == .intro }))
+        XCTAssertEqual(Set(queue.cards.filter(\.isNew).map(\.id)).count, 9)
+        XCTAssertTrue(queue.cards.contains(where: { $0.id == "phrase-new" && $0.mode == .cloze }))
         XCTAssertTrue(queue.cards.contains(where: { $0.id == "phrase-due" && $0.mode == .cloze }))
+        XCTAssertEqual(queue.cards.first?.id, "phrase-due")
         XCTAssertEqual(queue.cards.first?.mode, .cloze)
+        XCTAssertTrue(queue.cards.contains(where: { $0.id == "due-24" && $0.mode == .spell }))
+        XCTAssertEqual(Set(queue.cards.filter { $0.mode == .intro }.map(\.id)).count, 9)
     }
 
     func testExcerptDoesNotEnterReview() {
@@ -74,7 +77,7 @@ final class ReviewQueueTests: XCTestCase {
 
         let cards = ReviewQueue.build(from: items, now: now).cards
         XCTAssertEqual(cards.first { $0.id == "fresh" }?.mode, .intro)
-        XCTAssertEqual(cards.first { $0.id == "repeat" }?.mode, .cloze)
+        XCTAssertEqual(cards.first { $0.id == "repeat" }?.mode, .spell)
     }
 
     func testSkipsFamiliarAndMasteredThatIsNotDue() {
@@ -93,7 +96,7 @@ final class ReviewQueueTests: XCTestCase {
         ]
         let queue = ReviewQueue.build(from: items, now: now)
         XCTAssertEqual(queue.cards.map(\.id), ["done"])
-        XCTAssertEqual(queue.cards.first?.mode, .cloze)
+        XCTAssertEqual(queue.cards.first?.mode, .spell)
         XCTAssertEqual(queue.dueCount, 1)
         XCTAssertEqual(ReviewQueue.reviewableCount(in: items, now: now), 1)
     }
@@ -113,7 +116,7 @@ final class ReviewQueueTests: XCTestCase {
 
         XCTAssertEqual(queue.cards.count, 14)
         XCTAssertEqual(Array(ids.suffix(3)), ["soon", "later", "new-10"])
-        XCTAssertEqual(queue.cards.first { $0.id == "soon" }?.mode, .cloze)
+        XCTAssertEqual(queue.cards.first { $0.id == "soon" }?.mode, .spell)
         XCTAssertEqual(queue.cards.first { $0.id == "new-10" }?.mode, .intro)
         XCTAssertEqual(queue.newCount, 11)
         XCTAssertEqual(queue.dueCount, 3)
@@ -134,6 +137,19 @@ final class ReviewQueueTests: XCTestCase {
             word(id: "due-\(index)", status: "learning", addedAt: now, nextReviewAt: now - Double(index + 1), repetitions: 1)
         }
         XCTAssertEqual(ReviewQueue.build(from: items, now: now, goal: 3).cards.count, 8)
+    }
+
+    func testIntroducedNewWordAndBareWord() {
+        var seen = word(id: "seen", status: "new", addedAt: now, nextReviewAt: now)
+        seen.introducedAt = now - 1000
+        var bare = word(id: "bare", status: "new", addedAt: now, nextReviewAt: now)
+        bare.definitions = []
+
+        let queue = ReviewQueue.build(from: [seen, bare], now: now)
+        XCTAssertEqual(queue.cards.map(\.id), ["seen"])
+        XCTAssertEqual(queue.cards.first?.mode, .spell)
+        XCTAssertFalse(ReviewQueue.isReviewable(bare, now: now))
+        XCTAssertEqual(ReviewQueue.reviewableCount(in: [seen, bare], now: now), 1)
     }
 
     func testReviewableCountExcludesBrowsingOnlyItemsButKeepsTodaysReviews() {

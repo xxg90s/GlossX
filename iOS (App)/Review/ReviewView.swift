@@ -4,6 +4,7 @@ import GlossXCore
 
 struct ReviewView: View {
     @EnvironmentObject private var store: LibraryStore
+    @State private var keyboardOverlap: CGFloat = 0
 
     var body: some View {
         ZStack {
@@ -33,7 +34,23 @@ struct ReviewView: View {
                 }
             }
         }
+        .padding(.bottom, keyboardOverlap)
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { notification in
+            keyboardOverlap = Self.keyboardOverlap(from: notification)
+        }
         .streakCelebration()
+    }
+
+    private static func keyboardOverlap(from notification: Notification) -> CGFloat {
+        guard
+            let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+            let window = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .flatMap(\.windows)
+                .first(where: \.isKeyWindow)
+        else { return 0 }
+        let covered = window.bounds.maxY - window.convert(frame, from: nil).minY
+        return max(0, covered - window.safeAreaInsets.bottom)
     }
 
     private func header(session: ReviewSession) -> some View {
@@ -70,10 +87,8 @@ private struct ReviewCardView: View {
     let card: ReviewCard
     let session: ReviewSession
 
-    @State private var selected: String?
     @State private var typed = ""
     @State private var result: ReviewGrade?
-    @FocusState private var spellFocused: Bool
     private let speaker = SpeechPlayer.shared
 
     private var answered: Bool { result != nil }
@@ -83,6 +98,35 @@ private struct ReviewCardView: View {
     }
 
     var body: some View {
+        Group {
+            if card.mode == .spell {
+                spellBody
+            } else {
+                browsingBody
+            }
+        }
+        .onAppear {
+            if card.mode == .intro {
+                speaker.speak(card.target)
+            }
+        }
+    }
+
+    /// The prompt stays on screen while the keyboard is up. It is not inside a scroll view that can shrink to nothing.
+    private var spellBody: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            tags
+            spellCue
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            spellDock
+            footer
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 8)
+        .padding(.bottom, 12)
+    }
+
+    private var browsingBody: some View {
         VStack(spacing: 0) {
             ScrollView {
                 content
@@ -96,17 +140,8 @@ private struct ReviewCardView: View {
             }
             footer
                 .padding(.horizontal, 16)
+                .padding(.top, 12)
                 .padding(.bottom, 20)
-        }
-        .onAppear {
-            switch card.mode {
-            case .intro, .listen:
-                speaker.speak(card.target)
-            case .spell:
-                spellFocused = true
-            default:
-                break
-            }
         }
     }
 
@@ -119,16 +154,10 @@ private struct ReviewCardView: View {
             switch card.mode {
             case .intro, .cloze:
                 selfGradedPrompt
-            case .choice:
-                wordHeadline
-                optionList
-            case .listen:
-                listenPrompt
-                optionList
-            case .spell:
-                spellPrompt
             case .recall:
                 recallPrompt
+            case .spell:
+                EmptyView()
             }
             if showsChinese && !prompt.chinese.isEmpty {
                 Text(prompt.chinese)
@@ -150,7 +179,7 @@ private struct ReviewCardView: View {
 
     private var showsChinese: Bool {
         switch card.mode {
-        case .choice, .listen: return answered
+        case .spell: return answered
         case .recall: return false
         default: return true
         }
@@ -189,8 +218,6 @@ private struct ReviewCardView: View {
 
     private var modeTitle: String? {
         switch card.mode {
-        case .choice: return "选出释义"
-        case .listen: return "听音选义"
         case .spell: return "拼写"
         case .intro: return "新词"
         case .recall: return "回想英文"
@@ -263,6 +290,7 @@ private struct ReviewCardView: View {
             Text([card.pos, card.definitionText].filter { !$0.isEmpty }.joined(separator: "  "))
                 .font(.title3)
                 .foregroundColor(GlossXPalette.ink)
+                .lineLimit(card.mode == .spell ? 4 : nil)
         }
     }
 
@@ -278,94 +306,50 @@ private struct ReviewCardView: View {
     }
 
     @ViewBuilder
-    private var listenPrompt: some View {
-        Button {
-            speaker.speak(card.target)
-        } label: {
-            Image(systemName: "speaker.wave.3.fill")
-                .font(.system(size: 44))
-                .foregroundColor(GlossXPalette.green)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 24)
-                .background(GlossXPalette.wash)
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+    private var spellCue: some View {
+        definitionLine
+        if !card.english.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            sentence(revealed: answered)
+                .lineLimit(3)
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel("再听一遍")
-        if answered {
-            wordHeadline
-        }
-    }
-
-    private var optionList: some View {
-        VStack(spacing: 10) {
-            ForEach(card.options, id: \.self) { option in
-                Button {
-                    choose(option)
-                } label: {
-                    Text(option)
-                        .font(.body.weight(.medium))
-                        .multilineTextAlignment(.leading)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .padding(16)
-                        .foregroundColor(optionForeground(option))
-                        .background(optionBackground(option))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                                .stroke(optionBorder(option), lineWidth: 1)
-                        )
-                        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-                }
-                .buttonStyle(.plain)
-                .disabled(answered)
-            }
-        }
-    }
-
-    private func optionForeground(_ option: String) -> Color {
-        answered && option == card.answer ? GlossXPalette.onAccent : GlossXPalette.ink
-    }
-
-    private func optionBackground(_ option: String) -> Color {
-        guard answered else { return GlossXPalette.card }
-        if option == card.answer { return GlossXPalette.green }
-        if option == selected { return GlossXPalette.danger.opacity(0.15) }
-        return GlossXPalette.card
-    }
-
-    private func optionBorder(_ option: String) -> Color {
-        answered && option == selected && option != card.answer ? GlossXPalette.danger : GlossXPalette.mint
     }
 
     @ViewBuilder
-    private var spellPrompt: some View {
-        definitionLine
-        sentence(revealed: answered)
-        Text(SpellCheck.hint(for: card.target))
-            .font(.title3.monospaced())
-            .foregroundColor(GlossXPalette.muted)
-        TextField("输入英文", text: $typed)
-            .font(.title3)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .focused($spellFocused)
-            .submitLabel(.done)
-            .onSubmit(submitSpelling)
-            .disabled(answered)
-            .padding(14)
-            .background(GlossXPalette.card)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        if let result {
-            HStack(alignment: .firstTextBaseline, spacing: 12) {
-                Text(result == .remembered ? "正确" : (result == .fuzzy ? "差一点" : "正确答案"))
-                    .font(.headline)
-                    .foregroundColor(result == .forgot ? GlossXPalette.danger : GlossXPalette.green)
-                Text(card.target)
-                    .font(.title2.weight(.bold))
-                    .foregroundColor(GlossXPalette.ink)
-                speakButton
+    private var spellDock: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if !answered {
+                Text("凭释义拼出英文，大小写不计。")
+                    .font(.subheadline)
+                    .foregroundColor(GlossXPalette.muted)
+                LatinTextField(
+                    placeholder: "输入英文",
+                    text: $typed,
+                    isEnabled: true,
+                    focusOnAppear: true,
+                    onSubmit: submitSpelling
+                )
+                .padding(14)
+                .background(GlossXPalette.card)
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            } else if let result {
+                if result != .remembered && !typed.trimmingCharacters(in: .whitespaces).isEmpty {
+                    Text(typed)
+                        .font(.title3)
+                        .strikethrough()
+                        .foregroundColor(GlossXPalette.danger)
+                }
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    Text(result == .remembered ? "正确" : (result == .fuzzy ? "差一点" : "正确答案"))
+                        .font(.headline)
+                        .foregroundColor(result == .forgot ? GlossXPalette.danger : GlossXPalette.green)
+                    Text(card.target)
+                        .font(.title2.weight(.bold))
+                        .foregroundColor(GlossXPalette.ink)
+                    speakButton
+                }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 
     private func sentence(revealed: Bool) -> some View {
@@ -402,14 +386,29 @@ private struct ReviewCardView: View {
             }
             .buttonStyle(PrimaryReviewButtonStyle())
         } else if card.mode == .spell {
-            HStack(spacing: 10) {
+            VStack(spacing: 8) {
+                Button("提交", action: submitSpelling)
+                    .buttonStyle(PrimaryReviewButtonStyle())
+                    .opacity(canSubmit ? 1 : 0.4)
+                    .disabled(!canSubmit)
                 Button("不会") {
                     finish(.forgot)
                 }
-                .buttonStyle(SecondaryReviewButtonStyle())
-                Button("提交", action: submitSpelling)
-                    .buttonStyle(PrimaryReviewButtonStyle())
-                    .disabled(typed.trimmingCharacters(in: .whitespaces).isEmpty)
+                .font(.subheadline)
+                .foregroundColor(GlossXPalette.muted)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+            }
+        } else if card.mode == .intro {
+            VStack(spacing: 8) {
+                Text("先看清这个词。稍后要凭释义拼出来，这一下不算记住。")
+                    .font(.footnote)
+                    .foregroundColor(GlossXPalette.muted)
+                    .multilineTextAlignment(.center)
+                Button("看过了") {
+                    store.acknowledgeIntro()
+                }
+                .buttonStyle(PrimaryReviewButtonStyle())
             }
         } else if session.showsGradeButtons {
             HStack(spacing: 10) {
@@ -441,13 +440,8 @@ private struct ReviewCardView: View {
 
     // MARK: Answering
 
-    private func choose(_ option: String) {
-        guard !answered else { return }
-        selected = option
-        finish(option == card.answer ? .remembered : .forgot)
-        if card.mode == .choice {
-            speaker.speak(card.target)
-        }
+    private var canSubmit: Bool {
+        !typed.trimmingCharacters(in: .whitespaces).isEmpty
     }
 
     private func submitSpelling() {
@@ -458,7 +452,6 @@ private struct ReviewCardView: View {
 
     private func finish(_ grade: ReviewGrade) {
         result = grade
-        spellFocused = false
         UINotificationFeedbackGenerator().notificationOccurred(grade == .remembered ? .success : .error)
     }
 }

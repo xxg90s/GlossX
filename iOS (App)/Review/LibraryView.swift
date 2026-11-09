@@ -138,11 +138,13 @@ private struct LibraryRow: View {
                     .font(.headline)
                     .foregroundColor(GlossXPalette.ink)
                 Spacer()
-                Text(item.statusTitle)
+                Text(item.kind == .word && item.definitionText.isEmpty ? "待出题" : item.statusTitle)
                     .font(.caption)
                     .foregroundColor(GlossXPalette.muted)
             }
-            Text(item.definitionText.isEmpty ? item.chinese : item.definitionText)
+            Text(item.kind == .word && item.definitionText.isEmpty
+                 ? "还没有释义，打开后可以填写"
+                 : (item.definitionText.isEmpty ? item.chinese : item.definitionText))
                 .font(.subheadline)
                 .foregroundColor(GlossXPalette.muted)
                 .lineLimit(2)

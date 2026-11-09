@@ -11,7 +11,7 @@ final class ReviewSessionTests: XCTestCase {
         XCTAssertEqual(session.remaining, 2)
         XCTAssertFalse(session.showsAnswer)
         XCTAssertFalse(session.showsGradeButtons)
-        XCTAssertEqual(session.progressText, "1 / 2")
+        XCTAssertEqual(session.progressText, "还剩 2")
     }
 
     func testTapRevealsClozeThenGradeAdvances() {
@@ -28,9 +28,9 @@ final class ReviewSessionTests: XCTestCase {
         session.advanceAfterGrade()
         XCTAssertEqual(session.current?.id, "fresh")
         XCTAssertTrue(session.showsAnswer)
-        XCTAssertTrue(session.showsGradeButtons)
+        XCTAssertFalse(session.showsGradeButtons)
         XCTAssertEqual(session.remaining, 1)
-        XCTAssertEqual(session.progressText, "2 / 2")
+        XCTAssertEqual(session.progressText, "还剩 1")
 
         session.advanceAfterGrade()
         XCTAssertTrue(session.isFinished)
@@ -57,12 +57,34 @@ final class ReviewSessionTests: XCTestCase {
         XCTAssertTrue(session.isFinished)
     }
 
-    func testAutoGradedModesHideSelfGradeButtons() {
-        var choice = ReviewCard.stub(id: "c", isNew: false)
-        choice.mode = .choice
-        var session = ReviewSession(cards: [choice])
-        session.handleTap()
+    func testSpellingHidesSelfGradeButtons() {
+        var spell = ReviewCard.stub(id: "c", isNew: false)
+        spell.mode = .spell
+        let session = ReviewSession(cards: [spell])
         XCTAssertFalse(session.showsAnswer)
+        XCTAssertFalse(session.showsGradeButtons)
+    }
+
+    func testAcknowledgingIntroSchedulesSpellingWithoutGrading() {
+        var session = ReviewSession(cards: [
+            ReviewCard.stub(id: "fresh", isNew: true),
+            ReviewCard.stub(id: "a", isNew: false),
+            ReviewCard.stub(id: "b", isNew: false),
+            ReviewCard.stub(id: "c", isNew: false)
+        ])
+
+        session.acknowledgeIntro()
+        XCTAssertEqual(session.current?.id, "a")
+        XCTAssertEqual(session.cards.map(\.id), ["fresh", "a", "b", "c", "fresh"])
+        XCTAssertEqual(session.cards.last?.mode, .spell)
+        XCTAssertTrue(session.isFirstAttempt)
+
+        session.advanceAfterGrade(.remembered)
+        session.advanceAfterGrade(.remembered)
+        session.advanceAfterGrade(.remembered)
+        XCTAssertEqual(session.current?.id, "fresh")
+        XCTAssertEqual(session.current?.mode, .spell)
+        XCTAssertTrue(session.isFirstAttempt)
         XCTAssertFalse(session.showsGradeButtons)
     }
 
@@ -75,11 +97,11 @@ final class ReviewSessionTests: XCTestCase {
         XCTAssertTrue(session.showsGradeButtons)
     }
 
-    func testForgottenIntroCardReturnsAsRecallCard() {
+    func testForgottenIntroCardReturnsAsSpelling() {
         var session = ReviewSession(cards: [ReviewCard.stub(id: "fresh", isNew: true)])
         session.advanceAfterGrade(.forgot)
         XCTAssertEqual(session.current?.id, "fresh")
-        XCTAssertEqual(session.current?.mode, .cloze)
+        XCTAssertEqual(session.current?.mode, .spell)
         XCTAssertFalse(session.showsAnswer)
     }
 }

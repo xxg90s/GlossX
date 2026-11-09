@@ -8,14 +8,10 @@ public enum ItemKind: String, Equatable {
 }
 
 public enum CardMode: String, Equatable {
-    /// New card: everything shown, self-graded.
+    /// First sight of a new word: show it once. Does not grade.
     case intro
-    /// Fill the blank in the source sentence, self-graded.
+    /// Phrase: fill the blank, then self-grade.
     case cloze
-    /// Pick the Chinese definition for the English word; auto-graded.
-    case choice
-    /// Pick the Chinese definition after hearing the word; auto-graded.
-    case listen
     /// Type the word from its definition and sentence; auto-graded.
     case spell
     /// Whole sentence: recall the English from its Chinese, self-graded.
@@ -28,7 +24,7 @@ public enum CardMode: String, Equatable {
 
     /// Objective modes grade themselves from the user's answer.
     public var isAutoGraded: Bool {
-        self == .choice || self == .listen || self == .spell
+        self == .spell
     }
 }
 
@@ -111,6 +107,8 @@ public struct ReviewSourceItem: Equatable, Identifiable {
     public var addedAt: Double
     public var repetitions: Int
     public var nextReviewAt: Double
+    /// When the learner first saw this word. `0` means the intro card is still due.
+    public var introducedAt: Double
     /// Page the item was collected from, when the extension recorded it.
     public var sourceURL: String
     /// User-chosen AI example; when set it becomes the review sentence.
@@ -134,6 +132,7 @@ public struct ReviewSourceItem: Equatable, Identifiable {
         addedAt: Double,
         repetitions: Int,
         nextReviewAt: Double,
+        introducedAt: Double = 0,
         sourceURL: String = "",
         extraEnglish: String = "",
         extraChinese: String = "",
@@ -159,6 +158,7 @@ public struct ReviewSourceItem: Equatable, Identifiable {
         self.addedAt = addedAt
         self.repetitions = repetitions
         self.nextReviewAt = nextReviewAt
+        self.introducedAt = introducedAt
     }
 
     public var definitionText: String {
@@ -189,9 +189,7 @@ public struct ReviewCard: Equatable, Identifiable {
     public var chinese: String
     public var hostname: String
     public var repetitions: Int
-    /// Choice/listen options; empty for other modes.
     public var options: [String]
-    /// The correct option for choice/listen.
     public var answer: String
 
     public init(

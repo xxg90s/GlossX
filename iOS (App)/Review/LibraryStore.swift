@@ -125,16 +125,18 @@ final class LibraryStore: ObservableObject {
         applyRead(result)
         streakStore.refreshReviewableCount(reviewableCount)
         rescheduleReminder()
+        let unresolved = await backfillLexiconDefinitions()
         if pendingReviewLaunch {
             pendingReviewLaunch = false
             startReview()
         }
+        await backfillAIDefinitions(unresolved)
     }
 
     func startReview() {
         let summary = queue
         guard !summary.cards.isEmpty else { return }
-        session = ReviewSession(cards: QuizBuilder.prepare(summary.cards, pool: items))
+        session = ReviewSession(cards: summary.cards)
         undoStep = nil
         isReviewing = true
     }
@@ -176,6 +178,48 @@ final class LibraryStore: ObservableObject {
     func handleCardTap() {
         session?.handleTap()
         objectWillChange.send()
+    }
+
+    /// Seen the new word. The spelling card later in this session is the first real grade.
+    func acknowledgeIntro() {
+        guard let current = session, let card = current.current, card.mode == .intro else { return }
+        undoStep = UndoStep(
+            session: current,
+            itemId: card.id,
+            vocabItem: snapshot.payload.vocabItems[card.id],
+            snippetItem: snapshot.payload.snippetItems[card.id],
+            stats: snapshot.payload.stats,
+            streak: streakStore.record,
+            celebration: celebrationStreak
+        )
+        snapshot = LibraryMutator.markIntroduced(in: snapshot, id: card.id, now: Self.now)
+        session?.acknowledgeIntro()
+        persistLocal()
+        schedulePush()
+        objectWillChange.send()
+    }
+
+    @discardableResult
+    func saveDefinition(id: String, definition: String) -> Bool {
+        guard let next = LibraryMutator.fillDefinition(
+            in: snapshot,
+            id: id,
+            definition: definition,
+            now: Self.now
+        ) else { return false }
+        snapshot = next
+        libraryDidChange()
+        return true
+    }
+
+    var wordsAwaitingDefinition: Int {
+        items.filter {
+            $0.kind == .word && $0.definitionText.isEmpty && $0.status != "familiar" && $0.status != "skipped"
+        }.count
+    }
+
+    var hasAnythingToReview: Bool {
+        reviewableCount > 0
     }
 
     func grade(_ grade: ReviewGrade) {
@@ -416,6 +460,82 @@ final class LibraryStore: ObservableObject {
 
     private var snapshotHasItems: Bool {
         !snapshot.payload.vocabItems.isEmpty || !snapshot.payload.snippetItems.isEmpty
+    }
+
+    private static var lexiconCatalogs: [[StarterPack.Entry]]?
+
+    private static func loadLexiconCatalogs() -> [[StarterPack.Entry]] {
+        if let lexiconCatalogs { return lexiconCatalogs }
+        guard let plugins = Bundle.main.builtInPlugInsURL else {
+            lexiconCatalogs = []
+            return []
+        }
+        let loaded = StarterPack.lexicons.compactMap { lexicon -> [StarterPack.Entry]? in
+            let url = plugins
+                .appendingPathComponent("GlossX Extension.appex")
+                .appendingPathComponent(StarterPack.fileName(for: lexicon.id))
+            guard let data = try? Data(contentsOf: url) else { return nil }
+            let entries = StarterPack.parse(data)
+            return entries.isEmpty ? nil : entries
+        }
+        lexiconCatalogs = loaded
+        return loaded
+    }
+
+    /// Fills empty definitions from the bundled word lists. Returns words the lists do not contain.
+    private func backfillLexiconDefinitions() async -> [(id: String, word: String)] {
+        guard !isReviewing else { return [] }
+        let catalogs = Self.loadLexiconCatalogs()
+        var next = snapshot
+        var changed = false
+        var unresolved: [(id: String, word: String)] = []
+        for (id, raw) in snapshot.payload.vocabItems where JSONValue.stringArray(raw["definitions"]).isEmpty {
+            let stored = JSONValue.string(raw["word"]).trimmingCharacters(in: .whitespacesAndNewlines)
+            let word = stored.isEmpty ? id : stored
+            if let entry = LexiconLookup.find(word: word, in: catalogs),
+               let updated = LibraryMutator.fillDefinition(
+                in: next,
+                id: id,
+                definition: entry.zh,
+                phonetic: entry.phonetic,
+                pos: entry.pos,
+                now: Self.now
+               ) {
+                next = updated
+                changed = true
+            } else {
+                unresolved.append((id, word))
+            }
+        }
+        if changed {
+            snapshot = next
+            libraryDidChange()
+        }
+        return unresolved
+    }
+
+    /// One model request per word the lexicon missed. Stops if a review starts.
+    private func backfillAIDefinitions(_ unresolved: [(id: String, word: String)]) async {
+        guard !isReviewing else { return }
+        guard !unresolved.isEmpty,
+              case .success = AIConfig.resolve(settings: snapshot.payload.settings, aiKeys: snapshot.payload.aiKeys)
+        else { return }
+        for item in unresolved {
+            if Task.isCancelled || isReviewing { return }
+            guard JSONValue.stringArray(snapshot.payload.vocabItems[item.id]?["definitions"]).isEmpty else { continue }
+            guard let parsed = try? await AIDefinitionClient.lookup(word: item.word, snapshot: snapshot),
+                  let updated = LibraryMutator.fillDefinition(
+                    in: snapshot,
+                    id: item.id,
+                    definition: parsed.definition,
+                    phonetic: parsed.phonetic,
+                    pos: parsed.pos,
+                    now: Self.now
+                  )
+            else { continue }
+            snapshot = updated
+            libraryDidChange()
+        }
     }
 
     private func persistLocal() {

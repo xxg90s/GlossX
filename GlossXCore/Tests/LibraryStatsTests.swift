@@ -69,7 +69,7 @@ final class LibraryStatsTests: XCTestCase {
     private func item(_ id: String, status: String, nextReviewAt: Double = 0) -> ReviewSourceItem {
         ReviewSourceItem(
             id: id, kind: .word, target: id, lemma: "", phonetic: "", pos: "",
-            definitions: [], english: "", chinese: "", hostname: "",
+            definitions: ["释义"], english: "", chinese: "", hostname: "",
             status: status, addedAt: 0, repetitions: status == "new" ? 0 : 1, nextReviewAt: nextReviewAt
         )
     }

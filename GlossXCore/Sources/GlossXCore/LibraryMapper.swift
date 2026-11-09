@@ -42,6 +42,7 @@ public enum LibraryMapper {
             addedAt: JSONValue.double(json["addedAt"]),
             repetitions: JSONValue.int(json["repetitions"]),
             nextReviewAt: JSONValue.double(json["nextReviewAt"]),
+            introducedAt: JSONValue.double(json["introducedAt"]),
             sourceURL: JSONValue.string(context["pageUrl"]),
             extraEnglish: extraEnglish,
             extraChinese: extraChinese,

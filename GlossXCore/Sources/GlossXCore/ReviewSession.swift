@@ -40,21 +40,32 @@ public struct ReviewSession: Equatable {
         return current.mode == .intro || revealed
     }
 
-    /// Self-grade buttons; auto-graded modes grade from the answer instead.
+    /// Self-grade buttons. Intro only acknowledges; spelling grades itself.
     public var showsGradeButtons: Bool {
         guard let current else { return false }
-        return showsAnswer && !current.mode.isAutoGraded
+        if current.mode == .intro || current.mode.isAutoGraded { return false }
+        return showsAnswer
     }
 
     public var progressText: String {
-        guard !cards.isEmpty else { return "0 / 0" }
-        if isFinished { return "\(cards.count) / \(cards.count)" }
-        return "\(index + 1) / \(cards.count)"
+        guard !cards.isEmpty else { return "还剩 0" }
+        if isFinished { return "还剩 0" }
+        return "还剩 \(remaining)"
     }
 
     public mutating func handleTap() {
         guard current?.mode.revealsOnTap == true, !revealed else { return }
         revealed = true
+    }
+
+    /// Marks a new word as seen and queues a spelling card. Does not count as a grade.
+    public mutating func acknowledgeIntro() {
+        guard var card = current, card.mode == .intro else { return }
+        card.mode = .spell
+        let position = min(index + 1 + Self.relearnGap, cards.count)
+        cards.insert(card, at: position)
+        index += 1
+        revealed = false
     }
 
     public mutating func advanceAfterGrade(_ grade: ReviewGrade = .remembered) {
@@ -63,7 +74,7 @@ public struct ReviewSession: Equatable {
             if grade != .remembered {
                 var again = card
                 if again.mode == .intro {
-                    again.mode = .cloze
+                    again.mode = .spell
                 }
                 let position = min(index + 1 + Self.relearnGap, cards.count)
                 cards.insert(again, at: position)

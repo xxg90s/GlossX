@@ -42,8 +42,8 @@ public enum ReviewQueue {
             .sorted { $0.nextReviewAt < $1.nextReviewAt }
             .prefix(maxDue)
 
-        let newCards = newItems.map { card(from: $0, mode: .intro) }
-        let dueCards = dueItems.map { card(from: $0, mode: .cloze) }
+        let newCards = newItems.map { card(from: $0) }
+        let dueCards = dueItems.map { card(from: $0) }
         var cards = interleave(due: Array(dueCards), new: Array(newCards))
         var newCount = newCards.count
         var dueCount = dueCards.count
@@ -55,11 +55,11 @@ public enum ReviewQueue {
             let ahead = pool
                 .filter { !isNew($0) }
                 .sorted { $0.nextReviewAt < $1.nextReviewAt }
-                .map { card(from: $0, mode: .cloze) }
+                .map { card(from: $0) }
             let extraNew = pool
                 .filter { isNew($0) }
                 .sorted { $0.addedAt > $1.addedAt }
-                .map { card(from: $0, mode: .intro) }
+                .map { card(from: $0) }
             let padding = (ahead + extraNew).prefix(shortfall)
             cards.append(contentsOf: padding)
             newCount += padding.filter(\.isNew).count
@@ -84,6 +84,7 @@ public enum ReviewQueue {
     public static func isReviewable(_ item: ReviewSourceItem, now: Double) -> Bool {
         guard item.status != "familiar", item.status != "skipped" else { return false }
         if item.kind == .excerpt { return false }
+        if item.kind == .word && item.definitionText.isEmpty { return false }
         if item.kind == .sentence && item.definitions.isEmpty && item.chinese.isEmpty { return false }
         return item.status != "mastered" || item.nextReviewAt <= now
     }
@@ -92,11 +93,11 @@ public enum ReviewQueue {
         item.status == "new" && item.repetitions == 0
     }
 
-    private static func card(from item: ReviewSourceItem, mode: CardMode) -> ReviewCard {
+    private static func card(from item: ReviewSourceItem) -> ReviewCard {
         ReviewCard(
             id: item.id,
             kind: item.kind,
-            mode: item.kind == .sentence ? .recall : mode,
+            mode: mode(for: item),
             target: item.target,
             lemma: item.lemma,
             phonetic: item.phonetic,
@@ -107,6 +108,21 @@ public enum ReviewQueue {
             hostname: item.hostname,
             repetitions: item.repetitions
         )
+    }
+
+    /// Words pass by spelling. A brand-new word is shown once first.
+    private static func mode(for item: ReviewSourceItem) -> CardMode {
+        switch item.kind {
+        case .sentence:
+            return .recall
+        case .phrase, .excerpt:
+            return .cloze
+        case .word:
+            if item.status == "new" && item.repetitions == 0 && item.introducedAt == 0 {
+                return .intro
+            }
+            return .spell
+        }
     }
 
     private static func interleave(due: [ReviewCard], new: [ReviewCard]) -> [ReviewCard] {

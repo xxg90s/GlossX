@@ -34,7 +34,7 @@ enum AIExampleClient {
         return examples
     }
 
-    private static func request(endpoint: AIEndpoint, prompt: String) async throws -> String {
+    static func request(endpoint: AIEndpoint, prompt: String) async throws -> String {
         var request = URLRequest(url: endpoint.url)
         request.httpMethod = "POST"
         request.timeoutInterval = 20
@@ -91,5 +91,22 @@ enum AIExampleClient {
         let choices = object?["choices"] as? [[String: Any]] ?? []
         let message = JSONValue.dictionary(choices.first?["message"])
         return JSONValue.string(message["content"])
+    }
+}
+
+enum AIDefinitionClient {
+    static func lookup(word: String, snapshot: LibrarySnapshot) async throws -> AIDefinition {
+        let endpoint: AIEndpoint
+        switch AIConfig.resolve(settings: snapshot.payload.settings, aiKeys: snapshot.payload.aiKeys) {
+        case .success(let value):
+            endpoint = value
+        case .failure(let error):
+            throw AIExampleClient.Failure.config(error)
+        }
+        let content = try await AIExampleClient.request(endpoint: endpoint, prompt: AIDefinitionParser.prompt(word: word))
+        guard let parsed = AIDefinitionParser.parse(content, word: word) else {
+            throw AIExampleClient.Failure.empty
+        }
+        return parsed
     }
 }

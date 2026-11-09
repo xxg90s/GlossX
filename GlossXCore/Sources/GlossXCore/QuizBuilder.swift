@@ -1,62 +1,29 @@
 import Foundation
 
-/// Picks a question type per card by familiarity: recognise first, then hear, then produce.
-public enum QuizBuilder {
-    public static let optionCount = 4
-
-    public static func prepare(_ cards: [ReviewCard], pool: [ReviewSourceItem]) -> [ReviewCard] {
-        let definitions = pool
-            .filter { $0.kind != .sentence && $0.kind != .excerpt && !$0.definitionText.isEmpty }
-            .map { (id: $0.id, text: $0.definitionText) }
-        return cards.map { prepare($0, definitions: definitions) }
+public enum SpellInput {
+    /// Curly quotes from some keyboards become the apostrophe used in words like "don't".
+    public static func normalize(_ raw: String) -> String {
+        raw
+            .replacingOccurrences(of: "’", with: "'")
+            .replacingOccurrences(of: "‘", with: "'")
+            .replacingOccurrences(of: "＇", with: "'")
     }
 
-    private static func prepare(_ card: ReviewCard, definitions: [(id: String, text: String)]) -> ReviewCard {
-        guard card.mode == .cloze else { return card }
-        var next = card
-        switch preferredMode(for: card) {
-        case .choice, .listen:
-            guard let options = options(for: card, definitions: definitions) else { return card }
-            next.mode = preferredMode(for: card)
-            next.options = options
-            next.answer = card.definitionText
-        case .spell:
-            next.mode = .spell
-        default:
-            break
-        }
-        return next
-    }
-
-    private static func preferredMode(for card: ReviewCard) -> CardMode {
-        let isWord = card.kind == .word
-        switch card.repetitions {
-        case ..<2:
-            return .choice
-        case 2:
-            return isWord ? .listen : .choice
-        default:
-            return isWord && StableHash.value(card.id) % 2 == 0 ? .spell : .cloze
+    /// Latin letters, spaces, hyphens and apostrophes. Empty is allowed so deletion still works.
+    /// Accented letters such as é stay; Han, kana and hangul do not.
+    public static func accepts(_ text: String) -> Bool {
+        normalize(text).allSatisfy { character in
+            if character == " " || character == "'" || character == "-" { return true }
+            guard character.isLetter else { return false }
+            return character.unicodeScalars.allSatisfy { !isCJK($0.value) }
         }
     }
 
-    private static func options(for card: ReviewCard, definitions: [(id: String, text: String)]) -> [String]? {
-        let correct = card.definitionText
-        guard !correct.isEmpty else { return nil }
-        var seen: Set<String> = [correct]
-        let distractors = definitions
-            .filter { $0.id != card.id }
-            .sorted { StableHash.value(card.id + $0.id) < StableHash.value(card.id + $1.id) }
-            .compactMap { candidate -> String? in
-                guard !seen.contains(candidate.text) else { return nil }
-                seen.insert(candidate.text)
-                return candidate.text
-            }
-            .prefix(optionCount - 1)
-        guard distractors.count == optionCount - 1 else { return nil }
-        var options = Array(distractors)
-        options.insert(correct, at: Int(StableHash.value(card.id) % UInt64(optionCount)))
-        return options
+    private static func isCJK(_ value: UInt32) -> Bool {
+        (0x3400...0x9FFF).contains(value)
+            || (0xF900...0xFAFF).contains(value)
+            || (0x3040...0x30FF).contains(value)
+            || (0xAC00...0xD7AF).contains(value)
     }
 }
 
@@ -99,14 +66,3 @@ public enum SpellCheck {
     }
 }
 
-/// FNV-1a; stable across launches, unlike `Hasher`.
-enum StableHash {
-    static func value(_ text: String) -> UInt64 {
-        var hash: UInt64 = 0xcbf29ce484222325
-        for byte in text.utf8 {
-            hash ^= UInt64(byte)
-            hash = hash &* 0x100000001b3
-        }
-        return hash
-    }
-}

@@ -37,6 +37,15 @@ final class LibraryMapperTests: XCTestCase {
         XCTAssertEqual(item.definitions, [paragraphChinese])
     }
 
+    func testVocabIntroducedAtRoundTrips() {
+        let item = LibraryMapper.vocabItem(id: "apple", json: [
+            "word": "apple",
+            "definitions": ["苹果"],
+            "introducedAt": 42
+        ])
+        XCTAssertEqual(item.introducedAt, 42)
+    }
+
     func testExcerptStaysOutOfPhraseAndSentenceKinds() {
         let item = LibraryMapper.snippetItem(id: "s1", json: [
             "type": "excerpt",
@@ -45,6 +54,7 @@ final class LibraryMapperTests: XCTestCase {
             "context": ["fullEnglish": paragraphEnglish, "fullChinese": paragraphChinese]
         ])
 
+        XCTAssertEqual(item.introducedAt, 0)
         XCTAssertEqual(item.kind, .excerpt)
         XCTAssertEqual(item.definitions, ["审议了每项提案"])
     }

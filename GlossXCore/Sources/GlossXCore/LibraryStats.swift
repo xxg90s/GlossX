@@ -83,7 +83,8 @@ public enum LibraryStats {
 
     private static func forecast(items: [ReviewSourceItem], today: String, now: Double, timeZone: TimeZone) -> [ForecastDay] {
         var counts: [String: Int] = [:]
-        for item in items where item.kind != .sentence || !item.chinese.isEmpty || !item.definitions.isEmpty {
+        for item in items where item.kind != .word || !item.definitionText.isEmpty {
+            guard item.kind != .sentence || !item.chinese.isEmpty || !item.definitions.isEmpty else { continue }
             guard item.status != "new", item.status != "familiar", item.status != "skipped", !item.status.isEmpty else { continue }
             let day = item.nextReviewAt <= now ? today : DayStamp.string(fromMilliseconds: item.nextReviewAt, timeZone: timeZone)
             counts[day, default: 0] += 1

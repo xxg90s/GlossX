@@ -172,6 +172,41 @@ public enum LibraryMutator {
         return next
     }
 
+    /// Records that the learner has seen the word. Does not touch the review schedule.
+    public static func markIntroduced(in snapshot: LibrarySnapshot, id: String, now: Double) -> LibrarySnapshot {
+        var next = snapshot
+        guard var item = next.payload.vocabItems[id] else { return snapshot }
+        item["introducedAt"] = now
+        item["updatedAt"] = now
+        next.payload.vocabItems[id] = item
+        next.updatedAt = now
+        return next
+    }
+
+    /// Fills an empty definition. Nil when the word is missing, the text is blank, or a definition already exists.
+    public static func fillDefinition(
+        in snapshot: LibrarySnapshot,
+        id: String,
+        definition rawDefinition: String,
+        phonetic: String = "",
+        pos: String = "",
+        now: Double
+    ) -> LibrarySnapshot? {
+        let definition = rawDefinition.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !definition.isEmpty, var item = snapshot.payload.vocabItems[id] else { return nil }
+        guard JSONValue.stringArray(item["definitions"]).isEmpty else { return nil }
+        item["definitions"] = [definition]
+        let phoneticText = phonetic.trimmingCharacters(in: .whitespacesAndNewlines)
+        let posText = pos.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !phoneticText.isEmpty { item["phonetic"] = phoneticText }
+        if !posText.isEmpty { item["pos"] = posText }
+        item["updatedAt"] = now
+        var next = snapshot
+        next.payload.vocabItems[id] = item
+        next.updatedAt = now
+        return next
+    }
+
     /// Sets the review example for a word. Nil when the id is not a vocab item or the English is blank.
     public static func setExtraExample(
         in snapshot: LibrarySnapshot,
