@@ -40,11 +40,13 @@
             if (SKIP_TAGS.has(parent.tagName)) return true;
             if (parent.isContentEditable) return true;
             if (parent.classList?.contains("glossx-word")) return true;
-            if (parent.classList?.contains("glossx-sentence")) return true;
+            if (isSentenceChrome(parent)) return true;
             if (parent.hasAttribute?.(SENTENCE_ATTR)) return true;
             if (parent.hasAttribute?.(PENDING_ATTR)) return true;
+            if (parent.hasAttribute?.(ORIGINAL_ATTR)) return true;
             if (parent.closest?.(
-                ".glossx-sentence, .glossx-word, .glossx-floating-control, "
+                ".glossx-sentence, .glossx-sentence-block, .glossx-sentence-en, .glossx-sentence-cn, "
+                + ".glossx-word, .glossx-floating-control, "
                 + ".glossx-decode-panel, .glossx-word-save-panel, .glossx-snippet-save-panel, "
                 + ".glossx-hint-banner"
             )) {
@@ -188,9 +190,78 @@
             .replace(/"/g, "&quot;");
     }
 
+    function classTokens(element) {
+        if (!element) return [];
+        if (typeof element.className === "string") {
+            return element.className.split(/\s+/).filter(Boolean);
+        }
+        if (element.classList && typeof element.classList.length === "number") {
+            return Array.from(element.classList);
+        }
+        return [];
+    }
+
+    function isSentenceChrome(element) {
+        return classTokens(element).some((token) => (
+            token === "glossx-sentence" || token.startsWith("glossx-sentence-")
+        ));
+    }
+
+    function normalizeEnglish(text) {
+        return String(text || "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    }
+
+    function isSameEnglish(leftText, rightText) {
+        const left = normalizeEnglish(leftText);
+        const right = normalizeEnglish(rightText);
+        if (!left || !right || left.length < 8 || right.length < 8) return false;
+        if (left === right) return true;
+        const shorter = left.length < right.length ? left : right;
+        const longer = left.length < right.length ? right : left;
+        return longer.includes(shorter) && shorter.length / longer.length >= 0.82;
+    }
+
+    function removeOnceIgnoreCase(text, piece) {
+        const source = String(text || "");
+        const needle = String(piece || "");
+        if (!needle) return source;
+        const index = source.toLowerCase().indexOf(needle.toLowerCase());
+        if (index === -1) return source;
+        return `${source.slice(0, index)} ${source.slice(index + needle.length)}`;
+    }
+
+    function originalForDisplay(originalText, english) {
+        let text = String(originalText || "").replace(/\s+/g, " ").trim();
+        if (!text || !/[\u4e00-\u9fff]/.test(text)) return text;
+
+        const translated = String(english || "").replace(/\s+/g, " ").trim();
+        if (translated && !/[\u4e00-\u9fff]/.test(translated)) {
+            text = removeOnceIgnoreCase(text, translated).replace(/\s+/g, " ").trim();
+        }
+
+        let first = -1;
+        let last = -1;
+        for (let i = 0; i < text.length; i += 1) {
+            const code = text.charCodeAt(i);
+            if (code >= 0x4e00 && code <= 0x9fff) {
+                if (first === -1) first = i;
+                last = i;
+            }
+        }
+        if (first === -1) return text;
+
+        const edge = /[\s\u3000，。！？；、：：“”‘’（）「」《》…—·]/;
+        let start = first;
+        let end = last + 1;
+        while (start > 0 && edge.test(text.charAt(start - 1))) start -= 1;
+        while (end < text.length && edge.test(text.charAt(end))) end += 1;
+        return text.slice(start, end).trim();
+    }
+
     function buildSentenceMarkup(originalText, english, displayMode) {
-        const safeOriginal = escapeHtml(originalText);
-        const safeEnglish = escapeHtml(english || originalText);
+        const visibleOriginal = originalForDisplay(originalText, english);
+        const safeOriginal = escapeHtml(visibleOriginal);
+        const safeEnglish = escapeHtml(english || visibleOriginal);
 
         switch (displayMode) {
             case "cn_then_en":
@@ -221,8 +292,36 @@
         }
         span.setAttribute(PENDING_ATTR, "1");
         span.setAttribute(ORIGINAL_ATTR, originalText);
-        span.innerHTML = `<span class="glossx-sentence-cn">${escapeHtml(originalText)}</span>`;
+        span.innerHTML = `<span class="glossx-sentence-cn">${escapeHtml(originalForDisplay(originalText, ""))}</span>`;
         return span;
+    }
+
+    function absorbAdjacentDuplicate(span, english) {
+        if (!span || !english) return;
+        [span.previousSibling, span.nextSibling].forEach((sibling) => {
+            if (!sibling || sibling.nodeType !== 3) return;
+            const raw = sibling.nodeValue || "";
+            if (/[\u4e00-\u9fff]/.test(raw) || !isSameEnglish(raw, english)) return;
+            const original = span.getAttribute(ORIGINAL_ATTR) || "";
+            const merged = sibling === span.previousSibling ? `${raw}${original}` : `${original}${raw}`;
+            span.setAttribute(ORIGINAL_ATTR, merged);
+            if (sibling.parentNode) sibling.parentNode.removeChild(sibling);
+        });
+    }
+
+    function unwrapNestedSentences(root) {
+        if (!root?.querySelectorAll) return;
+        const nested = [...root.querySelectorAll(
+            ".glossx-sentence .glossx-sentence, .glossx-sentence-block .glossx-sentence-block"
+        )].reverse();
+        nested.forEach((inner) => {
+            if (!inner.parentNode) return;
+            const original = inner.getAttribute(ORIGINAL_ATTR)
+                || inner.querySelector(".glossx-sentence-cn")?.textContent
+                || "";
+            const text = document.createTextNode(originalForDisplay(original, "") || "");
+            inner.parentNode.replaceChild(text, inner);
+        });
     }
 
     function applySentenceTranslation(span, originalText, english, source, displayMode) {
@@ -233,6 +332,8 @@
         span.classList.add("glossx-sentence");
         span.classList.toggle("glossx-sentence-block", usesBlockLayout(displayMode));
         span.innerHTML = buildSentenceMarkup(originalText, english, displayMode);
+        absorbAdjacentDuplicate(span, english);
+        unwrapNestedSentences(span.parentNode || span);
     }
 
     function markSentenceFailed(span, originalText) {
@@ -323,6 +424,7 @@
     const ParagraphTranslator = {
         async processRoot(root, options) {
             if (!root || !options?.settings) return 0;
+            unwrapNestedSentences(root);
 
             const candidates = collectSentenceCandidates(root);
             if (!candidates.length) return 0;
@@ -363,6 +465,7 @@
             results.forEach((ok) => {
                 if (ok) count += 1;
             });
+            unwrapNestedSentences(root);
             return count;
         },
 

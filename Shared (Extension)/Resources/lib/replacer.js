@@ -25,7 +25,11 @@
             if (parent.isContentEditable) return true;
             if (parent.classList?.contains("glossx-word")) return true;
             if (parent.classList?.contains("glossx-sentence")) return true;
+            if (parent.classList?.contains("glossx-sentence-block")) return true;
+            if (parent.classList?.contains("glossx-sentence-en")) return true;
+            if (parent.classList?.contains("glossx-sentence-cn")) return true;
             if (parent.hasAttribute?.("data-glossx-sentence")) return true;
+            if (parent.hasAttribute?.("data-glossx-original")) return true;
             if (parent.hasAttribute?.(PROCESSED_ATTR)) return true;
             if (parent.hasAttribute?.(PROCESSED_BLOCK_ATTR)) return true;
             parent = parent.parentElement;
@@ -39,9 +43,13 @@
         if (element.isContentEditable) return true;
         if (element.classList?.contains("glossx-word")) return true;
         if (element.classList?.contains("glossx-sentence")) return true;
+        if (element.classList?.contains("glossx-sentence-block")) return true;
+        if (element.classList?.contains("glossx-sentence-en")) return true;
+        if (element.classList?.contains("glossx-sentence-cn")) return true;
         if (element.hasAttribute?.("data-glossx-sentence")) return true;
+        if (element.hasAttribute?.("data-glossx-original")) return true;
         if (element.hasAttribute?.(PROCESSED_BLOCK_ATTR)) return true;
-        if (element.closest?.(".glossx-word, .glossx-sentence, .glossx-floating-control, .glossx-decode-panel, .glossx-word-save-panel, .glossx-snippet-save-panel, .glossx-hint-banner")) {
+        if (element.closest?.(".glossx-word, .glossx-sentence, .glossx-sentence-block, .glossx-sentence-en, .glossx-sentence-cn, .glossx-floating-control, .glossx-decode-panel, .glossx-word-save-panel, .glossx-snippet-save-panel, .glossx-hint-banner")) {
             return true;
         }
         return false;

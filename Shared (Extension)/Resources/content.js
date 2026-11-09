@@ -245,6 +245,7 @@
             return !!element.closest(
                 ".glossx-snippet-save-panel, .glossx-word-save-panel, .glossx-decode-panel, "
                 + ".glossx-hint-banner, .glossx-floating-control, .glossx-sentence, "
+                + ".glossx-sentence-block, .glossx-sentence-en, .glossx-sentence-cn, "
                 + ".glossx-word, .glossx-vocab-word, .glossx-vocab-toast, .glossx-snippet-saved"
             );
         }
