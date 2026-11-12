@@ -112,18 +112,28 @@ private struct ReviewCardView: View {
         }
     }
 
-    /// The prompt stays on screen while the keyboard is up. It is not inside a scroll view that can shrink to nothing.
+    /// The answer field stays pinned. The prompt scrolls in the space above it, so a long sentence stays readable while the keyboard is up.
     private var spellBody: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            tags
-            spellCue
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-            spellDock
-            footer
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                tags
+                spellCue
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+            .padding(.top, 8)
+            .padding(.bottom, 12)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 8)
-        .padding(.bottom, 12)
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            VStack(alignment: .leading, spacing: 16) {
+                spellDock
+                footer
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 4)
+            .padding(.bottom, 12)
+            .background(GlossXPalette.paper)
+        }
     }
 
     private var browsingBody: some View {
@@ -247,12 +257,15 @@ private struct ReviewCardView: View {
             .font(.title3.weight(.medium))
             .foregroundColor(GlossXPalette.ink)
             .lineSpacing(6)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
         if session.showsAnswer {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 Text(card.target)
                     .font(.title3)
                     .foregroundColor(GlossXPalette.green)
                     .lineSpacing(6)
+                    .fixedSize(horizontal: false, vertical: true)
                     .frame(maxWidth: .infinity, alignment: .leading)
                 speakButton
             }
@@ -290,7 +303,7 @@ private struct ReviewCardView: View {
             Text([card.pos, card.definitionText].filter { !$0.isEmpty }.joined(separator: "  "))
                 .font(.title3)
                 .foregroundColor(GlossXPalette.ink)
-                .lineLimit(card.mode == .spell ? 4 : nil)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -310,7 +323,6 @@ private struct ReviewCardView: View {
         definitionLine
         if !card.english.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             sentence(revealed: answered)
-                .lineLimit(3)
         }
     }
 
@@ -371,6 +383,7 @@ private struct ReviewCardView: View {
                 .font(.title3)
                 .foregroundColor(GlossXPalette.ink)
                 .lineSpacing(6)
+                .fixedSize(horizontal: false, vertical: true)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
