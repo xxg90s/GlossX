@@ -277,6 +277,8 @@ public struct LibraryPayload {
     public var wordRecords: [String: Any]
     /// Tombstones keyed `vocab:<id>` / `snippet:<id>`, valued with the deletion time in ms.
     public var deletedItems: [String: Double]
+    /// `nil` means this snapshot has not been checked for existing starter-pack words.
+    public var starterPacks: [String: StarterPackRecord]?
 
     public init(
         vocabItems: [String: [String: Any]],
@@ -286,7 +288,8 @@ public struct LibraryPayload {
         aiProviderProfiles: [Any],
         stats: [String: Any],
         wordRecords: [String: Any],
-        deletedItems: [String: Double] = [:]
+        deletedItems: [String: Double] = [:],
+        starterPacks: [String: StarterPackRecord]? = nil
     ) {
         self.vocabItems = vocabItems
         self.snippetItems = snippetItems
@@ -296,6 +299,7 @@ public struct LibraryPayload {
         self.stats = stats
         self.wordRecords = wordRecords
         self.deletedItems = deletedItems
+        self.starterPacks = starterPacks
     }
 }
 

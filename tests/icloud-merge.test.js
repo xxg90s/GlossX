@@ -173,4 +173,42 @@ assert.ok(S.SYNC_KEYS.includes("deletedItems"));
 assert.equal(S.payloadsEqual({ vocabItems: { a: { x: 1, y: 2 } } }, { vocabItems: { a: { y: 2, x: 1 } } }), true);
 assert.equal(S.payloadsEqual({ vocabItems: { a: { x: 1 } } }, { vocabItems: { a: { x: 2 } } }), false);
 
+// A missing starterPacks key stays missing. A newer disable clears the list.
+{
+    const untouched = S.mergePayloads({
+        local: {},
+        cloud: snap({}, 10),
+        now: 20
+    });
+    assert.equal(Object.prototype.hasOwnProperty.call(untouched.payload, "starterPacks"), false);
+
+    const disabled = S.mergePayloads({
+        local: {
+            starterPacks: { daily: { enabled: true, ids: ["time", "day"], updatedAt: 100 } }
+        },
+        cloud: snap({
+            starterPacks: { daily: { enabled: false, ids: ["time"], updatedAt: 200 } }
+        }, 200),
+        now: 300
+    });
+    assert.equal(disabled.payload.starterPacks.daily.enabled, false);
+    assert.deepEqual([...disabled.payload.starterPacks.daily.ids], []);
+
+    const kept = S.mergePayloads({
+        local: {},
+        cloud: snap({
+            starterPacks: { daily: { enabled: true, ids: ["time"], updatedAt: 10 } }
+        }, 10),
+        now: 20
+    });
+    assert.deepEqual([...kept.payload.starterPacks.daily.ids], ["time"]);
+
+    const union = S.mergePayloads({
+        local: { starterPacks: { daily: { enabled: true, ids: ["day"], updatedAt: 100 } } },
+        cloud: snap({ starterPacks: { daily: { enabled: true, ids: ["time"], updatedAt: 100 } } }, 100),
+        now: 200
+    });
+    assert.deepEqual([...union.payload.starterPacks.daily.ids], ["day", "time"]);
+}
+
 console.log("icloud-merge tests passed");

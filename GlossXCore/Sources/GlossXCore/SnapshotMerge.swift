@@ -43,7 +43,11 @@ public enum SnapshotMerge {
                     : primary.aiProviderProfiles,
                 stats: mergeStats(cloud: cloud.payload.stats, local: local.payload.stats),
                 wordRecords: primary.wordRecords.isEmpty ? secondary.wordRecords : primary.wordRecords,
-                deletedItems: deleted
+                deletedItems: deleted,
+                starterPacks: StarterPackMembership.mergePacks(
+                    local: local.payload.starterPacks,
+                    cloud: cloud.payload.starterPacks
+                )
             )
         )
     }

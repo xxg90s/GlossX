@@ -4,8 +4,9 @@ import GlossXCore
 struct SettingsView: View {
     @EnvironmentObject private var store: LibraryStore
     @State private var accent = SpeechPlayer.accent
-    @State private var showsStarterPack = false
     @State private var showsOnboarding = false
+    @State private var pendingLeave: StarterPack.Lexicon?
+    @State private var starterMessage: String?
 
     private var accentBinding: Binding<SpeechPlayer.Accent> {
         Binding(
@@ -60,8 +61,38 @@ struct SettingsView: View {
                         .font(.footnote)
                         .foregroundColor(GlossXPalette.muted)
                 }
-                Section("入门") {
-                    Button("导入入门词包") { showsStarterPack = true }
+                Section("入门词包") {
+                    ForEach(StarterPack.lexicons) { lexicon in
+                        HStack {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(lexicon.title)
+                                    .foregroundColor(GlossXPalette.ink)
+                                Text(store.starterPackDetail(lexicon.id))
+                                    .font(.footnote)
+                                    .foregroundColor(GlossXPalette.muted)
+                            }
+                            Spacer()
+                            Button(store.isStarterPackEnabled(lexicon.id) ? "移出" : "加入") {
+                                if store.isStarterPackEnabled(lexicon.id) {
+                                    pendingLeave = lexicon
+                                } else {
+                                    switch store.joinStarterPack(lexicon.id) {
+                                    case nil:
+                                        starterMessage = "这个词表暂时读不到。"
+                                    case 0:
+                                        starterMessage = "这个词表里的词都已在词库中，换一个试试。"
+                                    default:
+                                        starterMessage = nil
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if let starterMessage {
+                        Text(starterMessage)
+                            .font(.footnote)
+                            .foregroundColor(GlossXPalette.muted)
+                    }
                     Button("查看新手引导") { showsOnboarding = true }
                 }
                 .foregroundColor(GlossXPalette.green)
@@ -74,9 +105,22 @@ struct SettingsView: View {
             .navigationTitle("我的")
         }
         .navigationViewStyle(.stack)
-        .sheet(isPresented: $showsStarterPack) {
-            StarterPackSheet()
-                .environmentObject(store)
+        .confirmationDialog(
+            "移出「\(pendingLeave?.title ?? "")」？",
+            isPresented: Binding(
+                get: { pendingLeave != nil },
+                set: { if !$0 { pendingLeave = nil } }
+            ),
+            titleVisibility: .visible
+        ) {
+            Button("移出", role: .destructive) {
+                if let lexicon = pendingLeave {
+                    store.leaveStarterPack(lexicon.id)
+                }
+                pendingLeave = nil
+            }
+        } message: {
+            Text(store.starterPackLeaveMessage(pendingLeave?.id ?? ""))
         }
         .fullScreenCover(isPresented: $showsOnboarding) {
             OnboardingView()

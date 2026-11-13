@@ -42,6 +42,7 @@ public enum LibraryMutator {
         } else {
             return snapshot
         }
+        next = StarterPackMembership.removeFromLists(next, id: id)
         next.updatedAt = now
         return next
     }

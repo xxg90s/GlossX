@@ -167,10 +167,12 @@ struct StarterPackPicker: View {
                     .foregroundColor(GlossXPalette.muted)
             }
             Button("导入并开始") {
-                let added = store.importStarterPack(selection)
-                if added > 0 {
+                switch store.joinStarterPack(selection) {
+                case let added? where added > 0:
                     onFinish()
-                } else {
+                case nil:
+                    message = "这个词表暂时读不到。"
+                default:
                     message = "这个词表里的词都已在词库中，换一个试试。"
                 }
             }

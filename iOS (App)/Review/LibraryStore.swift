@@ -26,6 +26,7 @@ final class LibraryStore: ObservableObject {
         let streak: StreakRecord
         let celebration: Int?
         let deletedItems: [String: Double]
+        let starterPacks: [String: StarterPackRecord]?
     }
 
     private var pushTask: Task<Void, Never>?
@@ -43,6 +44,12 @@ final class LibraryStore: ObservableObject {
         }
         reminderEnabled = ReviewReminder.isEnabled
         rebuildItems()
+        let packsBeforePrepare = snapshot.payload.starterPacks
+        reconcilePacks()
+        if snapshot.payload.starterPacks != packsBeforePrepare {
+            persistLocal()
+            schedulePush()
+        }
         streakStore.onExternalChange = { [weak self] in
             self?.objectWillChange.send()
             self?.rescheduleReminder()
@@ -192,9 +199,11 @@ final class LibraryStore: ObservableObject {
             stats: snapshot.payload.stats,
             streak: streakStore.record,
             celebration: celebrationStreak,
-            deletedItems: snapshot.payload.deletedItems
+            deletedItems: snapshot.payload.deletedItems,
+            starterPacks: snapshot.payload.starterPacks
         )
         snapshot = LibraryMutator.markIntroduced(in: snapshot, id: card.id, now: Self.now)
+        reconcilePacks()
         session?.acknowledgeIntro()
         persistLocal()
         schedulePush()
@@ -234,7 +243,8 @@ final class LibraryStore: ObservableObject {
             stats: snapshot.payload.stats,
             streak: streakStore.record,
             celebration: celebrationStreak,
-            deletedItems: snapshot.payload.deletedItems
+            deletedItems: snapshot.payload.deletedItems,
+            starterPacks: snapshot.payload.starterPacks
         )
         if current.isFirstAttempt {
             let wasCompleted = streakStatus.todayCompleted
@@ -245,6 +255,7 @@ final class LibraryStore: ObservableObject {
                 now: Self.now,
                 today: Self.today
             )
+            reconcilePacks()
             recordStreakReview(id: card.id, wasCompleted: wasCompleted)
             persistLocal()
             schedulePush()
@@ -260,7 +271,9 @@ final class LibraryStore: ObservableObject {
         snapshot.payload.snippetItems[step.itemId] = step.snippetItem
         snapshot.payload.stats = step.stats
         snapshot.payload.deletedItems = step.deletedItems
+        snapshot.payload.starterPacks = step.starterPacks
         snapshot.updatedAt = Self.now
+        reconcilePacks()
         streakStore.update(step.streak, reviewableCount: reviewableCount)
         celebrationStreak = step.celebration
         session = step.session
@@ -292,7 +305,8 @@ final class LibraryStore: ObservableObject {
             stats: snapshot.payload.stats,
             streak: streakStore.record,
             celebration: celebrationStreak,
-            deletedItems: snapshot.payload.deletedItems
+            deletedItems: snapshot.payload.deletedItems,
+            starterPacks: snapshot.payload.starterPacks
         )
         snapshot = LibraryMutator.delete(in: snapshot, id: card.id, now: Self.now)
         session?.drop(id: card.id)
@@ -311,17 +325,24 @@ final class LibraryStore: ObservableObject {
     /// False when the word is blank or already collected.
     @discardableResult
     func addWord(_ word: String, definition: String, example: String, exampleChinese: String) -> Bool {
-        guard let next = LibraryMutator.addWord(
+        if let next = LibraryMutator.addWord(
             to: snapshot,
             word: word,
             definition: definition,
             example: example,
             exampleChinese: exampleChinese,
             now: Self.now
-        ) else { return false }
-        snapshot = next
-        libraryDidChange()
-        return true
+        ) {
+            snapshot = next
+            libraryDidChange()
+            return true
+        }
+        let id = word.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        if let claimed = StarterPackMembership.claim(snapshot, id: id, source: "ios", now: Self.now) {
+            snapshot = claimed
+            libraryDidChange()
+        }
+        return false
     }
 
     @discardableResult
@@ -345,35 +366,90 @@ final class LibraryStore: ObservableObject {
         let records = (try? ShareInbox.consume(in: container)) ?? []
         guard !records.isEmpty else { return }
         var next = snapshot
-        var added = 0
+        var changed = false
         for record in records {
             let now = record.addedAt > 0 ? record.addedAt : Self.now
             if let updated = LibraryMutator.importSharedText(record.text, into: next, now: now) {
                 next = updated
-                added += 1
+                changed = true
+            } else if ShareInbox.classify(record.text) == .word {
+                let id = ShareInbox.normalize(record.text).lowercased()
+                if let claimed = StarterPackMembership.claim(next, id: id, source: "share", now: now) {
+                    next = claimed
+                    changed = true
+                }
             }
         }
-        guard added > 0 else { return }
+        guard changed else { return }
         snapshot = next
         libraryDidChange()
     }
 
-    /// Number of words added; 0 when the list is missing or every word is already collected.
+    func isStarterPackEnabled(_ lexiconId: String) -> Bool {
+        snapshot.payload.starterPacks?[lexiconId]?.enabled == true
+    }
+
+    func starterPackRemovableCount(_ lexiconId: String) -> Int {
+        guard isStarterPackEnabled(lexiconId) else { return 0 }
+        return snapshot.payload.starterPacks?[lexiconId]?.ids.count ?? 0
+    }
+
+    func starterPackDetail(_ lexiconId: String) -> String {
+        guard isStarterPackEnabled(lexiconId) else { return "未加入" }
+        let count = starterPackRemovableCount(lexiconId)
+        if count == 0 { return "已加入，没有可移出的词" }
+        return "已加入，还可移出 \(count) 个"
+    }
+
+    func starterPackLeaveMessage(_ lexiconId: String) -> String {
+        let count = starterPackRemovableCount(lexiconId)
+        if count == 0 {
+            return "没有可移出的词。这个词包会关掉，已练过的会留在词库里。"
+        }
+        return "将移出 \(count) 个还没练过的词。已练过或你另外收藏的会保留。"
+    }
+
+    /// `nil` when the word list cannot be read. `0` when every word is already in the library.
     @discardableResult
-    func importStarterPack(_ lexiconId: String, limit: Int = StarterPack.defaultLimit) -> Int {
+    func joinStarterPack(_ lexiconId: String, limit: Int = StarterPack.defaultLimit) -> Int? {
         guard let url = Bundle.main.builtInPlugInsURL?
             .appendingPathComponent("GlossX Extension.appex")
             .appendingPathComponent(StarterPack.fileName(for: lexiconId)),
             let data = try? Data(contentsOf: url)
-        else { return 0 }
-        let result = StarterPack.importWords(StarterPack.parse(data), into: snapshot, limit: limit, now: Self.now)
+        else { return nil }
+        let result = StarterPackMembership.join(
+            snapshot,
+            lexiconId: lexiconId,
+            entries: StarterPack.parse(data),
+            limit: limit,
+            now: Self.now
+        )
         guard result.added > 0 else { return 0 }
         snapshot = result.snapshot
         libraryDidChange()
         return result.added
     }
 
+    func leaveStarterPack(_ lexiconId: String) {
+        let result = StarterPackMembership.leave(snapshot, lexiconId: lexiconId, now: Self.now)
+        snapshot = result.snapshot
+        if var current = session {
+            for id in result.removedIds {
+                current.drop(id: id)
+            }
+            session = current
+        }
+        libraryDidChange()
+    }
+
+    /// Number of words added; 0 when the list is missing or every word is already collected.
+    @discardableResult
+    func importStarterPack(_ lexiconId: String, limit: Int = StarterPack.defaultLimit) -> Int {
+        joinStarterPack(lexiconId, limit: limit) ?? 0
+    }
+
     private func libraryDidChange() {
+        reconcilePacks()
         streakStore.refreshReviewableCount(reviewableCount)
         persistLocal()
         schedulePush()
@@ -466,8 +542,9 @@ final class LibraryStore: ObservableObject {
                 let local = snapshot
                 let merged = SnapshotMerge.merge(cloud: cloud, local: local, now: now)
                 snapshot = merged
+                reconcilePacks()
                 persistLocal()
-                if !SnapshotCodec.samePayload(merged, cloud) {
+                if !SnapshotCodec.samePayload(snapshot, cloud) {
                     schedulePush()
                 }
                 sync = .synced(label: TodayHome.formatSyncLabel(status: "synced", lastAt: now, now: now))
@@ -489,6 +566,35 @@ final class LibraryStore: ObservableObject {
     }
 
     private static var lexiconCatalogs: [[StarterPack.Entry]]?
+
+    private func reconcilePacks() {
+        let next = StarterPackMembership.prepare(
+            snapshot,
+            definitions: Self.lexiconDefinitions(),
+            now: Self.now
+        )
+        if next.payload.starterPacks != snapshot.payload.starterPacks {
+            snapshot = next
+        }
+    }
+
+    private static func lexiconDefinitions() -> [String: [String: String]]? {
+        let catalogs = loadLexiconCatalogs()
+        guard !catalogs.isEmpty else { return nil }
+        var index: [String: [String: String]] = [:]
+        for entries in catalogs {
+            for entry in entries {
+                let id = entry.en.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+                guard !id.isEmpty else { continue }
+                var words = index[entry.lexicon] ?? [:]
+                if words[id] == nil {
+                    words[id] = entry.zh
+                }
+                index[entry.lexicon] = words
+            }
+        }
+        return index
+    }
 
     private static func loadLexiconCatalogs() -> [[StarterPack.Entry]] {
         if let lexiconCatalogs { return lexiconCatalogs }

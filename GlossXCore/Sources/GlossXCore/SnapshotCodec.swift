@@ -11,6 +11,12 @@ public enum SnapshotCodec {
         let payload = JSONValue.dictionary(root["payload"])
         let updatedAt = JSONValue.double(root["updatedAt"])
         let metaUpdatedAt = JSONValue.double(root["metaUpdatedAt"])
+        let starterPacks: [String: StarterPackRecord]?
+        if payload.keys.contains("starterPacks") {
+            starterPacks = StarterPackMembership.decode(payload["starterPacks"]) ?? [:]
+        } else {
+            starterPacks = nil
+        }
         return LibrarySnapshot(
             version: version,
             updatedAt: updatedAt,
@@ -23,26 +29,31 @@ public enum SnapshotCodec {
                 aiProviderProfiles: payload["aiProviderProfiles"] as? [Any] ?? [],
                 stats: JSONValue.dictionary(payload["stats"]),
                 wordRecords: mapLooseObject(payload["wordRecords"]),
-                deletedItems: mapTimestamps(payload["deletedItems"])
+                deletedItems: mapTimestamps(payload["deletedItems"]),
+                starterPacks: starterPacks
             )
         )
     }
 
     public static func encode(_ snapshot: LibrarySnapshot) throws -> Data {
+        var payload: [String: Any] = [
+            "vocabItems": snapshot.payload.vocabItems,
+            "snippetItems": snapshot.payload.snippetItems,
+            "settings": snapshot.payload.settings,
+            "aiKeys": snapshot.payload.aiKeys,
+            "aiProviderProfiles": snapshot.payload.aiProviderProfiles,
+            "stats": snapshot.payload.stats,
+            "wordRecords": snapshot.payload.wordRecords,
+            "deletedItems": snapshot.payload.deletedItems
+        ]
+        if let packs = snapshot.payload.starterPacks {
+            payload["starterPacks"] = StarterPackMembership.encode(packs)
+        }
         let root: [String: Any] = [
             "version": snapshot.version,
             "updatedAt": snapshot.updatedAt,
             "metaUpdatedAt": snapshot.metaUpdatedAt,
-            "payload": [
-                "vocabItems": snapshot.payload.vocabItems,
-                "snippetItems": snapshot.payload.snippetItems,
-                "settings": snapshot.payload.settings,
-                "aiKeys": snapshot.payload.aiKeys,
-                "aiProviderProfiles": snapshot.payload.aiProviderProfiles,
-                "stats": snapshot.payload.stats,
-                "wordRecords": snapshot.payload.wordRecords,
-                "deletedItems": snapshot.payload.deletedItems
-            ]
+            "payload": payload
         ]
         return try JSONSerialization.data(withJSONObject: root, options: [.prettyPrinted, .sortedKeys])
     }
@@ -70,7 +81,8 @@ public enum SnapshotCodec {
                 aiKeys: [:],
                 aiProviderProfiles: [],
                 stats: [:],
-                wordRecords: [:]
+                wordRecords: [:],
+                starterPacks: [:]
             )
         )
     }

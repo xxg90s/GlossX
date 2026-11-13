@@ -1145,6 +1145,9 @@ async function saveVocabItem(payload) {
         exampleFromContext: null,
         status: base.status === "mastered" ? "learning" : (base.status || "new")
     };
+    if (String(base.source || "").startsWith("starter:")) {
+        item.source = "safari";
+    }
 
     items[id] = item;
     await saveVocabItems(items);

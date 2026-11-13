@@ -7,7 +7,8 @@
         "aiProviderProfiles",
         "stats",
         "wordRecords",
-        "deletedItems"
+        "deletedItems",
+        "starterPacks"
     ];
     const META_KEYS = ["settings", "aiKeys", "aiProviderProfiles", "wordRecords"];
     const ITEM_KEYS = { vocabItems: "vocab", snippetItems: "snippet" };
@@ -30,7 +31,8 @@
             aiProviderProfiles: [],
             stats: {},
             wordRecords: {},
-            deletedItems: {}
+            deletedItems: {},
+            starterPacks: null
         };
     }
 
@@ -78,6 +80,9 @@
     }
 
     function clonePayloadValue(key, value, fallback) {
+        if (key === "starterPacks") {
+            return isPlainObject(value) ? value : null;
+        }
         if (key === "aiProviderProfiles") {
             return Array.isArray(value) ? value : fallback.aiProviderProfiles;
         }
@@ -91,6 +96,7 @@
         for (const key of SYNC_KEYS) {
             nextPayload[key] = clonePayloadValue(key, source[key], fallback);
         }
+        if (nextPayload.starterPacks == null) delete nextPayload.starterPacks;
         const snapshot = {
             version: 1,
             updatedAt,
@@ -218,7 +224,71 @@
         }
         payload.stats = mergeStats(localPayload.stats, cloudPayload.stats);
         payload.deletedItems = deletedItems;
+        const starterPacks = mergeStarterPacks(localPayload.starterPacks, cloudPayload.starterPacks);
+        if (starterPacks) payload.starterPacks = starterPacks;
+        else delete payload.starterPacks;
         return { payload, metaUpdatedAt: Math.max(localMeta, cloudMeta) };
+    }
+
+    function uniqueStrings(list) {
+        const out = [];
+        const seen = new Set();
+        for (const id of list || []) {
+            const text = String(id || "");
+            if (!text || seen.has(text)) continue;
+            seen.add(text);
+            out.push(text);
+        }
+        return out;
+    }
+
+    function normalizeStarterPack(record) {
+        return {
+            enabled: !!record.enabled,
+            ids: record.enabled ? uniqueStrings(record.ids) : [],
+            updatedAt: num(record.updatedAt)
+        };
+    }
+
+    function mergeStarterPackRecord(local, cloud) {
+        const left = isPlainObject(local) ? local : null;
+        const right = isPlainObject(cloud) ? cloud : null;
+        if (!left && !right) return { enabled: false, ids: [], updatedAt: 0 };
+        if (!left) return normalizeStarterPack(right);
+        if (!right) return normalizeStarterPack(left);
+        const leftAt = num(left.updatedAt);
+        const rightAt = num(right.updatedAt);
+        let enabled;
+        let updatedAt;
+        if (rightAt > leftAt) {
+            enabled = !!right.enabled;
+            updatedAt = rightAt;
+        } else if (leftAt > rightAt) {
+            enabled = !!left.enabled;
+            updatedAt = leftAt;
+        } else {
+            enabled = !!(left.enabled || right.enabled);
+            updatedAt = leftAt;
+        }
+        return {
+            enabled,
+            ids: enabled ? uniqueStrings([].concat(left.ids || [], right.ids || [])) : [],
+            updatedAt
+        };
+    }
+
+    /// Missing on both sides stays missing, so an old library is not treated as every pack being off.
+    function mergeStarterPacks(local, cloud) {
+        const localOk = isPlainObject(local);
+        const cloudOk = isPlainObject(cloud);
+        if (!localOk && !cloudOk) return null;
+        if (!localOk) return cloud;
+        if (!cloudOk) return local;
+        const merged = {};
+        for (const id of new Set([...Object.keys(local), ...Object.keys(cloud)])) {
+            merged[id] = mergeStarterPackRecord(local[id], cloud[id]);
+        }
+        return merged;
     }
 
     /** Tombstones for items removed by a storage.onChanged event, or null when nothing changed. */
@@ -270,6 +340,10 @@
         const incoming = snapshot.payload || {};
         const storage = { ...(existingStorage || {}) };
         for (const key of SYNC_KEYS) {
+            if (key === "starterPacks") {
+                if (isPlainObject(incoming[key])) storage[key] = incoming[key];
+                continue;
+            }
             storage[key] = clonePayloadValue(key, incoming[key], fallback);
         }
         return {

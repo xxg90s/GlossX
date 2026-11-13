@@ -117,6 +117,9 @@
             exampleVersion: VOCAB_EXAMPLE_VERSION,
             status: base.status === "mastered" ? "learning" : (base.status || "new")
         };
+        if (String(base.source || "").startsWith("starter:")) {
+            item.source = "safari";
+        }
 
         items[id] = item;
         await saveVocabItems(items);

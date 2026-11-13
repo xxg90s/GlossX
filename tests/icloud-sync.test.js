@@ -32,7 +32,8 @@ assert.equal(
         "aiProviderProfiles",
         "stats",
         "wordRecords",
-        "deletedItems"
+        "deletedItems",
+        "starterPacks"
     ])
 );
 
@@ -142,6 +143,7 @@ same(snapshot.payload.vocabItems, { a: { word: "a" } });
 same(snapshot.payload.snippetItems, {});
 same(snapshot.payload.aiProviderProfiles, []);
 same(snapshot.payload.settings, { aiEnabled: true });
+assert.equal(Object.prototype.hasOwnProperty.call(snapshot.payload, "starterPacks"), false);
 
 const existing = { icloudMeta: { lastStatus: "synced" }, extraKey: 1, vocabItems: { old: true } };
 const applied = S.applySnapshot(snapshot, existing);
