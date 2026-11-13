@@ -97,6 +97,41 @@ final class ReviewSessionTests: XCTestCase {
         XCTAssertTrue(session.showsGradeButtons)
     }
 
+    func testDropRemovesTheItemAndAnyLaterCopy() {
+        var session = ReviewSession(cards: [
+            ReviewCard.stub(id: "known", isNew: false),
+            ReviewCard.stub(id: "next", isNew: false),
+            ReviewCard.stub(id: "known", isNew: false)
+        ])
+
+        session.drop(id: "known")
+
+        XCTAssertEqual(session.cards.map(\.id), ["next"])
+        XCTAssertEqual(session.current?.id, "next")
+        XCTAssertFalse(session.revealed)
+    }
+
+    func testDropOnTheRepeatedCopyFinishesWhenNothingFollows() {
+        var session = ReviewSession(cards: (0..<4).map { ReviewCard.stub(id: "c\($0)", isNew: false) })
+        session.advanceAfterGrade(.forgot)
+        session.advanceAfterGrade(.remembered)
+        session.advanceAfterGrade(.remembered)
+        session.advanceAfterGrade(.remembered)
+        XCTAssertEqual(session.current?.id, "c0")
+
+        session.drop(id: "c0")
+
+        XCTAssertTrue(session.isFinished)
+        XCTAssertFalse(session.cards.contains { $0.id == "c0" })
+    }
+
+    func testDropLastCardFinishesTheSession() {
+        var session = ReviewSession(cards: [ReviewCard.stub(id: "only", isNew: false)])
+        session.drop(id: "only")
+        XCTAssertTrue(session.isFinished)
+        XCTAssertNil(session.current)
+    }
+
     func testForgottenIntroCardReturnsAsSpelling() {
         var session = ReviewSession(cards: [ReviewCard.stub(id: "fresh", isNew: true)])
         session.advanceAfterGrade(.forgot)

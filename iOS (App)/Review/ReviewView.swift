@@ -13,7 +13,7 @@ struct ReviewView: View {
                 VStack(spacing: 0) {
                     header(session: session)
                     ReviewCardView(card: card, session: session)
-                        .id(session.index)
+                        .id("\(session.index)-\(card.id)")
                 }
             } else {
                 VStack(spacing: 16) {
@@ -89,6 +89,7 @@ private struct ReviewCardView: View {
 
     @State private var typed = ""
     @State private var result: ReviewGrade?
+    @State private var confirmsDelete = false
     private let speaker = SpeechPlayer.shared
 
     private var answered: Bool { result != nil }
@@ -104,6 +105,13 @@ private struct ReviewCardView: View {
             } else {
                 browsingBody
             }
+        }
+        .confirmationDialog("删除“\(card.target)”？", isPresented: $confirmsDelete, titleVisibility: .visible) {
+            Button("删除", role: .destructive) {
+                store.deleteCurrentCard()
+            }
+        } message: {
+            Text("会同时从 Mac 和其他设备的词库中删除，复习进度不会保留。")
         }
         .onAppear {
             if card.mode == .intro {
@@ -399,8 +407,21 @@ private struct ReviewCardView: View {
 
     // MARK: Footer
 
-    @ViewBuilder
     private var footer: some View {
+        VStack(spacing: 4) {
+            footerActions
+            Button("我会了，删除") {
+                confirmsDelete = true
+            }
+            .font(.subheadline)
+            .foregroundColor(GlossXPalette.danger)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+        }
+    }
+
+    @ViewBuilder
+    private var footerActions: some View {
         if let result {
             Button("继续") {
                 store.grade(result)

@@ -83,4 +83,13 @@ public struct ReviewSession: Equatable {
         index += 1
         revealed = false
     }
+
+    /// Drops this item from the session, including a later spelling or relearn copy.
+    public mutating func drop(id: String) {
+        let passed = cards.prefix(index).filter { $0.id != id }.count
+        cards.removeAll { $0.id == id }
+        index = min(passed, cards.count)
+        revealed = false
+        gradedIds.remove(id)
+    }
 }

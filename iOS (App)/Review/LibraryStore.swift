@@ -25,6 +25,7 @@ final class LibraryStore: ObservableObject {
         let stats: [String: Any]
         let streak: StreakRecord
         let celebration: Int?
+        let deletedItems: [String: Double]
     }
 
     private var pushTask: Task<Void, Never>?
@@ -190,7 +191,8 @@ final class LibraryStore: ObservableObject {
             snippetItem: snapshot.payload.snippetItems[card.id],
             stats: snapshot.payload.stats,
             streak: streakStore.record,
-            celebration: celebrationStreak
+            celebration: celebrationStreak,
+            deletedItems: snapshot.payload.deletedItems
         )
         snapshot = LibraryMutator.markIntroduced(in: snapshot, id: card.id, now: Self.now)
         session?.acknowledgeIntro()
@@ -231,7 +233,8 @@ final class LibraryStore: ObservableObject {
             snippetItem: snapshot.payload.snippetItems[card.id],
             stats: snapshot.payload.stats,
             streak: streakStore.record,
-            celebration: celebrationStreak
+            celebration: celebrationStreak,
+            deletedItems: snapshot.payload.deletedItems
         )
         if current.isFirstAttempt {
             let wasCompleted = streakStatus.todayCompleted
@@ -256,6 +259,7 @@ final class LibraryStore: ObservableObject {
         snapshot.payload.vocabItems[step.itemId] = step.vocabItem
         snapshot.payload.snippetItems[step.itemId] = step.snippetItem
         snapshot.payload.stats = step.stats
+        snapshot.payload.deletedItems = step.deletedItems
         snapshot.updatedAt = Self.now
         streakStore.update(step.streak, reviewableCount: reviewableCount)
         celebrationStreak = step.celebration
@@ -275,6 +279,28 @@ final class LibraryStore: ObservableObject {
     func deleteItem(id: String) {
         snapshot = LibraryMutator.delete(in: snapshot, id: id, now: Self.now)
         libraryDidChange()
+    }
+
+    /// Removes the card being practiced. It leaves this round, including a later copy, and can be undone.
+    func deleteCurrentCard() {
+        guard let current = session, let card = current.current else { return }
+        undoStep = UndoStep(
+            session: current,
+            itemId: card.id,
+            vocabItem: snapshot.payload.vocabItems[card.id],
+            snippetItem: snapshot.payload.snippetItems[card.id],
+            stats: snapshot.payload.stats,
+            streak: streakStore.record,
+            celebration: celebrationStreak,
+            deletedItems: snapshot.payload.deletedItems
+        )
+        snapshot = LibraryMutator.delete(in: snapshot, id: card.id, now: Self.now)
+        session?.drop(id: card.id)
+        streakStore.refreshReviewableCount(reviewableCount)
+        persistLocal()
+        schedulePush()
+        rescheduleReminder()
+        objectWillChange.send()
     }
 
     func setSkipped(id: String, skipped: Bool) {
