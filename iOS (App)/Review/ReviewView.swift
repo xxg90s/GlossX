@@ -289,11 +289,17 @@ private struct ReviewCardView: View {
                     .foregroundColor(GlossXPalette.ink)
                 speakButton
             }
-            if !card.phonetic.isEmpty {
-                Text(card.phonetic)
-                    .font(.title3)
-                    .foregroundColor(GlossXPalette.muted)
-            }
+            phoneticLine
+        }
+    }
+
+    @ViewBuilder
+    private var phoneticLine: some View {
+        if !card.phonetic.isEmpty {
+            Text(card.phonetic)
+                .font(.title3)
+                .foregroundColor(GlossXPalette.muted)
+                .fixedSize(horizontal: false, vertical: true)
         }
     }
 
@@ -330,6 +336,7 @@ private struct ReviewCardView: View {
     private var spellDock: some View {
         VStack(alignment: .leading, spacing: 12) {
             if !answered {
+                phoneticLine
                 Text("凭释义拼出英文，大小写不计。")
                     .font(.subheadline)
                     .foregroundColor(GlossXPalette.muted)
@@ -359,6 +366,7 @@ private struct ReviewCardView: View {
                         .foregroundColor(GlossXPalette.ink)
                     speakButton
                 }
+                phoneticLine
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
