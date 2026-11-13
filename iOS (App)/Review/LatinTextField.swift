@@ -35,6 +35,7 @@ struct LatinTextField: UIViewRepresentable {
         field.setContentHuggingPriority(.defaultHigh, for: .vertical)
         field.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         field.addTarget(context.coordinator, action: #selector(Coordinator.editingChanged), for: .editingChanged)
+        field.pendingFocus = focusOnAppear
         return field
     }
 
@@ -44,16 +45,7 @@ struct LatinTextField: UIViewRepresentable {
             field.text = text
         }
         field.isEnabled = isEnabled
-        if focusOnAppear, isEnabled, !context.coordinator.didFocus {
-            context.coordinator.didFocus = true
-            DispatchQueue.main.async {
-                guard field.window != nil else {
-                    context.coordinator.didFocus = false
-                    return
-                }
-                field.becomeFirstResponder()
-            }
-        }
+        field.focusIfPending()
         if !isEnabled, field.isFirstResponder {
             field.resignFirstResponder()
         }
@@ -61,7 +53,6 @@ struct LatinTextField: UIViewRepresentable {
 
     final class Coordinator: NSObject, UITextFieldDelegate {
         var parent: LatinTextField
-        var didFocus = false
 
         init(_ parent: LatinTextField) {
             self.parent = parent
@@ -95,6 +86,31 @@ struct LatinTextField: UIViewRepresentable {
 }
 
 final class EnglishKeyboardTextField: UITextField {
+    var pendingFocus = false
+    private var focusRetries = 0
+
+    override func didMoveToWindow() {
+        super.didMoveToWindow()
+        focusIfPending()
+    }
+
+    /// Focus is deferred until the field is in a window; a refused request is retried briefly
+    /// so a presentation transition cannot leave the keyboard down.
+    func focusIfPending() {
+        guard pendingFocus, window != nil, isEnabled else { return }
+        pendingFocus = false
+        DispatchQueue.main.async { [weak self] in
+            guard let self, self.window != nil, !self.isFirstResponder else { return }
+            if !self.becomeFirstResponder(), self.focusRetries < 10 {
+                self.focusRetries += 1
+                self.pendingFocus = true
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                    self?.focusIfPending()
+                }
+            }
+        }
+    }
+
     override var textInputMode: UITextInputMode? {
         UITextInputMode.activeInputModes.first { mode in
             mode.primaryLanguage?.hasPrefix("en") == true

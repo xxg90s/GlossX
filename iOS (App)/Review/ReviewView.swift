@@ -4,7 +4,6 @@ import GlossXCore
 
 struct ReviewView: View {
     @EnvironmentObject private var store: LibraryStore
-    @State private var keyboardOverlap: CGFloat = 0
 
     var body: some View {
         ZStack {
@@ -14,7 +13,9 @@ struct ReviewView: View {
                     header(session: session)
                     ReviewCardView(card: card, session: session)
                         .id("\(session.index)-\(card.id)")
+                        .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
                 }
+                .frame(maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: .top)
             } else {
                 VStack(spacing: 16) {
                     Text("本轮复习完成")
@@ -34,23 +35,7 @@ struct ReviewView: View {
                 }
             }
         }
-        .padding(.bottom, keyboardOverlap)
-        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillChangeFrameNotification)) { notification in
-            keyboardOverlap = Self.keyboardOverlap(from: notification)
-        }
         .streakCelebration()
-    }
-
-    private static func keyboardOverlap(from notification: Notification) -> CGFloat {
-        guard
-            let frame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-            let window = UIApplication.shared.connectedScenes
-                .compactMap({ $0 as? UIWindowScene })
-                .flatMap(\.windows)
-                .first(where: \.isKeyWindow)
-        else { return 0 }
-        let covered = window.bounds.maxY - window.convert(frame, from: nil).minY
-        return max(0, covered - window.safeAreaInsets.bottom)
     }
 
     private func header(session: ReviewSession) -> some View {
@@ -120,26 +105,33 @@ private struct ReviewCardView: View {
         }
     }
 
-    /// The answer field stays pinned. The prompt scrolls in the space above it, so a long sentence stays readable while the keyboard is up.
+    /// The prompt keeps the space above the answer field. A bottom inset can shrink that
+    /// scroll view to nothing once the keyboard and the delete action are both on screen.
     private var spellBody: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                tags
-                spellCue
+        VStack(alignment: .leading, spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 16) {
+                    tags
+                    spellCue
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
+                .padding(.bottom, 12)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 20)
-            .padding(.top, 8)
-            .padding(.bottom, 12)
-        }
-        .safeAreaInset(edge: .bottom, spacing: 0) {
-            VStack(alignment: .leading, spacing: 16) {
+            .frame(maxWidth: .infinity, minHeight: 88, maxHeight: .infinity, alignment: .top)
+            .dismissesKeyboardOnScroll()
+            .contentShape(Rectangle())
+            .onTapGesture(perform: dismissKeyboard)
+
+            VStack(alignment: .leading, spacing: 12) {
                 spellDock
                 footer
             }
             .padding(.horizontal, 20)
             .padding(.top, 4)
             .padding(.bottom, 12)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(GlossXPalette.paper)
         }
     }
@@ -410,14 +402,20 @@ private struct ReviewCardView: View {
     private var footer: some View {
         VStack(spacing: 4) {
             footerActions
-            Button("我会了，删除") {
-                confirmsDelete = true
+            if card.mode != .spell || answered {
+                deleteButton
             }
-            .font(.subheadline)
-            .foregroundColor(GlossXPalette.danger)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
         }
+    }
+
+    private var deleteButton: some View {
+        Button("我会了，删除") {
+            confirmsDelete = true
+        }
+        .font(.subheadline)
+        .foregroundColor(GlossXPalette.danger)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 8)
     }
 
     @ViewBuilder
@@ -433,13 +431,16 @@ private struct ReviewCardView: View {
                     .buttonStyle(PrimaryReviewButtonStyle())
                     .opacity(canSubmit ? 1 : 0.4)
                     .disabled(!canSubmit)
-                Button("不会") {
-                    finish(.forgot)
+                HStack(spacing: 12) {
+                    Button("不会") {
+                        finish(.forgot)
+                    }
+                    .font(.subheadline)
+                    .foregroundColor(GlossXPalette.muted)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                    deleteButton
                 }
-                .font(.subheadline)
-                .foregroundColor(GlossXPalette.muted)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 8)
             }
         } else if card.mode == .intro {
             VStack(spacing: 8) {
@@ -495,6 +496,21 @@ private struct ReviewCardView: View {
     private func finish(_ grade: ReviewGrade) {
         result = grade
         UINotificationFeedbackGenerator().notificationOccurred(grade == .remembered ? .success : .error)
+    }
+
+    private func dismissKeyboard() {
+        UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
+    }
+}
+
+private extension View {
+    @ViewBuilder
+    func dismissesKeyboardOnScroll() -> some View {
+        if #available(iOS 16.0, *) {
+            scrollDismissesKeyboard(.interactively)
+        } else {
+            self
+        }
     }
 }
 
