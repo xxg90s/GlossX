@@ -336,7 +336,6 @@ private struct ReviewCardView: View {
     private var spellDock: some View {
         VStack(alignment: .leading, spacing: 12) {
             if !answered {
-                phoneticLine
                 Text("凭释义拼出英文，大小写不计。")
                     .font(.subheadline)
                     .foregroundColor(GlossXPalette.muted)
